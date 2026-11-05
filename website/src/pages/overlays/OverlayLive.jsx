@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { API_BASE } from '../../api';
 import OverlayScoreboard from './OverlayScoreboard';
 import OverlayRoulette from './OverlayRoulette';
@@ -6,11 +6,7 @@ import OverlayMatchup from './OverlayMatchup';
 import OverlayTicker from './OverlayTicker';
 
 export default function OverlayLive() {
-  const [serverMode, setServerMode] = useState('scoreboard');
-  const [displayMode, setDisplayMode] = useState('scoreboard');
-  const [isExiting, setIsExiting] = useState(false);
-  const [isSwitching, setIsSwitching] = useState(false);
-  const isInitialMount = useRef(true);
+  const [mode, setMode] = useState('scoreboard');
 
   useEffect(() => {
     document.body.style.background = 'transparent';
@@ -18,29 +14,13 @@ export default function OverlayLive() {
     document.documentElement.style.background = 'transparent';
 
     let mounted = true;
-    const unlockGlobalAudio = () => {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          const testCtx = new AudioCtx();
-          if (testCtx.state === 'suspended') {
-            testCtx.resume().catch(() => {});
-          }
-        }
-      } catch (e) {}
-    };
-
-    window.addEventListener('click', unlockGlobalAudio);
-    window.addEventListener('pointerdown', unlockGlobalAudio);
-    window.addEventListener('keydown', unlockGlobalAudio);
-
     const fetchMode = async () => {
       try {
         const res = await fetch(`${API_BASE}/overlay-state`);
         if (res.ok) {
           const data = await res.json();
-          if (mounted && data.mode && data.mode !== serverMode) {
-            setServerMode(data.mode);
+          if (mounted && data.mode && data.mode !== mode) {
+            setMode(data.mode);
           }
         }
       } catch (err) {}
@@ -51,53 +31,10 @@ export default function OverlayLive() {
     return () => {
       mounted = false;
       clearInterval(interval);
-      window.removeEventListener('click', unlockGlobalAudio);
-      window.removeEventListener('pointerdown', unlockGlobalAudio);
-      window.removeEventListener('keydown', unlockGlobalAudio);
       document.body.style.background = '';
       document.documentElement.style.background = '';
     };
-  }, [serverMode]);
-
-  // Transición suave direccional de entrada y salida entre escenas
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      setDisplayMode(serverMode);
-      return;
-    }
-
-    if (serverMode !== displayMode) {
-      setIsExiting(true);
-      setIsSwitching(true);
-
-      const switchTimer = setTimeout(() => {
-        setDisplayMode(serverMode);
-        setIsExiting(false);
-      }, 360);
-
-      const flareTimer = setTimeout(() => {
-        setIsSwitching(false);
-      }, 620);
-
-      return () => {
-        clearTimeout(switchTimer);
-        clearTimeout(flareTimer);
-      };
-    }
-  }, [serverMode, displayMode]);
-
-  const getExitTransform = (m) => {
-    if (m === 'scoreboard') return 'translateY(-90px) scale(0.98)';
-    if (m === 'ticker') return 'translateY(90px)';
-    return 'scale(0.92) translateY(-18px)';
-  };
-
-  const getEnterAnimation = (m) => {
-    if (m === 'scoreboard') return 'scoreboardEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-    if (m === 'ticker') return 'tickerEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-    return 'modalEnter 0.46s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-  };
+  }, [mode]);
 
   const renderContent = (currentMode) => {
     switch (currentMode) {
@@ -126,102 +63,15 @@ export default function OverlayLive() {
       }}
     >
       <style>{`
-        @keyframes scoreboardEnter {
-          0% {
-            opacity: 0;
-            transform: translateY(-80px) scale(0.98);
-            filter: blur(4px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0px);
-          }
-        }
-
-        @keyframes tickerEnter {
-          0% {
-            opacity: 0;
-            transform: translateY(80px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes modalEnter {
-          0% {
-            opacity: 0;
-            transform: scale(0.92) translateY(18px);
-            filter: blur(6px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            filter: blur(0px);
-          }
-        }
-
-        @keyframes overlaySweepFlare {
-          0% {
-            transform: translateX(-120%) skewX(-25deg);
-            opacity: 0;
-          }
-          25% {
-            opacity: 1;
-          }
-          75% {
-            opacity: 1;
-          }
-          100% {
-            transform: translateX(250%) skewX(-25deg);
-            opacity: 0;
-          }
+        @keyframes overlayFadeIn {
+          from { opacity: 0; transform: scale(0.97); filter: blur(3px); }
+          to { opacity: 1; transform: scale(1); filter: blur(0px); }
         }
       `}</style>
 
-      {/* Ráfaga luminosa estilo broadcast al cambiar de escena */}
-      {isSwitching && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            pointerEvents: 'none',
-            zIndex: 99999,
-            overflow: 'hidden',
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              width: '40vw',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 179, 0, 0.15) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(76, 175, 80, 0.2) 75%, transparent 100%)',
-              boxShadow: '0 0 50px rgba(255, 179, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.8)',
-              animation: 'overlaySweepFlare 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Contenedor animado con entrada y salida direccional */}
-      {displayMode !== 'hidden' && (
-        <div
-          key={displayMode}
-          style={{
-            width: '100%',
-            height: '100%',
-            opacity: isExiting ? 0 : 1,
-            transform: isExiting ? getExitTransform(displayMode) : 'translateY(0) scale(1)',
-            filter: isExiting ? 'blur(5px)' : 'blur(0px)',
-            transition: 'opacity 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.36s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.36s ease',
-            animation: !isExiting ? getEnterAnimation(displayMode) : 'none',
-            willChange: 'opacity, transform, filter',
-          }}
-        >
-          {renderContent(displayMode)}
+      {mode !== 'hidden' && (
+        <div key={mode} style={{ width: '100%', height: '100%', animation: 'overlayFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1)' }}>
+          {renderContent(mode)}
         </div>
       )}
     </div>
