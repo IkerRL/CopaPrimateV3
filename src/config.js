@@ -18,6 +18,14 @@ export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
     .map(o => o.trim())
     .filter(Boolean);
 
+// Twitch OAuth para el panel de moderación
+export const TWITCH_CLIENT_ID = (process.env.TWITCH_CLIENT_ID || '').trim();
+export const TWITCH_CLIENT_SECRET = (process.env.TWITCH_CLIENT_SECRET || '').trim();
+export const TWITCH_MODERATORS = (process.env.TWITCH_MODERATORS || 'makacagotica,ikerrl')
+    .split(',')
+    .map(m => m.trim().toLowerCase())
+    .filter(Boolean);
+
 // Token del panel de moderación. Si no está configurado se genera uno temporal en cada arranque.
 let adminToken = (process.env.ADMIN_TOKEN || '').trim();
 export const ADMIN_TOKEN_IS_TEMPORARY = !adminToken;

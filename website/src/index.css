@@ -1,35 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@400;500;600;700&family=Teko:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
 
-/* ================= TEMA CLÁSICO (Backup Original Selva Dorada) ================= */
+/* ================= ESTILO OFICIAL: VALORANT CLIENT + ESPECTRO MORADO RADIANITA ================= */
 :root,
-.theme-classic {
-  --primary: #ffb300;
-  --primary-2: #ff8f00;
-  --primary-soft: rgba(255, 179, 0, 0.12);
-  --jungle: #2fbf71;
-  --jungle-soft: rgba(47, 191, 113, 0.12);
-  --bg-dark: #06150f;
-  --bg-deep: #040d09;
-  --bg-card: rgba(10, 32, 22, 0.62);
-  --bg-card-strong: rgba(8, 26, 18, 0.9);
-  --text-main: #ffffff;
-  --text-soft: #d5dfd9;
-  --text-muted: #94a69c;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-gold: rgba(255, 179, 0, 0.28);
-  --success: #3ecf8e;
-  --danger: #ff5a36;
-  --feat-1: #3ecf8e;
-  --feat-2: #ffb300;
-  --feat-3: #ff5a36;
-
-  --radius: 18px;
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  --nav-h: 76px;
-}
-
-/* ================= TEMA FUSIÓN: ESTILO VIDEOGAME VALORANT + ESPECTRO MORADO & ACENTOS TÁCTICOS ================= */
 .theme-fusion {
   /* Color Principal: Morado Radiante */
   --primary: #c084fc;
@@ -62,18 +34,14 @@
   --bg-card-strong: rgba(11, 19, 28, 0.96);
   --bg-card-hover: rgba(20, 32, 45, 0.92);
 
-  /* Tipografía Táctica Riot */
   --text-main: #ffffff;
   --text-soft: #ece8e1;
   --text-muted: #8fa0ad;
-
-  /* Bordes & Resplandores */
   --border: rgba(255, 255, 255, 0.1);
   --border-gold: rgba(192, 132, 252, 0.35);
   --border-purple: rgba(192, 132, 252, 0.38);
   --border-cyan: rgba(0, 245, 212, 0.35);
 
-  /* Tokens Funcionales Auxiliares */
   --success: #00f5d4;
   --danger: #ff4655;
   --warning: #f5a623;
@@ -85,7 +53,7 @@
   --jungle: #a855f7;
   --jungle-soft: rgba(168, 85, 247, 0.14);
 
-  --radius: 4px;
+  --radius: 6px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
   --nav-h: 76px;

@@ -17,7 +17,7 @@ import OverlayMatchup from './components/overlays/OverlayMatchup';
 import OverlayTicker from './components/overlays/OverlayTicker';
 import OverlayRoulette from './components/overlays/OverlayRoulette';
 import OverlayLive from './components/overlays/OverlayLive';
-import { apiFetch, getToken, clearToken } from './api';
+import { apiFetch, getToken, clearToken, getTwitchUser } from './api';
 import './index.css';
 
 const NAV = [
@@ -46,6 +46,7 @@ function App() {
 
   const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
   const [sessionExpired, setSessionExpired] = useState(false);
+  const [twitchUser, setTwitchUser] = useState(() => getTwitchUser());
   const [activeTab, setActiveTab] = useState('overview');
   const [extractedTeam, setExtractedTeam] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -102,6 +103,7 @@ function App() {
 
   const handleLogout = () => {
     clearToken();
+    setTwitchUser(null);
     setIsAuthenticated(false);
     setSessionExpired(false);
   };
@@ -115,6 +117,7 @@ function App() {
           onSuccess={() => {
             setIsAuthenticated(true);
             setSessionExpired(false);
+            setTwitchUser(getTwitchUser());
           }}
           expired={sessionExpired}
         />
@@ -160,6 +163,22 @@ function App() {
               <span>Dashboard de Moderación</span>
             </div>
           </div>
+
+          {twitchUser && (
+            <div className="twitch-user-badge">
+              {twitchUser.avatar ? (
+                <img src={twitchUser.avatar} alt={twitchUser.displayName} className="twitch-user-avatar" />
+              ) : (
+                <div className="twitch-user-avatar-placeholder">
+                  {(twitchUser.displayName || 'M').charAt(0).toUpperCase()}
+                </div>
+              )}
+              <div className="twitch-user-meta">
+                <span className="twitch-user-name">@{twitchUser.displayName || twitchUser.login}</span>
+                <span className="twitch-user-tag">Moderador</span>
+              </div>
+            </div>
+          )}
 
           <span className="nav-section">Navegación</span>
           <nav className="nav-menu">

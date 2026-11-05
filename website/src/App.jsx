@@ -37,44 +37,12 @@ function App() {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('copa_theme') || 'fusion';
-  });
-  const [themeToast, setThemeToast] = useState(null);
 
-  // Sincronizar clase en HTML y guardar en localStorage
+  // Estilo oficial Fusión Valorant permanente
   useEffect(() => {
-    document.documentElement.classList.remove('theme-fusion', 'theme-classic');
-    document.documentElement.classList.add(`theme-${theme}`);
-    localStorage.setItem('copa_theme', theme);
-  }, [theme]);
-
-  // Manejar duración del toast táctico
-  useEffect(() => {
-    if (!themeToast) return;
-    const t = setTimeout(() => setThemeToast(null), 3500);
-    return () => clearTimeout(t);
-  }, [themeToast]);
-
-  const toggleTheme = (e) => {
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    const next = theme === 'fusion' ? 'classic' : 'fusion';
-    setTheme(next);
-    if (next === 'fusion') {
-      setThemeToast({
-        title: '⚡ SISTEMA TÁCTICO VALORANT',
-        subtitle: 'Espectro Púrpura Radianita · Acentos VCT & Cyan'
-      });
-    } else {
-      setThemeToast({
-        title: '🍌 MODO CLÁSICO ACTIVADO',
-        subtitle: 'Estilo Original Selva Dorada'
-      });
-    }
-  };
+    document.documentElement.classList.add('theme-fusion');
+    document.documentElement.classList.remove('theme-classic');
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -104,7 +72,7 @@ function App() {
   }
 
   return (
-    <div className={`app-container theme-${theme}`}>
+    <div className="app-container theme-fusion">
       <div className="bg-image" />
       <div className="bg-overlay" />
       <div className="radianite-spores" aria-hidden="true">
@@ -126,65 +94,28 @@ function App() {
       <div className="noise-overlay" />
       <div className="scanlines" />
 
-      {/* Notificación HUD de cambio de estilo */}
-      {themeToast && (
-        <div className="theme-hud-toast animate-toast">
-          <div className="theme-hud-header">
-            <span className="theme-hud-tag">// SISTEMA GRÁFICO</span>
-            <button type="button" onClick={() => setThemeToast(null)} className="theme-hud-close">×</button>
-          </div>
-          <div className="theme-hud-title">{themeToast.title}</div>
-          <div className="theme-hud-subtitle">{themeToast.subtitle}</div>
-        </div>
-      )}
-
       <LiveBanner />
 
       <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
         <div className="brand-group">
-          <button
-            type="button"
-            className="brand-logo-trigger"
-            onClick={toggleTheme}
-            title="Haz clic para cambiar el estilo gráfico (Fusión Selva + Morado Valorant / Clásico)"
-            aria-label="Cambiar estilo gráfico de la Copa Primate"
+          <Link 
+            to="/" 
+            className="brand-logo-trigger" 
+            title="Inicio · Copa Primate"
+            aria-label="Copa Primate - Inicio"
           >
             <img src="./copa-logo.png" alt="Logo Copa Primate" />
             <span className="brand-logo-pulse" />
-          </button>
+          </Link>
 
           <Link 
             to="/" 
             className="brand" 
             id="brand-link"
-            onClick={(e) => {
-              if (location.pathname === '/') {
-                toggleTheme(e);
-              }
-            }}
-            title="Inicio · Clic para alternar estilo gráfico"
+            title="Copa Primate Oficial"
           >
             COPA <span>PRIMATE</span>
           </Link>
-
-          <button
-            type="button"
-            className="theme-badge-btn"
-            onClick={toggleTheme}
-            title="Haz clic para alternar entre Fusión Valorant y Clásico"
-          >
-            {theme === 'fusion' ? (
-              <>
-                <span className="theme-indicator-dot fusion" />
-                <span className="theme-badge-text">⚡ FUSIÓN</span>
-              </>
-            ) : (
-              <>
-                <span className="theme-indicator-dot classic" />
-                <span className="theme-badge-text">🍌 CLÁSICO</span>
-              </>
-            )}
-          </button>
         </div>
 
         <button

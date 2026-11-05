@@ -5,7 +5,7 @@
 import { useState, useEffect } from 'react';
 import { TEAMS, STANDINGS } from './data';
 
-export const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:3001/api/public').replace(/\/$/, '');
+export const API_BASE = (import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.origin}/api/public` : 'http://localhost:3001/api/public')).replace(/\/$/, '');
 
 const TIMEOUT_MS = 6000;
 

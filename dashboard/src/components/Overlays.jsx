@@ -96,7 +96,7 @@ export default function Overlays() {
   };
 
   const copyUrl = (type, path) => {
-    const baseOrigin = window.location.origin.replace(':5174', ':5173');
+    const baseOrigin = window.location.port === '5174' ? window.location.origin.replace(':5174', ':5173') : window.location.origin;
     const fullUrl = `${baseOrigin}${path}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedUrl(type);
@@ -173,7 +173,7 @@ export default function Overlays() {
             </button>
 
             <a
-              href={`${window.location.origin.replace(':5174', ':5173')}/overlay/live`}
+              href={`${window.location.port === '5174' ? window.location.origin.replace(':5174', ':5173') : window.location.origin}/overlay/live`}
               target="_blank"
               rel="noreferrer"
               className="btn-secondary"
@@ -553,7 +553,7 @@ export default function Overlays() {
               </button>
 
               <a
-                href={`${window.location.origin.replace(':5174', ':5173')}${ov.url}`}
+                href={`${window.location.port === '5174' ? window.location.origin.replace(':5174', ':5173') : window.location.origin}${ov.url}`}
                 target="_blank"
                 rel="noreferrer"
                 className="btn-secondary"

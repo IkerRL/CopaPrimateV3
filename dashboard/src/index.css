@@ -1,23 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
-  --primate-orange: #ff9900;
-  --primate-orange-2: #ff6b00;
+  --primate-orange: #c084fc;
+  --primate-orange-2: #9333ea;
+  --fusion-purple: #c084fc;
+  --fusion-cyan: #00f5d4;
+  --twitch-purple: #9146ff;
+  --twitch-purple-hover: #772ce8;
   --primate-dark: #08080b;
   --primate-gray: #15151a;
   --primate-light-gray: #2d2d34;
   --text-main: #f5f5f7;
   --text-muted: #8b8b99;
   --danger: #ff4655;
-  --success: #00ff88;
+  --success: #00f5d4;
   --warning: #fbbf24;
   --info: #38bdf8;
-  --violet: #a78bfa;
+  --violet: #c084fc;
 
   --glass-bg: rgba(22, 22, 28, 0.55);
   --glass-bg-strong: rgba(18, 18, 24, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.07);
-  --glass-border-strong: rgba(255, 255, 255, 0.12);
+  --glass-border: rgba(192, 132, 252, 0.12);
+  --glass-border-strong: rgba(192, 132, 252, 0.22);
 
   --radius: 16px;
   --ease: cubic-bezier(0.4, 0, 0.2, 1);
@@ -60,9 +64,9 @@ code {
   position: fixed;
   inset: 0;
   background:
-    radial-gradient(circle at 12% 20%, rgba(255, 153, 0, 0.09), transparent 35%),
-    radial-gradient(circle at 88% 15%, rgba(255, 70, 85, 0.07), transparent 30%),
-    radial-gradient(circle at 70% 90%, rgba(167, 139, 250, 0.06), transparent 35%);
+    radial-gradient(circle at 12% 20%, rgba(192, 132, 252, 0.12), transparent 40%),
+    radial-gradient(circle at 88% 15%, rgba(0, 245, 212, 0.08), transparent 35%),
+    radial-gradient(circle at 50% 90%, rgba(145, 70, 255, 0.08), transparent 45%);
   z-index: -1;
   pointer-events: none;
   animation: meshShift 18s ease-in-out infinite alternate;
@@ -960,22 +964,23 @@ select.premium-input option { background: var(--primate-gray); }
   justify-content: center;
   padding: 24px;
   z-index: 100;
-  background: radial-gradient(circle at 50% 30%, rgba(255, 153, 0, 0.12), transparent 60%), #08080b;
+  background: radial-gradient(circle at 50% 30%, rgba(192, 132, 252, 0.14), transparent 60%), #08080b;
 }
 
 .login-card {
   width: 100%;
   max-width: 440px;
-  background: var(--glass-bg-strong);
-  border: 1px solid var(--glass-border-strong);
+  background: rgba(18, 18, 24, 0.94);
+  border: 1px solid rgba(192, 132, 252, 0.22);
   border-radius: var(--radius);
-  padding: 38px 32px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 153, 0, 0.1);
+  padding: 34px 28px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 50px rgba(192, 132, 252, 0.12);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   animation: pageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
 }
 
 .login-logo {
@@ -986,7 +991,7 @@ select.premium-input option { background: var(--primate-gray); }
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(255, 153, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(192, 132, 252, 0.35);
   margin: 0 auto 4px auto;
 }
 
@@ -1074,8 +1079,8 @@ select.premium-input option { background: var(--primate-gray); }
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--primate-orange), var(--primate-orange-2));
-  color: #000;
+  background: linear-gradient(135deg, #c084fc, #9333ea);
+  color: #fff;
   border: none;
   border-radius: 10px;
   padding: 12px 20px;
@@ -1083,18 +1088,147 @@ select.premium-input option { background: var(--primate-gray); }
   font-size: 14px;
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
-  box-shadow: 0 6px 18px rgba(255, 153, 0, 0.3);
+  box-shadow: 0 6px 18px rgba(192, 132, 252, 0.3);
   margin-top: 4px;
 }
 
 .login-btn:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(255, 153, 0, 0.45);
+  box-shadow: 0 8px 24px rgba(192, 132, 252, 0.45);
 }
 
 .login-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Botón Twitch oficial */
+.login-twitch-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #9146ff, #772ce8);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px rgba(145, 70, 255, 0.35);
+  width: 100%;
+}
+
+.login-twitch-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px rgba(145, 70, 255, 0.55);
+  filter: brightness(1.08);
+}
+
+.login-twitch-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Divisor estilizado */
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 6px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-divider span {
+  padding: 0 10px;
+}
+
+/* Modal de ayuda de configuración de Twitch */
+.twitch-help-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 8, 11, 0.96);
+  border-radius: var(--radius);
+  padding: 24px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  animation: pageIn 0.2s ease;
+}
+
+.twitch-help-content {
+  width: 100%;
+}
+
+/* Badge de usuario de Twitch en Sidebar */
+.twitch-user-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(145, 70, 255, 0.12);
+  border: 1px solid rgba(145, 70, 255, 0.28);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin: 0 14px 12px 14px;
+}
+
+.twitch-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #9146ff;
+  box-shadow: 0 0 10px rgba(145, 70, 255, 0.4);
+}
+
+.twitch-user-avatar-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #9146ff;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.twitch-user-meta {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.twitch-user-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.twitch-user-tag {
+  font-size: 10px;
+  color: #c084fc;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 600;
 }
 
 .spin {
