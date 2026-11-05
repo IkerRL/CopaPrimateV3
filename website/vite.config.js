@@ -5,10 +5,6 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   base: './',
   plugins: [react()],
-  build: {
-    outDir: '../docs',
-    emptyOutDir: true,
-  },
   server: {
     host: true
   }
