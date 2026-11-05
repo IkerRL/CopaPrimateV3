@@ -8,6 +8,7 @@
     "start": "node bot.js",
     "dev": "node --watch bot.js",
     "build": "npm --prefix website install && npm --prefix website run build && npm --prefix dashboard install && npm --prefix dashboard run build",
+    "postinstall": "npm --prefix website install && npm --prefix website run build && npm --prefix dashboard install && npm --prefix dashboard run build",
     "build:web": "npm --prefix website run build",
     "build:dashboard": "npm --prefix dashboard run build"
   },
