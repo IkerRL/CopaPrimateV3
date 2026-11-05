@@ -1,0 +1,33 @@
+{
+  "mode": "scoreboard",
+  "roulette": {
+    "state": "spinning",
+    "spinning": false,
+    "spinId": 1793673398601,
+    "chosenIdx": 8,
+    "reps": 12,
+    "targetMap": "Split",
+    "winnerMap": {
+      "name": "Split",
+      "location": "Tokio, Japón",
+      "url": "https://static.wikia.nocookie.net/valorant/images/d/d6/Loading_Screen_Split.png",
+      "active": true
+    },
+    "activeMaps": [
+      "Ascent",
+      "Bind",
+      "Breeze",
+      "Fracture",
+      "Haven",
+      "Icebox",
+      "Lotus",
+      "Pearl",
+      "Split",
+      "Sunset",
+      "Abyss",
+      "District",
+      "Summit"
+    ]
+  },
+  "updatedAt": "2026-11-03T02:45:10.347Z"
+}

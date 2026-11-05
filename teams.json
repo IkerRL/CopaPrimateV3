@@ -1,0 +1,309 @@
+[
+  {
+    "id": 1,
+    "name": "Los Monos",
+    "logo": "/monkeys.jpg",
+    "hidden": false,
+    "cupsPlayed": "3 Copas (2026)",
+    "cupsCount": 3,
+    "topAgents": [
+      "Jett",
+      "Reyna",
+      "Omen"
+    ],
+    "kills": 148,
+    "deaths": 86,
+    "assists": 72,
+    "totalPoints": 13,
+    "players": [
+      {
+        "name": "TenZ#NA1",
+        "currentRank": "Diamante 2",
+        "peakRank": "Diamante 3",
+        "rank": "Diamante",
+        "level": 120,
+        "points": 6,
+        "agent": "Jett",
+        "stats": {
+          "kills": 62,
+          "deaths": 24,
+          "assists": 18
+        },
+        "agents": [
+          "Jett",
+          "Jett",
+          "Reyna"
+        ]
+      },
+      {
+        "name": "Kyedae#0001",
+        "currentRank": "Oro 3",
+        "peakRank": "Oro 3",
+        "rank": "Oro",
+        "level": 85,
+        "points": 4,
+        "agent": "Reyna",
+        "stats": {
+          "kills": 48,
+          "deaths": 31,
+          "assists": 26
+        },
+        "agents": [
+          "Reyna",
+          "Clove"
+        ]
+      },
+      {
+        "name": "ScreaM#1 tap",
+        "currentRank": "Plata 3",
+        "peakRank": "Plata 3",
+        "rank": "Plata",
+        "level": 45,
+        "points": 3,
+        "agent": "Omen",
+        "stats": {
+          "kills": 38,
+          "deaths": 31,
+          "assists": 28
+        },
+        "agents": [
+          "Omen",
+          "Omen",
+          "Brimstone"
+        ]
+      }
+    ],
+    "validatedAt": "2026-02-15T12:00:00.000Z",
+    "status": "Aprobado (Público)"
+  },
+  {
+    "id": 2,
+    "name": "Gorilas",
+    "logo": "/gorilas.jpg",
+    "hidden": false,
+    "cupsPlayed": "2 Copas (2026)",
+    "cupsCount": 2,
+    "topAgents": [
+      "Raze",
+      "Clove",
+      "Cypher"
+    ],
+    "kills": 112,
+    "deaths": 128,
+    "assists": 51,
+    "totalPoints": 13.5,
+    "players": [
+      {
+        "name": "Mixwell#G2",
+        "currentRank": "Platino 2",
+        "peakRank": "Diamante 1",
+        "rank": "Platino",
+        "level": 200,
+        "points": 5.5,
+        "agent": "Raze",
+        "stats": {
+          "kills": 52,
+          "deaths": 38,
+          "assists": 14
+        },
+        "agents": [
+          "Raze",
+          "Raze",
+          "Jett"
+        ]
+      },
+      {
+        "name": "Keloqz#FR",
+        "currentRank": "Oro 3",
+        "peakRank": "Platino 1",
+        "rank": "Oro",
+        "level": 90,
+        "points": 4.5,
+        "agent": "Clove",
+        "stats": {
+          "kills": 36,
+          "deaths": 44,
+          "assists": 19
+        },
+        "agents": [
+          "Clove",
+          "Reyna"
+        ]
+      },
+      {
+        "name": "Avova#123",
+        "currentRank": "Plata 3",
+        "peakRank": "Oro 2",
+        "rank": "Plata",
+        "level": 50,
+        "points": 3.5,
+        "agent": "Cypher",
+        "stats": {
+          "kills": 24,
+          "deaths": 46,
+          "assists": 18
+        },
+        "agents": [
+          "Cypher",
+          "Cypher",
+          "Killjoy"
+        ]
+      }
+    ],
+    "validatedAt": "2026-02-15T12:15:00.000Z",
+    "status": "Aprobado (Público)"
+  },
+  {
+    "id": 3,
+    "name": "Primates FC",
+    "logo": "/logo3.png",
+    "hidden": false,
+    "cupsPlayed": "3 Copas (2026)",
+    "cupsCount": 3,
+    "topAgents": [
+      "Sova",
+      "Killjoy",
+      "Brimstone"
+    ],
+    "kills": 136,
+    "deaths": 98,
+    "assists": 68,
+    "totalPoints": 9.5,
+    "players": [
+      {
+        "name": "Knekro#123",
+        "currentRank": "Oro 2",
+        "peakRank": "Oro 3",
+        "rank": "Oro",
+        "level": 150,
+        "points": 4,
+        "agent": "Sova",
+        "stats": {
+          "kills": 50,
+          "deaths": 32,
+          "assists": 28
+        },
+        "agents": [
+          "Sova",
+          "Sova",
+          "Fade"
+        ]
+      },
+      {
+        "name": "IlloJuan#Malaga",
+        "currentRank": "Plata 2",
+        "peakRank": "Plata 3",
+        "rank": "Plata",
+        "level": 60,
+        "points": 3,
+        "agent": "Killjoy",
+        "stats": {
+          "kills": 46,
+          "deaths": 30,
+          "assists": 22
+        },
+        "agents": [
+          "Killjoy",
+          "Cypher"
+        ]
+      },
+      {
+        "name": "Xokas#WoW",
+        "currentRank": "Bronce 3",
+        "peakRank": "Plata 1",
+        "rank": "Bronce",
+        "level": 41,
+        "points": 2.5,
+        "agent": "Brimstone",
+        "stats": {
+          "kills": 40,
+          "deaths": 36,
+          "assists": 18
+        },
+        "agents": [
+          "Brimstone",
+          "Brimstone",
+          "Omen"
+        ]
+      }
+    ],
+    "validatedAt": "2026-02-15T12:30:00.000Z",
+    "status": "Aprobado (Público)"
+  },
+  {
+    "id": 4,
+    "name": "Chimp Squad",
+    "logo": "/logo4.png",
+    "hidden": false,
+    "cupsPlayed": "1ª Copa (Debut 2026)",
+    "cupsCount": 1,
+    "topAgents": [
+      "Fade",
+      "Iso",
+      "Breach"
+    ],
+    "kills": 124,
+    "deaths": 115,
+    "assists": 59,
+    "totalPoints": 15.5,
+    "players": [
+      {
+        "name": "Boaster#FNC",
+        "currentRank": "Ascendente 3",
+        "peakRank": "Inmortal 2",
+        "rank": "Inmortal",
+        "level": 300,
+        "points": 7.5,
+        "agent": "Fade",
+        "stats": {
+          "kills": 56,
+          "deaths": 34,
+          "assists": 25
+        },
+        "agents": [
+          "Fade",
+          "Fade",
+          "Sova"
+        ]
+      },
+      {
+        "name": "Derke#FNC",
+        "currentRank": "Diamante 3",
+        "peakRank": "Ascendente 2",
+        "rank": "Ascendente",
+        "level": 120,
+        "points": 6.5,
+        "agent": "Iso",
+        "stats": {
+          "kills": 48,
+          "deaths": 38,
+          "assists": 18
+        },
+        "agents": [
+          "Iso",
+          "Jett"
+        ]
+      },
+      {
+        "name": "Leo#FNC",
+        "currentRank": "Hierro 3",
+        "peakRank": "Bronce 1",
+        "rank": "Hierro",
+        "level": 42,
+        "points": 1.5,
+        "agent": "Breach",
+        "stats": {
+          "kills": 20,
+          "deaths": 43,
+          "assists": 16
+        },
+        "agents": [
+          "Breach",
+          "KAY/O"
+        ]
+      }
+    ],
+    "validatedAt": "2026-02-15T12:45:00.000Z",
+    "status": "Aprobado (Público)"
+  }
+]

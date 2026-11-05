@@ -1,0 +1,708 @@
+/* ===== ESTILOS OFICIALES COPA PRIMATE VOL. II - FASE DE GRUPOS & LIGA ===== */
+.copa-v2-container {
+  --omen-deep: #0e271d;
+  --omen-dark: #081c15;
+  --omen-purple: #4caf50;
+  --omen-cyan: #ffb300;
+  --omen-glow: rgba(0, 0, 0, 0.5);
+  --valorant-red: #d84315;
+  --card-bg: linear-gradient(90deg, rgba(46, 28, 24, 0.95) 0%, rgba(62, 39, 35, 0.9) 10%, rgba(78, 52, 46, 0.8) 50%, rgba(62, 39, 35, 0.9) 90%, rgba(46, 28, 24, 0.95) 100%);
+  --card-border: rgba(121, 85, 72, 0.8);
+  --gold: #ffc107;
+  --col-a: #e53935;
+  --col-b: #ffb300;
+  --col-c: #4caf50;
+  --col-d: #0288d1;
+
+  background: radial-gradient(circle at 50% 20%, rgba(27, 67, 50, 0.45), transparent 70%), #0a110d;
+  color: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(76, 175, 80, 0.25);
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Header con Monitos */
+.copa-header {
+  text-align: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 16px;
+  background: linear-gradient(to bottom, rgba(27, 67, 50, 0.3), transparent);
+}
+
+.copa-title-main {
+  font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(76, 175, 80, 0.4);
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.copa-vol-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 6px;
+}
+
+.copa-sticker-monkey {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px var(--omen-cyan));
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.copa-sticker-monkey:hover {
+  transform: scale(1.15) rotate(-8deg);
+}
+
+.copa-vol-text {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--omen-purple);
+  letter-spacing: 2px;
+}
+
+/* Selector de Fases / Tabs */
+.copa-phase-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.copa-phase-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ccc;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.copa-phase-btn:hover {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: var(--omen-purple);
+  color: #fff;
+}
+
+.copa-phase-btn.active {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 179, 0, 0.15));
+  border-color: var(--omen-cyan);
+  color: #ffb300;
+  box-shadow: 0 0 15px rgba(255, 179, 0, 0.25);
+}
+
+/* Acciones globales */
+.copa-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btn-v-action {
+  background: linear-gradient(135deg, #2e7d32, #1b5e20);
+  border: 1px solid #4caf50;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-v-action:hover {
+  background: linear-gradient(135deg, #388e3c, #2e7d32);
+  box-shadow: 0 0 12px rgba(76, 175, 80, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-v-secondary {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ddd;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.btn-v-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: #ffb300;
+}
+
+/* GRUPOS GRID (4 COLUMNAS) */
+.copa-presentacion-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .copa-presentacion-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .copa-presentacion-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.copa-group-col {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  padding: 14px;
+  border: 2px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.copa-group-col.A {
+  border-color: rgba(229, 57, 53, 0.6);
+  background: linear-gradient(180deg, rgba(229, 57, 53, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.copa-group-col.B {
+  border-color: rgba(255, 179, 0, 0.6);
+  background: linear-gradient(180deg, rgba(255, 179, 0, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.copa-group-col.C {
+  border-color: rgba(76, 175, 80, 0.6);
+  background: linear-gradient(180deg, rgba(76, 175, 80, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.copa-group-col.D {
+  border-color: rgba(2, 136, 209, 0.6);
+  background: linear-gradient(180deg, rgba(2, 136, 209, 0.08) 0%, rgba(0, 0, 0, 0.3) 100%);
+}
+
+.copa-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.copa-group-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.copa-group-col.A .copa-group-title { color: var(--col-a); }
+.copa-group-col.B .copa-group-title { color: var(--col-b); }
+.copa-group-col.C .copa-group-title { color: var(--col-c); }
+.copa-group-col.D .copa-group-title { color: var(--col-d); }
+
+.copa-team-card {
+  width: 100%;
+  height: 95px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  border: 2px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.copa-team-card:hover {
+  border-color: var(--omen-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Smoke cover para revelar */
+.copa-smoke-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: linear-gradient(135deg, #3e2723, var(--omen-dark));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.copa-smoke-cover::after {
+  content: "⚡ REVELAR";
+  color: var(--omen-purple);
+  font-weight: 900;
+  font-size: 0.72rem;
+  letter-spacing: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px dashed rgba(76, 175, 80, 0.5);
+}
+
+.copa-team-card.revealed .copa-smoke-cover {
+  opacity: 0;
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+
+.copa-team-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.copa-team-card.revealed .copa-team-content {
+  opacity: 1;
+}
+
+.copa-team-logo {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+.copa-team-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.copa-team-name {
+  font-weight: 900;
+  font-size: 0.88rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copa-players-row {
+  font-size: 0.72rem;
+  color: #aaa;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 3px;
+}
+
+.copa-group-badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  z-index: 11;
+  text-transform: uppercase;
+}
+
+.copa-group-badge.A { background: rgba(229, 57, 53, 0.2); color: var(--col-a); border: 1px solid var(--col-a); }
+.copa-group-badge.B { background: rgba(255, 179, 0, 0.2); color: var(--col-b); border: 1px solid var(--col-b); }
+.copa-group-badge.C { background: rgba(76, 175, 80, 0.2); color: var(--col-c); border: 1px solid var(--col-c); }
+.copa-group-badge.D { background: rgba(2, 136, 209, 0.2); color: var(--col-d); border: 1px solid var(--col-d); }
+
+/* ZOOM SPOTLIGHT MODAL */
+.copa-zoom-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+.copa-zoom-card {
+  background: linear-gradient(135deg, #1b382b, #0f1f18);
+  border: 3px solid var(--omen-cyan);
+  border-radius: 14px;
+  padding: 30px;
+  max-width: 440px;
+  width: 100%;
+  position: relative;
+  box-shadow: 0 0 50px rgba(255, 179, 0, 0.35);
+  text-align: center;
+  animation: scaleUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.copa-zoom-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+  filter: drop-shadow(0 0 20px rgba(255, 179, 0, 0.5));
+}
+
+.copa-zoom-title {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1.5px;
+  margin-bottom: 8px;
+}
+
+.copa-zoom-players {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.copa-zoom-player-item {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffb300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* SORTEO BOMBO & ANIMACIÓN */
+.copa-sorteo-box {
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 12px;
+  padding: 30px;
+  border: 1px solid rgba(255, 179, 0, 0.3);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.sorteo-ball-interactive {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background-color: #3e2723;
+  background-image: radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.15), transparent 50%),
+                    radial-gradient(circle at 35% 20%, #1a0b06 5px, transparent 6px),
+                    radial-gradient(circle at 65% 20%, #1a0b06 5px, transparent 6px);
+  border: 3px solid var(--omen-cyan);
+  box-shadow: 0 0 30px rgba(255, 179, 0, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+
+.sorteo-ball-interactive:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 50px rgba(255, 179, 0, 0.7);
+}
+
+.sorteo-ball-interactive.spinning {
+  animation: spinBall 0.15s linear infinite;
+  cursor: not-allowed;
+}
+
+@keyframes spinBall {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* INTERFAZ SPLIT LIGA (TABLA & JORNADAS) */
+.copa-liga-split {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 1050px) {
+  .copa-liga-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.copa-tabla-box {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  border-radius: 10px;
+  padding: 16px;
+  height: fit-content;
+}
+
+.copa-section-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--omen-cyan);
+  letter-spacing: 2px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+}
+
+.copa-standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.copa-standings-table th {
+  padding: 8px 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.copa-standings-table th:nth-child(2) {
+  text-align: left;
+}
+
+.copa-standings-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  text-align: center;
+}
+
+.copa-standings-table td:nth-child(2) {
+  text-align: left;
+}
+
+.tr-direct {
+  background: rgba(76, 175, 80, 0.08);
+  border-left: 3px solid #4caf50;
+}
+
+.tr-playoff {
+  background: rgba(255, 179, 0, 0.06);
+  border-left: 3px solid #ffb300;
+}
+
+.tr-elim {
+  background: rgba(229, 57, 53, 0.04);
+  border-left: 3px solid rgba(229, 57, 53, 0.4);
+}
+
+.pos-tag {
+  font-weight: 900;
+  font-size: 0.75rem;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.pos-direct { background: rgba(76, 175, 80, 0.25); color: #4caf50; }
+.pos-playoff { background: rgba(255, 179, 0, 0.25); color: #ffb300; }
+.pos-elim { background: rgba(229, 57, 53, 0.2); color: #e53935; }
+
+/* Acordeón de Jornadas */
+.copa-jornadas-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.copa-accordion-item {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.copa-accordion-header {
+  padding: 12px 16px;
+  background: rgba(27, 67, 50, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  color: var(--omen-cyan);
+}
+
+.copa-accordion-header:hover {
+  background: rgba(27, 67, 50, 0.55);
+}
+
+.copa-accordion-body {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.copa-match-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--omen-purple);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.copa-match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.copa-match-side {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.copa-match-side.right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.copa-match-logo {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.copa-match-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copa-score-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.copa-score-input {
+  width: 38px;
+  height: 28px;
+  background: #111;
+  border: 1px solid var(--omen-purple);
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  font-weight: 900;
+  font-size: 0.88rem;
+}
+
+.copa-score-input:focus {
+  outline: none;
+  border-color: var(--omen-cyan);
+  box-shadow: 0 0 8px rgba(255, 179, 0, 0.4);
+}
+
+.copa-match-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 6px;
+  margin-top: 2px;
+}
+
+.btn-send-live {
+  background: rgba(255, 179, 0, 0.15);
+  border: 1px solid rgba(255, 179, 0, 0.5);
+  color: #ffb300;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+
+.btn-send-live:hover {
+  background: #ffb300;
+  color: #000;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+

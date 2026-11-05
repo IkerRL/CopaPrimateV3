@@ -1,0 +1,23 @@
+{
+  "active": true,
+  "status": "FINALIZADO",
+  "team1": {
+    "name": "Thunder Buddies",
+    "logo": "/logo3.png",
+    "score": 0,
+    "mapsWon": 0
+  },
+  "team2": {
+    "name": "Entry Baiters",
+    "logo": "/logo5.png",
+    "score": 0,
+    "mapsWon": 0
+  },
+  "map": "Ascent",
+  "round": 1,
+  "format": "",
+  "side": "",
+  "mvp": "",
+  "notes": "",
+  "updatedAt": "2026-11-05T00:17:20.227Z"
+}
