@@ -90,7 +90,7 @@ export async function runTier1Tests() {
   // F2: Overlays Visual Palette
   // ==========================================
 
-  await ctx.runTest('F2.1: Website overlay files contain no legacy tokens (wood, banana, jungle hexes)', async () => {
+  await ctx.runTest('F2.1: Website overlay files contain no legacy tokens (wood, jungle hexes)', async () => {
     const violations = [];
     for (const relFile of WEBSITE_OVERLAY_FILES) {
       const content = readFileSafe(relFile);
@@ -176,24 +176,21 @@ export async function runTier1Tests() {
   // F3: Scoreboard HUD
   // ==========================================
 
-  await ctx.runTest('F3.1: OverlayScoreboard renders map name in center HUD', async () => {
+  await ctx.runTest('F3.1: OverlayScoreboard does not display map name in center HUD', async () => {
     const content = readFileSafe('website/src/pages/overlays/OverlayScoreboard.jsx') || '';
     const hasMapDisplay =
-      content.includes('match.map') ||
-      content.includes('map-name') ||
-      content.includes('hud-map') ||
-      /map/i.test(content);
-    assert.ok(hasMapDisplay, 'OverlayScoreboard must reference active map display');
+      content.includes('hud-map-name') ||
+      content.includes('MAPA TÁCTICO');
+    assert.ok(!hasMapDisplay, 'OverlayScoreboard must not display map name in center HUD');
   });
 
-  await ctx.runTest('F3.2: OverlayScoreboard renders round counter', async () => {
+  await ctx.runTest('F3.2: OverlayScoreboard does not display round counter in center HUD', async () => {
     const content = readFileSafe('website/src/pages/overlays/OverlayScoreboard.jsx') || '';
     const hasRoundDisplay =
-      content.includes('match.round') ||
-      content.includes('round-counter') ||
-      content.includes('ronda') ||
-      /round/i.test(content);
-    assert.ok(hasRoundDisplay, 'OverlayScoreboard must render round counter');
+      content.includes('hud-round-counter') ||
+      content.includes('hud-center-meta') ||
+      /RONDA\s*\{/i.test(content);
+    assert.ok(!hasRoundDisplay, 'OverlayScoreboard must not display round counter in center HUD');
   });
 
   await ctx.runTest('F3.3: OverlayScoreboard displays team side indicators (ATT / DEF)', async () => {
@@ -207,18 +204,16 @@ export async function runTier1Tests() {
     assert.ok(hasSides, 'OverlayScoreboard must display side indicators');
   });
 
-  await ctx.runTest('F3.4: OverlayScoreboard uses Radianite pips instead of banana emojis for map wins', async () => {
+  await ctx.runTest('F3.4: OverlayScoreboard uses banana icons (🍌) for map wins', async () => {
     const content = readFileSafe('website/src/pages/overlays/OverlayScoreboard.jsx') || '';
     assert.ok(
-      !content.includes('🍌'),
-      'OverlayScoreboard must not use banana emoji 🍌 for map win indicators'
+      content.includes('🍌'),
+      'OverlayScoreboard must use banana emoji 🍌 for map win indicators'
     );
-    const hasPips =
-      content.includes('pip') ||
-      content.includes('diamond') ||
-      content.includes('map-dot') ||
-      content.includes('map-win-pip');
-    assert.ok(hasPips, 'OverlayScoreboard must render map win pips');
+    const hasMapWins =
+      content.includes('map-wins-container') &&
+      content.includes('map-win-dot');
+    assert.ok(hasMapWins, 'OverlayScoreboard must render map win dots');
   });
 
   await ctx.runTest('F3.5: Scoreboard HUD CSS implements team name truncation (ellipsis)', async () => {

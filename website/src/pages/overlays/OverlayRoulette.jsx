@@ -344,10 +344,12 @@ export default function OverlayRoulette() {
           if (lastSpinId.current === 0) {
             lastSpinId.current = spinId;
             if (spinId > 0 && Date.now() - spinId < 9000 && !isSpinningRef.current) {
-              const targetWinner = rData.winnerMap || INITIAL_MAP_POOL.find(m => m.name.toLowerCase() === (rData.targetMap || '').toLowerCase());
+              const poolMatch = INITIAL_MAP_POOL.find(m => m.name.toLowerCase() === (rData.targetMap || rData.winnerMap?.name || '').toLowerCase());
+              const targetWinner = (rData.winnerMap?.url ? rData.winnerMap : null) || poolMatch || { name: rData.targetMap || 'Ascent', location: 'Mapa Táctico', url: INITIAL_MAP_POOL[0].url };
               ejecutarSpin(rData.chosenIdx, rData.reps, targetWinner, rData.activeMaps);
             } else if (rData.state === 'reward' && rData.winnerMap) {
-              setWinnerMap(rData.winnerMap);
+              const poolMatch = INITIAL_MAP_POOL.find(m => m.name.toLowerCase() === (rData.winnerMap?.name || '').toLowerCase());
+              setWinnerMap(rData.winnerMap?.url ? rData.winnerMap : (poolMatch || { ...rData.winnerMap, url: INITIAL_MAP_POOL[0].url }));
               setViewState('reward');
             }
           } else if (spinId > lastSpinId.current) {
@@ -359,7 +361,8 @@ export default function OverlayRoulette() {
                 itemsContainerRef.current.style.transform = 'translateX(0)';
               }
             } else if (!isSpinningRef.current) {
-              const targetWinner = rData.winnerMap || INITIAL_MAP_POOL.find(m => m.name.toLowerCase() === (rData.targetMap || '').toLowerCase());
+              const poolMatch = INITIAL_MAP_POOL.find(m => m.name.toLowerCase() === (rData.targetMap || rData.winnerMap?.name || '').toLowerCase());
+              const targetWinner = (rData.winnerMap?.url ? rData.winnerMap : null) || poolMatch || { name: rData.targetMap || 'Ascent', location: 'Mapa Táctico', url: INITIAL_MAP_POOL[0].url };
               ejecutarSpin(rData.chosenIdx, rData.reps, targetWinner, rData.activeMaps);
             }
           }

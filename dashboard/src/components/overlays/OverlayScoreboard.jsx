@@ -54,7 +54,11 @@ export default function OverlayScoreboard() {
   const isMatchPointT1 = s1 >= 12 && s1 > s2;
   const isMatchPointT2 = s2 >= 12 && s2 > s1;
   const isPause = String(match.status || '').toUpperCase().includes('PAUSA');
-  const isVisible = match.active !== false;
+  const isOverlay = typeof window !== 'undefined' && (
+    window.location.search.includes('overlay=1') ||
+    window.location.pathname.includes('/overlay')
+  );
+  const isVisible = isOverlay || match.active !== false || true;
 
   const isSwapped = (match.side || '').toLowerCase().includes('atk vs def') || (match.side || '').toLowerCase() === 'swapped';
   const team1Side = isSwapped ? 'ATACANTE' : 'DEFENSOR';
@@ -100,9 +104,9 @@ export default function OverlayScoreboard() {
               MATCH POINT
             </div>
             <div className="map-wins-container" id="maps-left" title="Mapas ganados">
-              <div className={`map-win-dot map-win-pip ${m1 > 0 ? 'active' : ''}`} data-idx="0" />
-              <div className={`map-win-dot map-win-pip ${m1 > 1 ? 'active' : ''}`} data-idx="1" />
-              <div className={`map-win-dot map-win-pip ${m1 > 2 ? 'active' : ''}`} data-idx="2" />
+              <div className={`map-win-dot ${m1 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
+              <div className={`map-win-dot ${m1 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
+              <div className={`map-win-dot ${m1 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
             </div>
             <div className="team-info">
               <div className="team-identity-block">
@@ -144,15 +148,6 @@ export default function OverlayScoreboard() {
             </div>
           </div>
 
-          <div className="hud-center-meta">
-            <span className="hud-map-name">
-              {match.map ? match.map.toUpperCase() : 'MAPA TÁCTICO'}
-            </span>
-            <span className="hud-round-counter">
-              RONDA {match.round ?? 0}
-            </span>
-          </div>
-
           <div className="center-accent-bar" />
         </div>
 
@@ -181,9 +176,9 @@ export default function OverlayScoreboard() {
               </div>
             </div>
             <div className="map-wins-container" id="maps-right" title="Mapas ganados">
-              <div className={`map-win-dot map-win-pip ${m2 > 2 ? 'active' : ''}`} data-idx="2" />
-              <div className={`map-win-dot map-win-pip ${m2 > 1 ? 'active' : ''}`} data-idx="1" />
-              <div className={`map-win-dot map-win-pip ${m2 > 0 ? 'active' : ''}`} data-idx="0" />
+              <div className={`map-win-dot ${m2 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
+              <div className={`map-win-dot ${m2 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
+              <div className={`map-win-dot ${m2 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
             </div>
             <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
               MATCH POINT

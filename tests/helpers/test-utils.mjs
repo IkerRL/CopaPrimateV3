@@ -5,7 +5,6 @@ export const ROOT_DIR = process.cwd();
 
 export const LEGACY_TOKENS = [
   'wood',
-  'banana',
   '#4e2e1a',
   '#27140b',
   '#795548',

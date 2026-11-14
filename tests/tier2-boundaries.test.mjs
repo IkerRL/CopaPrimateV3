@@ -102,21 +102,16 @@ export async function runTier2Tests() {
     assert.equal(hits.length, 0, `Found legacy hex colors in overlays:\n${hits.join('\n')}`);
   });
 
-  await ctx.runTest('B2.2: Scan for banana emoji (🍌) across all overlay JSX files', async () => {
-    const jsxFiles = [...WEBSITE_OVERLAY_FILES, ...DASHBOARD_OVERLAY_FILES].filter(f => f.endsWith('.jsx'));
-    const bananaHits = [];
-    for (const f of jsxFiles) {
-      const content = readFileSafe(f) || '';
-      if (content.includes('🍌') || content.includes('\\ud83c\\udf4c')) {
-        bananaHits.push(f);
-      }
-    }
-    assert.equal(bananaHits.length, 0, `Banana emoji found in overlay JSX files:\n${bananaHits.join('\n')}`);
+  await ctx.runTest('B2.2: OverlayScoreboard uses banana emoji (🍌) for map win indicators', async () => {
+    const webScoreboard = readFileSafe('website/src/pages/overlays/OverlayScoreboard.jsx') || '';
+    const dashScoreboard = readFileSafe('dashboard/src/components/overlays/OverlayScoreboard.jsx') || '';
+    assert.ok(webScoreboard.includes('🍌'), 'website OverlayScoreboard must contain banana emoji 🍌');
+    assert.ok(dashScoreboard.includes('🍌'), 'dashboard OverlayScoreboard must contain banana emoji 🍌');
   });
 
-  await ctx.runTest('B2.3: Scan for legacy word tokens "wood" and "banana" in overlay files', async () => {
+  await ctx.runTest('B2.3: Scan for legacy word token "wood" in overlay files', async () => {
     const allFiles = [...WEBSITE_OVERLAY_FILES, ...DASHBOARD_OVERLAY_FILES];
-    const wordTokens = ['wood', 'banana'];
+    const wordTokens = ['wood'];
     const hits = [];
     for (const f of allFiles) {
       const content = readFileSafe(f) || '';

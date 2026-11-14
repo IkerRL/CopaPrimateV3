@@ -230,12 +230,12 @@ function DashboardMain() {
 }
 
 export default function App() {
-  const currentPath = window.location.pathname;
-  if (currentPath.startsWith('/overlay')) {
-    if (currentPath.includes('roulette')) return <OverlayRoulette />;
-    if (currentPath.includes('matchup')) return <OverlayMatchup />;
-    if (currentPath.includes('ticker')) return <OverlayTicker />;
-    if (currentPath.includes('scoreboard')) return <OverlayScoreboard />;
+  const rawPath = (window.location.pathname + window.location.hash).toLowerCase();
+  if (rawPath.includes('/overlay')) {
+    if (rawPath.includes('roulette')) return <OverlayRoulette />;
+    if (rawPath.includes('matchup')) return <OverlayMatchup />;
+    if (rawPath.includes('ticker')) return <OverlayTicker />;
+    if (rawPath.includes('scoreboard')) return <OverlayScoreboard />;
     return <OverlayLive />;
   }
 

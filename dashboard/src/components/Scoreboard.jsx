@@ -773,20 +773,20 @@ export default function Scoreboard() {
                 </div>
                 <div className="map-wins-container" id="maps-left" title="Mapas ganados (Haz clic para alternar)">
                   <div
-                    className={`map-win-dot map-win-pip ${m1 > 0 ? 'active' : ''}`}
+                    className={`map-win-dot ${m1 > 0 ? 'active' : ''}`}
                     data-idx="0"
                     onClick={() => handleBananaChange('team1', m1 >= 1 ? -1 : 1)}
-                  />
+                  >🍌</div>
                   <div
-                    className={`map-win-dot map-win-pip ${m1 > 1 ? 'active' : ''}`}
+                    className={`map-win-dot ${m1 > 1 ? 'active' : ''}`}
                     data-idx="1"
                     onClick={() => handleBananaChange('team1', m1 >= 2 ? -1 : 1)}
-                  />
+                  >🍌</div>
                   <div
-                    className={`map-win-dot map-win-pip ${m1 > 2 ? 'active' : ''}`}
+                    className={`map-win-dot ${m1 > 2 ? 'active' : ''}`}
                     data-idx="2"
                     onClick={() => handleBananaChange('team1', m1 >= 3 ? -1 : 1)}
-                  />
+                  >🍌</div>
                 </div>
                 <div className="team-info">
                   <div className="team-identity-block">
@@ -834,15 +834,6 @@ export default function Scoreboard() {
                 </div>
               </div>
 
-              <div className="hud-center-meta">
-                <span className="hud-map-name">
-                  {matchData.map ? matchData.map.toUpperCase() : 'MAPA TÁCTICO'}
-                </span>
-                <span className="hud-round-counter">
-                  RONDA {matchData.round ?? 0}
-                </span>
-              </div>
-
               <div className="center-accent-bar" />
             </div>
 
@@ -878,20 +869,20 @@ export default function Scoreboard() {
                 </div>
                 <div className="map-wins-container" id="maps-right" title="Mapas ganados (Haz clic para alternar)">
                   <div
-                    className={`map-win-dot map-win-pip ${m2 > 2 ? 'active' : ''}`}
+                    className={`map-win-dot ${m2 > 2 ? 'active' : ''}`}
                     data-idx="2"
                     onClick={() => handleBananaChange('team2', m2 >= 3 ? -1 : 1)}
-                  />
+                  >🍌</div>
                   <div
-                    className={`map-win-dot map-win-pip ${m2 > 1 ? 'active' : ''}`}
+                    className={`map-win-dot ${m2 > 1 ? 'active' : ''}`}
                     data-idx="1"
                     onClick={() => handleBananaChange('team2', m2 >= 2 ? -1 : 1)}
-                  />
+                  >🍌</div>
                   <div
-                    className={`map-win-dot map-win-pip ${m2 > 0 ? 'active' : ''}`}
+                    className={`map-win-dot ${m2 > 0 ? 'active' : ''}`}
                     data-idx="0"
                     onClick={() => handleBananaChange('team2', m2 >= 1 ? -1 : 1)}
-                  />
+                  >🍌</div>
                 </div>
                 <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
                   MATCH POINT

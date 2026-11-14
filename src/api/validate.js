@@ -23,7 +23,7 @@ export const bool = (v, fallback = false) => (typeof v === 'boolean' ? v : fallb
 export const hexColor = (v, fallback) => (typeof v === 'string' && /^#[0-9a-f]{6}$/i.test(v) ? v : fallback);
 
 // Logos: rutas locales (/logo.png), URLs http(s) o imágenes en data URL (máx ~1.5 MB)
-export function logo(v, fallback = '/monkeys.jpg') {
+export function logo(v, fallback = '/copa-logo.png') {
     if (typeof v !== 'string' || !v) return fallback;
     if (v.startsWith('/') && v.length <= 300 && !v.includes('..')) return v;
     if (/^https?:\/\//i.test(v) && v.length <= 2000) return v;

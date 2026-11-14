@@ -7,6 +7,20 @@ import { apiFetch } from '../api';
 
 const MAP_NAMES = ['Ascent', 'Bind', 'Haven', 'Split', 'Sunset', 'Lotus', 'Abyss', 'Icebox', 'Breeze', 'Fracture', 'Pearl'];
 
+const MAP_POOL_DATA = {
+  Ascent: { location: 'Venecia, Italia', url: 'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png' },
+  Bind: { location: 'Rabat, Marruecos', url: 'https://static.wikia.nocookie.net/valorant/images/2/23/Loading_Screen_Bind.png' },
+  Breeze: { location: 'Triángulo de las Bermudas, Océano Atlántico', url: 'https://static.wikia.nocookie.net/valorant/images/1/10/Loading_Screen_Breeze.png' },
+  Fracture: { location: 'Santa Fe, Nuevo México, EE. UU.', url: 'https://static.wikia.nocookie.net/valorant/images/f/fc/Loading_Screen_Fracture.png' },
+  Haven: { location: 'Timbu, Bután', url: 'https://static.wikia.nocookie.net/valorant/images/7/70/Loading_Screen_Haven.png' },
+  Icebox: { location: 'Isla Bennett, Rusia', url: 'https://static.wikia.nocookie.net/valorant/images/1/13/Loading_Screen_Icebox.png' },
+  Lotus: { location: 'Ghats occidentales, India', url: 'https://static.wikia.nocookie.net/valorant/images/d/d0/Loading_Screen_Lotus.png' },
+  Pearl: { location: 'Lisboa, Portugal', url: 'https://static.wikia.nocookie.net/valorant/images/a/af/Loading_Screen_Pearl.png' },
+  Split: { location: 'Tokio, Japón', url: 'https://static.wikia.nocookie.net/valorant/images/d/d6/Loading_Screen_Split.png' },
+  Sunset: { location: 'Los Ángeles, California, EE. UU.', url: 'https://static.wikia.nocookie.net/valorant/images/5/5c/Loading_Screen_Sunset.png' },
+  Abyss: { location: 'Tierras Altas de Noruega', url: 'https://static.wikia.nocookie.net/valorant/images/6/61/Loading_Screen_Abyss.png' }
+};
+
 export default function Overlays() {
   const [matches, setMatches] = useState([]);
   const [selectedMatchId, setSelectedMatchId] = useState(null);
@@ -51,6 +65,7 @@ export default function Overlays() {
     setActiveOverlayMode('roulette');
     const idx = Math.floor(Math.random() * MAP_NAMES.length);
     const randomMapName = MAP_NAMES[idx];
+    const mapInfo = MAP_POOL_DATA[randomMapName] || { location: 'Mapa Táctico', url: 'https://static.wikia.nocookie.net/valorant/images/e/e7/Loading_Screen_Ascent.png' };
     try {
       await apiFetch('/overlay-state', {
         method: 'POST',
@@ -63,7 +78,7 @@ export default function Overlays() {
             chosenIdx: idx,
             reps: 12,
             targetMap: randomMapName,
-            winnerMap: { name: randomMapName, location: 'Mapa Táctico' }
+            winnerMap: { name: randomMapName, location: mapInfo.location, url: mapInfo.url }
           }
         })
       });

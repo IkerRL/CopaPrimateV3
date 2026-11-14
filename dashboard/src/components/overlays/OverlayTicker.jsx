@@ -40,7 +40,11 @@ export default function OverlayTicker() {
     };
   }, []);
 
-  const isVisible = match.active !== false;
+  const isOverlay = typeof window !== 'undefined' && (
+    window.location.search.includes('overlay=1') ||
+    window.location.pathname.includes('/overlay')
+  );
+  const isVisible = isOverlay || match.active !== false || true;
 
   return (
     <div style={{

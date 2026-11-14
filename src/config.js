@@ -13,7 +13,7 @@ export const PORT = Number(process.env.PORT) || 3001;
 
 // Orígenes permitidos para CORS (separados por comas). Por defecto: servidores de Vite en local.
 export const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS ||
-    'http://localhost:5173,http://localhost:5174,http://localhost:4173,http://127.0.0.1:5173,http://127.0.0.1:5174')
+    'http://localhost:5173,http://localhost:5174,http://localhost:4173,http://localhost:3001,http://127.0.0.1:5173,http://127.0.0.1:5174,http://127.0.0.1:3001')
     .split(',')
     .map(o => o.trim())
     .filter(Boolean);

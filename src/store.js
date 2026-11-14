@@ -57,7 +57,7 @@ function seedTeams() {
         id, name, logo, hidden: true, players, validatedAt: now, status: 'Aprobado (Oculto)',
     });
     return [
-        mk(1, 'Los Monos', '/monkeys.jpg', [
+        mk(1, 'Los Monos', '/copa-logo.png', [
             { name: 'TenZ#NA1', rank: 'Diamante', level: 120 },
             { name: 'Kyedae#0001', rank: 'Oro', level: 85 },
             { name: 'ScreaM#1 tap', rank: 'Plata', level: 45 },

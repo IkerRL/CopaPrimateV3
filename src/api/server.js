@@ -55,7 +55,7 @@ export function startApi() {
     app.use('/api/auth/twitch', rateLimit({ windowMs: 60_000, max: 60 }), twitchRouter);
 
     // Web pública: solo lectura, con límite generoso
-    app.use('/api/public', rateLimit({ windowMs: 60_000, max: 240 }), publicRouter);
+    app.use('/api/public', rateLimit({ windowMs: 60_000, max: 1200 }), publicRouter);
     app.use('/api/public', (req, res) => res.status(404).json({ error: 'Ruta de API pública no encontrada' }));
 
     // Panel de moderación: requiere token
@@ -79,6 +79,7 @@ export function startApi() {
     // ===== Web Oficial del Torneo servida en la raíz / =====
     if (fs.existsSync(websiteDist)) {
         app.use(express.static(websiteDist));
+        app.use('/overlay/assets', express.static(path.join(websiteDist, 'assets')));
         app.use((req, res, next) => {
             if (req.path.startsWith('/api') || req.path.startsWith('/admin')) {
                 return next();

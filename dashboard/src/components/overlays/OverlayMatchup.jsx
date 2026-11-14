@@ -43,7 +43,11 @@ export default function OverlayMatchup() {
     };
   }, []);
 
-  const isVisible = match.active !== false;
+  const isOverlay = typeof window !== 'undefined' && (
+    window.location.search.includes('overlay=1') ||
+    window.location.pathname.includes('/overlay')
+  );
+  const isVisible = isOverlay || match.active !== false || true;
 
   const isSwapped = (match.side || '').toLowerCase().includes('atk vs def') || (match.side || '').toLowerCase() === 'swapped';
   const team1Side = isSwapped ? 'LADO ROJO / ATACANTE' : 'LADO AZUL / DEFENSOR';
