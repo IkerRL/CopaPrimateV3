@@ -861,10 +861,9 @@ export default function Scoreboard() {
               </div>
             </div>
 
-            {/* CENTRO DEL TORNEO REDISEÑADO CON MONOS OFICIALES Y COPA */}
+            {/* CENTRO DEL TORNEO: SOLO NOMBRE, VOL. III Y MONITOS OFICIALES */}
             <div className="tournament-center">
               <div className="center-top-row">
-                <img src="/copa-logo.png" className="center-cup-icon" alt="Copa" />
                 <span className="main-title" id="display-title">COPA PRIMATE</span>
               </div>
 
