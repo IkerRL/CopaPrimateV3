@@ -17,6 +17,7 @@ import OverlayMatchup from './components/overlays/OverlayMatchup';
 import OverlayTicker from './components/overlays/OverlayTicker';
 import OverlayRoulette from './components/overlays/OverlayRoulette';
 import OverlayLive from './components/overlays/OverlayLive';
+import OverlayGruposSorteo from './components/overlays/OverlayGruposSorteo';
 import { apiFetch, getToken, clearToken, getTwitchUser } from './api';
 import './index.css';
 
@@ -235,6 +236,7 @@ export default function App() {
     if (rawPath.includes('roulette')) return <OverlayRoulette />;
     if (rawPath.includes('matchup')) return <OverlayMatchup />;
     if (rawPath.includes('ticker')) return <OverlayTicker />;
+    if (rawPath.includes('sorteo') || rawPath.includes('grupos')) return <OverlayGruposSorteo />;
     if (rawPath.includes('scoreboard')) return <OverlayScoreboard />;
     return <OverlayLive />;
   }

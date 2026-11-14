@@ -7,6 +7,49 @@ import { apiFetch } from '../api';
 import ConfirmModal from './ConfirmModal';
 import './overlays/marcador.css';
 
+export function getTeamTag(team) {
+  if (!team) return 'TBD';
+  if (team.tag && typeof team.tag === 'string' && team.tag.trim().length > 0) {
+    return team.tag.trim().slice(0, 4).toUpperCase();
+  }
+  const raw = (team.name || '').trim();
+  if (!raw || raw.toUpperCase() === 'SELECCIONAR' || raw.toUpperCase() === 'TBD') {
+    return 'TBD';
+  }
+
+  const clean = raw.toUpperCase();
+  if (clean.includes('GORIL')) return 'GOR';
+  if (clean.includes('MONO') || clean.includes('MONKEY')) return 'MON';
+  if (clean.includes('CHIMP')) return 'CHP';
+  if (clean.includes('ORANG')) return 'ORA';
+  if (clean.includes('BABUIN') || clean.includes('BABOON')) return 'BAB';
+  if (clean.includes('HERETICS')) return 'THB';
+  if (clean.includes('KOI')) return 'KOI';
+  if (clean.includes('GIANTS')) return 'GIA';
+  if (clean.includes('FNATIC')) return 'FNC';
+  if (clean.includes('SENTINEL')) return 'SEN';
+  if (clean.includes('FUSION')) return 'FSN';
+
+  if (/^[A-Za-z0-9]{2,4}$/.test(raw)) {
+    return raw.toUpperCase();
+  }
+
+  const words = raw.split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    return (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+  }
+  if (words.length === 2) {
+    const w1 = words[0];
+    const w2 = words[1];
+    if (w1.length >= 1 && w2.length >= 2) {
+      return (w1[0] + w2.slice(0, 2)).toUpperCase();
+    }
+  }
+
+  const alphanum = raw.replace(/[^a-zA-Z0-9]/g, '');
+  return alphanum.slice(0, 3).toUpperCase() || 'TBD';
+}
+
 const STATUSES = [
   { id: 'LIVE', label: '🔴 EN VIVO', color: '#ff4655' },
   { id: 'PAUSA', label: '⏸️ PAUSA TÉCNICA', color: '#ffb300' },
@@ -788,24 +831,24 @@ export default function Scoreboard() {
                     onClick={() => handleBananaChange('team1', m1 >= 3 ? -1 : 1)}
                   >🍌</div>
                 </div>
-                <div className="team-info">
-                  <div className="team-identity-block">
-                    <span id="name-left" className="team-name" title={matchData.team1?.name || 'SELECCIONAR'}>
-                      {matchData.team1?.name || 'SELECCIONAR'}
-                    </span>
-                    <span className={`team-side-indicator ${team1SideClass}`}>
-                      {team1Side}
-                    </span>
+
+                <div className="team-info team-info-left">
+                  <div className={`team-side-indicator ${team1SideClass}`}>
+                    {team1Side}
                   </div>
+                  <span id="name-left" className="team-tag" title={matchData.team1?.name || 'SELECCIONAR'}>
+                    {getTeamTag(matchData.team1)}
+                  </span>
                   <div className="logo-box">
                     <img
                       id="img-left"
                       src={matchData.team1?.logo || '/logo1.png'}
-                      alt="Logo A"
+                      alt={getTeamTag(matchData.team1)}
                       onError={(e) => { e.target.src = '/logo1.png'; }}
                     />
                   </div>
                 </div>
+
                 <div
                   className="score-box"
                   id="score-left"
@@ -813,24 +856,27 @@ export default function Scoreboard() {
                   style={{ fontVariantNumeric: 'tabular-nums' }}
                   title="Clic: +1 ronda"
                 >
-                  {s1}
+                  <span className="score-num">{s1}</span>
                 </div>
               </div>
             </div>
 
-            {/* CENTRO DEL TORNEO */}
+            {/* CENTRO DEL TORNEO REDISEÑADO CON MONOS OFICIALES Y COPA */}
             <div className="tournament-center">
-              <div className="row-top">
-                <span className="main-title" id="display-title">Copa Primate</span>
+              <div className="center-top-row">
+                <img src="/copa-logo.png" className="center-cup-icon" alt="Copa" />
+                <span className="main-title" id="display-title">COPA PRIMATE</span>
               </div>
 
               <div className="row-bottom">
-                <div className="monkey-pad left-pad" id="monkey-pad-left">
-                  <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Copa Primate" />
+                <div className="monkey-pad left-pad" id="monkey-pad-left" title="Monito Oficial">
+                  <img src="/monito-izq.png" className="monkey-avatar monkey-left-img" id="monkeyLeft" alt="Mono Izquierda" />
                 </div>
-                <span className="sub-title" id="display-subtitle">VOL.III</span>
-                <div className="monkey-pad right-pad" id="monkey-pad-right">
-                  <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Copa Primate" />
+                <div className="vol-pill">
+                  <span className="sub-title" id="display-subtitle">VOL. III</span>
+                </div>
+                <div className="monkey-pad right-pad" id="monkey-pad-right" title="Monito Oficial">
+                  <img src="/monito-der.png" className="monkey-avatar monkey-right-img" id="monkeyRight" alt="Mono Derecha" />
                 </div>
               </div>
 
@@ -847,26 +893,26 @@ export default function Scoreboard() {
                   style={{ fontVariantNumeric: 'tabular-nums' }}
                   title="Clic: +1 ronda"
                 >
-                  {s2}
+                  <span className="score-num">{s2}</span>
                 </div>
-                <div className="team-info">
+
+                <div className="team-info team-info-right">
                   <div className="logo-box">
                     <img
                       id="img-right"
                       src={matchData.team2?.logo || '/logo2.png'}
-                      alt="Logo B"
+                      alt={getTeamTag(matchData.team2)}
                       onError={(e) => { e.target.src = '/logo2.png'; }}
                     />
                   </div>
-                  <div className="team-identity-block" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
-                    <span id="name-right" className="team-name" title={matchData.team2?.name || 'SELECCIONAR'}>
-                      {matchData.team2?.name || 'SELECCIONAR'}
-                    </span>
-                    <span className={`team-side-indicator ${team2SideClass}`}>
-                      {team2Side}
-                    </span>
+                  <span id="name-right" className="team-tag" title={matchData.team2?.name || 'SELECCIONAR'}>
+                    {getTeamTag(matchData.team2)}
+                  </span>
+                  <div className={`team-side-indicator ${team2SideClass}`}>
+                    {team2Side}
                   </div>
                 </div>
+
                 <div className="map-wins-container" id="maps-right" title="Mapas ganados (Haz clic para alternar)">
                   <div
                     className={`map-win-dot ${m2 > 2 ? 'active' : ''}`}
@@ -884,6 +930,7 @@ export default function Scoreboard() {
                     onClick={() => handleBananaChange('team2', m2 >= 1 ? -1 : 1)}
                   >🍌</div>
                 </div>
+
                 <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
                   MATCH POINT
                 </div>

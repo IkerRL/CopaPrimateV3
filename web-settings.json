@@ -1,9 +1,9 @@
 {
-  "showStandings": false,
-  "showGroups": false,
-  "showMatches": false,
-  "tournamentPhase": "inscripciones",
-  "activeMatchday": "J1",
+  "showStandings": true,
+  "showGroups": true,
+  "showMatches": true,
+  "tournamentPhase": "fase_liga",
+  "activeMatchday": "ALL",
   "totalSlots": 16,
   "announcementBanner": ""
 }

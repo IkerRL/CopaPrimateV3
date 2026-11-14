@@ -1,6 +1,1466 @@
 {
-  "drawCompleted": false,
-  "drawnAt": null,
-  "groups": {},
-  "matches": []
+  "drawCompleted": true,
+  "drawnAt": "2026-11-14T20:26:14.976Z",
+  "groups": {
+    "A": [
+      {
+        "id": "A1",
+        "name": "Thunder Buddies",
+        "jugadores": [
+          "Brrokeen",
+          "Pipe"
+        ],
+        "logo": "/logo3.png",
+        "grupo": "A"
+      },
+      {
+        "id": "A2",
+        "name": "Los Akrtona2",
+        "jugadores": [
+          "Kira",
+          "Serax"
+        ],
+        "logo": "/logo2.png",
+        "grupo": "A"
+      },
+      {
+        "id": "A3",
+        "name": "Chuu-Chuu 100% MAX",
+        "jugadores": [
+          "MakaQuillo",
+          "Max"
+        ],
+        "logo": "/logo8.png",
+        "grupo": "A"
+      },
+      {
+        "id": "A4",
+        "name": "REHENKARMACIÓN",
+        "jugadores": [
+          "Satha",
+          "Makflat"
+        ],
+        "logo": "/logo1.png",
+        "grupo": "A"
+      }
+    ],
+    "B": [
+      {
+        "id": "B1",
+        "name": "Entry Baiters",
+        "jugadores": [
+          "レックウザ",
+          "Militantedelsoe"
+        ],
+        "logo": "/logo5.png",
+        "grupo": "B"
+      },
+      {
+        "id": "B2",
+        "name": "Dream Team",
+        "jugadores": [
+          "JoKker",
+          "Pepardo"
+        ],
+        "logo": "/logo7.png",
+        "grupo": "B"
+      },
+      {
+        "id": "B3",
+        "name": "Makaco Ninja-Pelocho",
+        "jugadores": [
+          "MakacoNinja",
+          "Iker 😎"
+        ],
+        "logo": "/logo6.png",
+        "grupo": "B"
+      },
+      {
+        "id": "B4",
+        "name": "Kizuna",
+        "jugadores": [
+          "Alezita",
+          "Sarix"
+        ],
+        "logo": "/logo4.png",
+        "grupo": "B"
+      }
+    ],
+    "C": [
+      {
+        "id": "C1",
+        "name": "Sakura",
+        "jugadores": [
+          "Gustavo",
+          "Carlos"
+        ],
+        "logo": "/logo14.png",
+        "grupo": "C"
+      },
+      {
+        "id": "C2",
+        "name": "Soul Resonance",
+        "jugadores": [
+          "KrypT",
+          "Charly"
+        ],
+        "logo": "/logo11.png",
+        "grupo": "C"
+      },
+      {
+        "id": "C3",
+        "name": "Stranger Picks",
+        "jugadores": [
+          "TheDori",
+          "Sotomi"
+        ],
+        "logo": "/logo9.png",
+        "grupo": "C"
+      },
+      {
+        "id": "C4",
+        "name": "MARIIKS",
+        "jugadores": [
+          "Acid",
+          "Bru"
+        ],
+        "logo": "/logo10.png",
+        "grupo": "C"
+      }
+    ],
+    "D": [
+      {
+        "id": "D1",
+        "name": "Primates FC",
+        "jugadores": [
+          "Knekro",
+          "IlloJuan"
+        ],
+        "logo": "/logo12.png",
+        "grupo": "D"
+      },
+      {
+        "id": "D2",
+        "name": "Chimp Squad",
+        "jugadores": [
+          "Boaster",
+          "Derke"
+        ],
+        "logo": "/logo13.png",
+        "grupo": "D"
+      },
+      {
+        "id": "D3",
+        "name": "Banana Kings",
+        "jugadores": [
+          "Maka",
+          "Mixwell"
+        ],
+        "logo": "/logo15.png",
+        "grupo": "D"
+      },
+      {
+        "id": "D4",
+        "name": "Golden Gorillas",
+        "jugadores": [
+          "TenZ",
+          "ScreaM"
+        ],
+        "logo": "/logo10.png",
+        "grupo": "D"
+      }
+    ]
+  },
+  "jornadas": [
+    [
+      {
+        "id": 1,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 1",
+        "map": "Haven",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Thunder Buddies",
+          "logo": "/logo3.png"
+        },
+        "t2": {
+          "name": "Entry Baiters",
+          "logo": "/logo5.png"
+        }
+      },
+      {
+        "id": 2,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 2",
+        "map": "Split",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Los Akrtona2",
+          "logo": "/logo2.png"
+        },
+        "t2": {
+          "name": "Dream Team",
+          "logo": "/logo7.png"
+        }
+      },
+      {
+        "id": 3,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 3",
+        "map": "Sunset",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Chuu-Chuu 100% MAX",
+          "logo": "/logo8.png"
+        },
+        "t2": {
+          "name": "Makaco Ninja-Pelocho",
+          "logo": "/logo6.png"
+        }
+      },
+      {
+        "id": 4,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 4",
+        "map": "Lotus",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "REHENKARMACIÓN",
+          "logo": "/logo1.png"
+        },
+        "t2": {
+          "name": "Kizuna",
+          "logo": "/logo4.png"
+        }
+      },
+      {
+        "id": 5,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 5",
+        "map": "Abyss",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Sakura",
+          "logo": "/logo14.png"
+        },
+        "t2": {
+          "name": "Primates FC",
+          "logo": "/logo12.png"
+        }
+      },
+      {
+        "id": 6,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 6",
+        "map": "Icebox",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Soul Resonance",
+          "logo": "/logo11.png"
+        },
+        "t2": {
+          "name": "Chimp Squad",
+          "logo": "/logo13.png"
+        }
+      },
+      {
+        "id": 7,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 7",
+        "map": "Ascent",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Stranger Picks",
+          "logo": "/logo9.png"
+        },
+        "t2": {
+          "name": "Banana Kings",
+          "logo": "/logo15.png"
+        }
+      },
+      {
+        "id": 8,
+        "jornada": 1,
+        "round": "J1",
+        "date": "Jornada 1 · Partido 8",
+        "map": "Bind",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "MARIIKS",
+          "logo": "/logo10.png"
+        },
+        "t2": {
+          "name": "Golden Gorillas",
+          "logo": "/logo10.png"
+        }
+      }
+    ],
+    [
+      {
+        "id": 9,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 1",
+        "map": "Sunset",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Thunder Buddies",
+          "logo": "/logo3.png"
+        },
+        "t2": {
+          "name": "Sakura",
+          "logo": "/logo14.png"
+        }
+      },
+      {
+        "id": 10,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 2",
+        "map": "Lotus",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Los Akrtona2",
+          "logo": "/logo2.png"
+        },
+        "t2": {
+          "name": "Soul Resonance",
+          "logo": "/logo11.png"
+        }
+      },
+      {
+        "id": 11,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 3",
+        "map": "Abyss",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Chuu-Chuu 100% MAX",
+          "logo": "/logo8.png"
+        },
+        "t2": {
+          "name": "Stranger Picks",
+          "logo": "/logo9.png"
+        }
+      },
+      {
+        "id": 12,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 4",
+        "map": "Icebox",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "REHENKARMACIÓN",
+          "logo": "/logo1.png"
+        },
+        "t2": {
+          "name": "MARIIKS",
+          "logo": "/logo10.png"
+        }
+      },
+      {
+        "id": 13,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 5",
+        "map": "Ascent",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Entry Baiters",
+          "logo": "/logo5.png"
+        },
+        "t2": {
+          "name": "Primates FC",
+          "logo": "/logo12.png"
+        }
+      },
+      {
+        "id": 14,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 6",
+        "map": "Bind",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Dream Team",
+          "logo": "/logo7.png"
+        },
+        "t2": {
+          "name": "Chimp Squad",
+          "logo": "/logo13.png"
+        }
+      },
+      {
+        "id": 15,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 7",
+        "map": "Haven",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Makaco Ninja-Pelocho",
+          "logo": "/logo6.png"
+        },
+        "t2": {
+          "name": "Banana Kings",
+          "logo": "/logo15.png"
+        }
+      },
+      {
+        "id": 16,
+        "jornada": 2,
+        "round": "J2",
+        "date": "Jornada 2 · Partido 8",
+        "map": "Split",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Kizuna",
+          "logo": "/logo4.png"
+        },
+        "t2": {
+          "name": "Golden Gorillas",
+          "logo": "/logo10.png"
+        }
+      }
+    ],
+    [
+      {
+        "id": 17,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 1",
+        "map": "Abyss",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Thunder Buddies",
+          "logo": "/logo3.png"
+        },
+        "t2": {
+          "name": "Primates FC",
+          "logo": "/logo12.png"
+        }
+      },
+      {
+        "id": 18,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 2",
+        "map": "Icebox",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Los Akrtona2",
+          "logo": "/logo2.png"
+        },
+        "t2": {
+          "name": "Chimp Squad",
+          "logo": "/logo13.png"
+        }
+      },
+      {
+        "id": 19,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 3",
+        "map": "Ascent",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Chuu-Chuu 100% MAX",
+          "logo": "/logo8.png"
+        },
+        "t2": {
+          "name": "Banana Kings",
+          "logo": "/logo15.png"
+        }
+      },
+      {
+        "id": 20,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 4",
+        "map": "Bind",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "REHENKARMACIÓN",
+          "logo": "/logo1.png"
+        },
+        "t2": {
+          "name": "Golden Gorillas",
+          "logo": "/logo10.png"
+        }
+      },
+      {
+        "id": 21,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 5",
+        "map": "Haven",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Entry Baiters",
+          "logo": "/logo5.png"
+        },
+        "t2": {
+          "name": "Sakura",
+          "logo": "/logo14.png"
+        }
+      },
+      {
+        "id": 22,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 6",
+        "map": "Split",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Dream Team",
+          "logo": "/logo7.png"
+        },
+        "t2": {
+          "name": "Soul Resonance",
+          "logo": "/logo11.png"
+        }
+      },
+      {
+        "id": 23,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 7",
+        "map": "Sunset",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Makaco Ninja-Pelocho",
+          "logo": "/logo6.png"
+        },
+        "t2": {
+          "name": "Stranger Picks",
+          "logo": "/logo9.png"
+        }
+      },
+      {
+        "id": 24,
+        "jornada": 3,
+        "round": "J3",
+        "date": "Jornada 3 · Partido 8",
+        "map": "Lotus",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Kizuna",
+          "logo": "/logo4.png"
+        },
+        "t2": {
+          "name": "MARIIKS",
+          "logo": "/logo10.png"
+        }
+      }
+    ],
+    [
+      {
+        "id": 25,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 1",
+        "map": "Ascent",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Thunder Buddies",
+          "logo": "/logo3.png"
+        },
+        "t2": {
+          "name": "Dream Team",
+          "logo": "/logo7.png"
+        }
+      },
+      {
+        "id": 26,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 2",
+        "map": "Bind",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Los Akrtona2",
+          "logo": "/logo2.png"
+        },
+        "t2": {
+          "name": "Entry Baiters",
+          "logo": "/logo5.png"
+        }
+      },
+      {
+        "id": 27,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 3",
+        "map": "Haven",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Chuu-Chuu 100% MAX",
+          "logo": "/logo8.png"
+        },
+        "t2": {
+          "name": "Kizuna",
+          "logo": "/logo4.png"
+        }
+      },
+      {
+        "id": 28,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 4",
+        "map": "Split",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "REHENKARMACIÓN",
+          "logo": "/logo1.png"
+        },
+        "t2": {
+          "name": "Makaco Ninja-Pelocho",
+          "logo": "/logo6.png"
+        }
+      },
+      {
+        "id": 29,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 5",
+        "map": "Sunset",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Sakura",
+          "logo": "/logo14.png"
+        },
+        "t2": {
+          "name": "Chimp Squad",
+          "logo": "/logo13.png"
+        }
+      },
+      {
+        "id": 30,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 6",
+        "map": "Lotus",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Soul Resonance",
+          "logo": "/logo11.png"
+        },
+        "t2": {
+          "name": "Primates FC",
+          "logo": "/logo12.png"
+        }
+      },
+      {
+        "id": 31,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 7",
+        "map": "Abyss",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "Stranger Picks",
+          "logo": "/logo9.png"
+        },
+        "t2": {
+          "name": "Golden Gorillas",
+          "logo": "/logo10.png"
+        }
+      },
+      {
+        "id": 32,
+        "jornada": 4,
+        "round": "J4",
+        "date": "Jornada 4 · Partido 8",
+        "map": "Icebox",
+        "format": "BO1",
+        "status": "Programado",
+        "score1": 0,
+        "score2": 0,
+        "mvp": "",
+        "t1": {
+          "name": "MARIIKS",
+          "logo": "/logo10.png"
+        },
+        "t2": {
+          "name": "Banana Kings",
+          "logo": "/logo15.png"
+        }
+      }
+    ]
+  ],
+  "matches": [
+    {
+      "id": 1,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 1",
+      "map": "Haven",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Thunder Buddies",
+        "logo": "/logo3.png"
+      },
+      "t2": {
+        "name": "Entry Baiters",
+        "logo": "/logo5.png"
+      }
+    },
+    {
+      "id": 2,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 2",
+      "map": "Split",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Los Akrtona2",
+        "logo": "/logo2.png"
+      },
+      "t2": {
+        "name": "Dream Team",
+        "logo": "/logo7.png"
+      }
+    },
+    {
+      "id": 3,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 3",
+      "map": "Sunset",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Chuu-Chuu 100% MAX",
+        "logo": "/logo8.png"
+      },
+      "t2": {
+        "name": "Makaco Ninja-Pelocho",
+        "logo": "/logo6.png"
+      }
+    },
+    {
+      "id": 4,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 4",
+      "map": "Lotus",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "REHENKARMACIÓN",
+        "logo": "/logo1.png"
+      },
+      "t2": {
+        "name": "Kizuna",
+        "logo": "/logo4.png"
+      }
+    },
+    {
+      "id": 5,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 5",
+      "map": "Abyss",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Sakura",
+        "logo": "/logo14.png"
+      },
+      "t2": {
+        "name": "Primates FC",
+        "logo": "/logo12.png"
+      }
+    },
+    {
+      "id": 6,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 6",
+      "map": "Icebox",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Soul Resonance",
+        "logo": "/logo11.png"
+      },
+      "t2": {
+        "name": "Chimp Squad",
+        "logo": "/logo13.png"
+      }
+    },
+    {
+      "id": 7,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 7",
+      "map": "Ascent",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Stranger Picks",
+        "logo": "/logo9.png"
+      },
+      "t2": {
+        "name": "Banana Kings",
+        "logo": "/logo15.png"
+      }
+    },
+    {
+      "id": 8,
+      "jornada": 1,
+      "round": "J1",
+      "date": "Jornada 1 · Partido 8",
+      "map": "Bind",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "MARIIKS",
+        "logo": "/logo10.png"
+      },
+      "t2": {
+        "name": "Golden Gorillas",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 9,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 1",
+      "map": "Sunset",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Thunder Buddies",
+        "logo": "/logo3.png"
+      },
+      "t2": {
+        "name": "Sakura",
+        "logo": "/logo14.png"
+      }
+    },
+    {
+      "id": 10,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 2",
+      "map": "Lotus",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Los Akrtona2",
+        "logo": "/logo2.png"
+      },
+      "t2": {
+        "name": "Soul Resonance",
+        "logo": "/logo11.png"
+      }
+    },
+    {
+      "id": 11,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 3",
+      "map": "Abyss",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Chuu-Chuu 100% MAX",
+        "logo": "/logo8.png"
+      },
+      "t2": {
+        "name": "Stranger Picks",
+        "logo": "/logo9.png"
+      }
+    },
+    {
+      "id": 12,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 4",
+      "map": "Icebox",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "REHENKARMACIÓN",
+        "logo": "/logo1.png"
+      },
+      "t2": {
+        "name": "MARIIKS",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 13,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 5",
+      "map": "Ascent",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Entry Baiters",
+        "logo": "/logo5.png"
+      },
+      "t2": {
+        "name": "Primates FC",
+        "logo": "/logo12.png"
+      }
+    },
+    {
+      "id": 14,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 6",
+      "map": "Bind",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Dream Team",
+        "logo": "/logo7.png"
+      },
+      "t2": {
+        "name": "Chimp Squad",
+        "logo": "/logo13.png"
+      }
+    },
+    {
+      "id": 15,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 7",
+      "map": "Haven",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Makaco Ninja-Pelocho",
+        "logo": "/logo6.png"
+      },
+      "t2": {
+        "name": "Banana Kings",
+        "logo": "/logo15.png"
+      }
+    },
+    {
+      "id": 16,
+      "jornada": 2,
+      "round": "J2",
+      "date": "Jornada 2 · Partido 8",
+      "map": "Split",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Kizuna",
+        "logo": "/logo4.png"
+      },
+      "t2": {
+        "name": "Golden Gorillas",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 17,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 1",
+      "map": "Abyss",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Thunder Buddies",
+        "logo": "/logo3.png"
+      },
+      "t2": {
+        "name": "Primates FC",
+        "logo": "/logo12.png"
+      }
+    },
+    {
+      "id": 18,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 2",
+      "map": "Icebox",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Los Akrtona2",
+        "logo": "/logo2.png"
+      },
+      "t2": {
+        "name": "Chimp Squad",
+        "logo": "/logo13.png"
+      }
+    },
+    {
+      "id": 19,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 3",
+      "map": "Ascent",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Chuu-Chuu 100% MAX",
+        "logo": "/logo8.png"
+      },
+      "t2": {
+        "name": "Banana Kings",
+        "logo": "/logo15.png"
+      }
+    },
+    {
+      "id": 20,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 4",
+      "map": "Bind",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "REHENKARMACIÓN",
+        "logo": "/logo1.png"
+      },
+      "t2": {
+        "name": "Golden Gorillas",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 21,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 5",
+      "map": "Haven",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Entry Baiters",
+        "logo": "/logo5.png"
+      },
+      "t2": {
+        "name": "Sakura",
+        "logo": "/logo14.png"
+      }
+    },
+    {
+      "id": 22,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 6",
+      "map": "Split",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Dream Team",
+        "logo": "/logo7.png"
+      },
+      "t2": {
+        "name": "Soul Resonance",
+        "logo": "/logo11.png"
+      }
+    },
+    {
+      "id": 23,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 7",
+      "map": "Sunset",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Makaco Ninja-Pelocho",
+        "logo": "/logo6.png"
+      },
+      "t2": {
+        "name": "Stranger Picks",
+        "logo": "/logo9.png"
+      }
+    },
+    {
+      "id": 24,
+      "jornada": 3,
+      "round": "J3",
+      "date": "Jornada 3 · Partido 8",
+      "map": "Lotus",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Kizuna",
+        "logo": "/logo4.png"
+      },
+      "t2": {
+        "name": "MARIIKS",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 25,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 1",
+      "map": "Ascent",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Thunder Buddies",
+        "logo": "/logo3.png"
+      },
+      "t2": {
+        "name": "Dream Team",
+        "logo": "/logo7.png"
+      }
+    },
+    {
+      "id": 26,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 2",
+      "map": "Bind",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Los Akrtona2",
+        "logo": "/logo2.png"
+      },
+      "t2": {
+        "name": "Entry Baiters",
+        "logo": "/logo5.png"
+      }
+    },
+    {
+      "id": 27,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 3",
+      "map": "Haven",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Chuu-Chuu 100% MAX",
+        "logo": "/logo8.png"
+      },
+      "t2": {
+        "name": "Kizuna",
+        "logo": "/logo4.png"
+      }
+    },
+    {
+      "id": 28,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 4",
+      "map": "Split",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "REHENKARMACIÓN",
+        "logo": "/logo1.png"
+      },
+      "t2": {
+        "name": "Makaco Ninja-Pelocho",
+        "logo": "/logo6.png"
+      }
+    },
+    {
+      "id": 29,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 5",
+      "map": "Sunset",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Sakura",
+        "logo": "/logo14.png"
+      },
+      "t2": {
+        "name": "Chimp Squad",
+        "logo": "/logo13.png"
+      }
+    },
+    {
+      "id": 30,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 6",
+      "map": "Lotus",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Soul Resonance",
+        "logo": "/logo11.png"
+      },
+      "t2": {
+        "name": "Primates FC",
+        "logo": "/logo12.png"
+      }
+    },
+    {
+      "id": 31,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 7",
+      "map": "Abyss",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "Stranger Picks",
+        "logo": "/logo9.png"
+      },
+      "t2": {
+        "name": "Golden Gorillas",
+        "logo": "/logo10.png"
+      }
+    },
+    {
+      "id": 32,
+      "jornada": 4,
+      "round": "J4",
+      "date": "Jornada 4 · Partido 8",
+      "map": "Icebox",
+      "format": "BO1",
+      "status": "Programado",
+      "score1": 0,
+      "score2": 0,
+      "mvp": "",
+      "t1": {
+        "name": "MARIIKS",
+        "logo": "/logo10.png"
+      },
+      "t2": {
+        "name": "Banana Kings",
+        "logo": "/logo15.png"
+      }
+    }
+  ]
 }
