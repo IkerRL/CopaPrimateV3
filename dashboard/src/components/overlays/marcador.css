@@ -39,7 +39,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: min(92vw, 1150px);
+    max-width: min(94vw, 1200px);
     margin: 0 auto;
     filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
     animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -67,7 +67,7 @@
 .team-wrapper {
     display: flex;
     background: linear-gradient(135deg, rgba(15, 25, 35, 0.96) 0%, rgba(8, 8, 11, 0.98) 100%);
-    height: 64px;
+    height: 68px;
     align-items: center;
     transform: skew(var(--skew-angle));
     border: 1px solid rgba(192, 132, 252, 0.22);
@@ -76,6 +76,7 @@
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     box-sizing: border-box;
     position: relative;
+    overflow: visible;
 }
 
 .team-left .team-wrapper {
@@ -98,7 +99,7 @@
     transform: skew(var(--skew-angle)) translateY(-1px);
 }
 
-/* Efecto de resina brillante al cambiar marcador */
+/* Efecto de resina brillante */
 .team-wrapper::before {
     content: '';
     position: absolute;
@@ -116,7 +117,7 @@
     animation: shineSweep 1.6s ease-in-out;
 }
 
-/* Contenido dentro del tablón */
+/* Contenido dentro del tablón: flujo horizontal sin cortes */
 .team-info {
     display: flex;
     align-items: center;
@@ -124,16 +125,18 @@
     transform: skew(calc(var(--skew-angle) * -1));
     position: relative;
     z-index: 6;
-    gap: 8px;
+    gap: 12px;
 }
 
-.team-identity-block {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 2px;
+.team-info-left {
+    justify-content: flex-end;
 }
 
+.team-info-right {
+    justify-content: flex-start;
+}
+
+/* Logo de equipo */
 .logo-box {
     width: 44px;
     height: 44px;
@@ -141,17 +144,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 6px;
     flex-shrink: 0;
 }
 
 .logo-box img {
-    width: 42px;
-    height: 42px;
-    max-width: 42px;
-    max-height: 42px;
+    width: 40px;
+    height: 40px;
+    max-width: 40px;
+    max-height: 40px;
     object-fit: contain;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     z-index: 6;
@@ -161,48 +163,57 @@
     transform: scale(1.12);
 }
 
-.team-name {
+/* Nombre de 3 letras / Tri-code */
+.team-tag {
     color: var(--text-primary);
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-    font-family: 'Outfit', 'Inter', sans-serif;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+    font-size: 1.65rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    font-family: 'Rajdhani', 'Oswald', sans-serif;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 220px;
-}
-
-/* Indicador de Lado Táctico */
-.team-side-indicator {
-    font-size: 0.66rem;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    padding: 2px 8px;
-    border-radius: 3px;
     text-transform: uppercase;
     display: inline-block;
-    width: fit-content;
+    min-width: 52px;
+    text-align: center;
+}
+
+/* Indicador de Lado Táctico (Atacante / Defensor) - Sin cortes */
+.team-side-indicator {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    line-height: 1.2;
+    box-sizing: border-box;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .team-side-defender {
     color: #00f5d4;
-    background: rgba(0, 245, 212, 0.12);
-    border: 1px solid rgba(0, 245, 212, 0.35);
+    background: rgba(0, 245, 212, 0.14);
+    border: 1px solid rgba(0, 245, 212, 0.5);
+    text-shadow: 0 0 6px rgba(0, 245, 212, 0.4);
 }
 
 .team-side-attacker {
     color: #ff4655;
-    background: rgba(255, 70, 85, 0.12);
-    border: 1px solid rgba(255, 70, 85, 0.35);
+    background: rgba(255, 70, 85, 0.14);
+    border: 1px solid rgba(255, 70, 85, 0.5);
+    text-shadow: 0 0 6px rgba(255, 70, 85, 0.4);
 }
 
 /* ==========================================================================
-   EL MARCADOR DE RONDAS TÁCTICO
+   EL MARCADOR DE RONDAS TÁCTICO CON ANIMACIONES DE SUBIR Y BAJAR
    ========================================================================== */
 .score-box {
-    width: 76px;
+    width: 78px;
     height: 100%;
     display: flex;
     justify-content: center;
@@ -221,6 +232,7 @@
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 3px 6px rgba(0, 0, 0, 0.45);
     box-sizing: border-box;
     color: #ffffff;
+    overflow: visible;
 }
 
 .team-left .score-box {
@@ -235,27 +247,278 @@
     border-left: 2px solid var(--team-right-color);
 }
 
-.score-box:hover {
-    filter: brightness(1.15);
+.score-num {
+    display: inline-block;
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: skew(calc(var(--skew-angle) * -1));
+}
+
+/* Animaciones de subida y bajada de marcador */
+.score-box.score-up {
+    animation: scoreBoxUpFlash 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.score-box.score-down {
+    animation: scoreBoxDownFlash 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.score-box.score-up .score-num {
+    animation: scoreNumPopUp 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.score-box.score-down .score-num {
+    animation: scoreNumPopDown 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scoreBoxUpFlash {
+    0% {
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    20% {
+        box-shadow: 0 0 30px rgba(0, 245, 212, 0.8), inset 0 0 20px rgba(0, 245, 212, 0.5);
+        border-color: #00f5d4;
+    }
+    100% {
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+}
+
+@keyframes scoreBoxDownFlash {
+    0% {
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+    20% {
+        box-shadow: 0 0 30px rgba(255, 70, 85, 0.8), inset 0 0 20px rgba(255, 70, 85, 0.5);
+        border-color: #ff4655;
+    }
+    100% {
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7);
+    }
+}
+
+@keyframes scoreNumPopUp {
+    0% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1) translateY(0);
+    }
+    30% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1.35) translateY(-8px);
+        filter: drop-shadow(0 0 16px #00f5d4) brightness(1.6);
+        color: #ffffff;
+    }
+    70% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1.08) translateY(1px);
+    }
+    100% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1) translateY(0);
+    }
+}
+
+@keyframes scoreNumPopDown {
+    0% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1) translateY(0);
+    }
+    30% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(0.82) translateY(8px);
+        filter: drop-shadow(0 0 16px #ff4655) brightness(1.4);
+        color: #ff4655;
+    }
+    70% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1.05) translateY(-2px);
+    }
+    100% {
+        transform: skew(calc(var(--skew-angle) * -1)) scale(1) translateY(0);
+    }
+}
+
+/* Indicador flotante (+1 / -1) */
+.score-delta {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-family: 'Rajdhani', sans-serif;
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+    z-index: 20;
+    letter-spacing: 1px;
+}
+
+.score-delta.delta-up {
+    color: #00f5d4;
+    background: rgba(0, 245, 212, 0.2);
+    border: 1px solid #00f5d4;
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.6);
+    animation: deltaFloatUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.score-delta.delta-down {
+    color: #ff4655;
+    background: rgba(255, 70, 85, 0.2);
+    border: 1px solid #ff4655;
+    box-shadow: 0 0 12px rgba(255, 70, 85, 0.6);
+    animation: deltaFloatDown 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes deltaFloatUp {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px) scale(0.7);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-22px) scale(1.15);
+    }
+    75% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-30px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-38px) scale(0.9);
+    }
+}
+
+@keyframes deltaFloatDown {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-5px) scale(0.7);
+    }
+    30% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(22px) scale(1.15);
+    }
+    75% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(30px) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(38px) scale(0.9);
+    }
 }
 
 /* ==========================================================================
-   CENTRO DEL TORNEO (FUSIÓN SLEEK MODULE)
+   CENTRO DEL TORNEO REDISEÑADO CON MONOS Y LOGO OFICIAL
    ========================================================================== */
 .tournament-center {
-    background: linear-gradient(180deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%);
-    border: 1px solid rgba(192, 132, 252, 0.35);
+    background: linear-gradient(180deg, rgba(22, 16, 38, 0.98) 0%, rgba(10, 8, 18, 0.99) 100%);
+    border: 1.5px solid rgba(192, 132, 252, 0.45);
     border-radius: 12px;
-    width: 300px;
-    height: 84px;
-    margin: 0 12px;
+    width: 290px;
+    height: 72px;
+    margin: 0 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(192, 132, 252, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85), 0 0 25px rgba(192, 132, 252, 0.22);
     z-index: 10;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+}
+
+.center-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 2;
+    margin-bottom: 2px;
+}
+
+.center-cup-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.7));
+}
+
+.main-title {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #ffffff 0%, #e9d5ff 60%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(192, 132, 252, 0.45);
+    line-height: 1.1;
+}
+
+.row-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    position: relative;
+    z-index: 5;
+    margin-top: 1px;
+}
+
+/* Soportes para los dos Monos Oficiales */
+.monkey-pad {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.monkey-pad:hover {
+    transform: scale(1.2);
+}
+
+.monkey-avatar {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    transition: all 0.3s;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
+}
+
+.monkey-left-img {
+    animation: monkeyLeftIdle 3s ease-in-out infinite alternate;
+}
+
+.monkey-right-img {
+    animation: monkeyRightIdle 3s ease-in-out infinite alternate;
+}
+
+@keyframes monkeyLeftIdle {
+    0% { transform: rotate(-3deg) scale(1); filter: drop-shadow(0 0 8px rgba(0, 245, 212, 0.4)); }
+    100% { transform: rotate(3deg) scale(1.08); filter: drop-shadow(0 0 14px rgba(0, 245, 212, 0.7)); }
+}
+
+@keyframes monkeyRightIdle {
+    0% { transform: rotate(3deg) scale(1); filter: drop-shadow(0 0 8px rgba(255, 70, 85, 0.4)); }
+    100% { transform: rotate(-3deg) scale(1.08); filter: drop-shadow(0 0 14px rgba(255, 70, 85, 0.7)); }
+}
+
+.vol-pill {
+    background: rgba(192, 132, 252, 0.14);
+    border: 1px solid rgba(192, 132, 252, 0.45);
+    border-radius: 4px;
+    padding: 2px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(192, 132, 252, 0.2);
+}
+
+.sub-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    color: #00f5d4;
+    letter-spacing: 2.5px;
+    font-weight: 800;
+    text-shadow: 0 0 8px rgba(0, 245, 212, 0.5);
+    line-height: 1;
 }
 
 .center-accent-bar {
@@ -264,105 +527,16 @@
     left: 0;
     width: 100%;
     height: 3px;
-    background: linear-gradient(90deg, var(--team-left-color), var(--val-purple), var(--team-right-color));
+    background: linear-gradient(90deg, var(--team-left-color), #c084fc, var(--team-right-color));
     z-index: 1;
     opacity: 0.9;
     pointer-events: none;
     border-radius: 0 0 12px 12px;
-}
-
-.row-top {
-    margin-bottom: 2px;
-    z-index: 2;
-}
-
-.main-title {
-    font-family: 'Oswald', 'Rajdhani', sans-serif;
-    font-size: 1.45rem;
-    color: #c084fc;
-    font-weight: 900;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    text-shadow: 0 0 12px rgba(192, 132, 252, 0.45);
-}
-
-.row-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    position: relative;
-    z-index: 5;
-}
-
-.sub-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 0.95rem;
-    color: #00f5d4;
-    letter-spacing: 3px;
-    font-weight: 800;
-    text-shadow: 0 0 8px rgba(0, 245, 212, 0.4);
-    transition: all 0.3s;
-}
-
-/* Metadata de mapa y ronda en el centro */
-.hud-center-meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 2px;
-    z-index: 5;
-}
-
-.hud-map-name {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.08);
-    padding: 2px 8px;
-    border-radius: 3px;
-    letter-spacing: 1.5px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    text-transform: uppercase;
-}
-
-.hud-round-counter {
-    font-size: 0.72rem;
-    font-weight: 800;
-    color: #00f5d4;
-    background: rgba(0, 245, 212, 0.12);
-    padding: 2px 8px;
-    border-radius: 3px;
-    letter-spacing: 1.5px;
-    border: 1px solid rgba(0, 245, 212, 0.32);
-    font-variant-numeric: tabular-nums;
-    text-transform: uppercase;
-}
-
-/* Soportes para logo del torneo */
-.monkey-pad {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.monkey-pad:hover {
-    transform: scale(1.15);
-}
-
-.vol-logo {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-    transition: all 0.3s;
-    filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5));
+    box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
 }
 
 /* ==========================================================================
-   PIPS DE RADIANITA (MAP WINS)
+   PIPS DE PLATANICOS (MAP WINS)
    ========================================================================== */
 .map-wins-container {
     display: flex;

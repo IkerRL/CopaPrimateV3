@@ -1,6 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { API_BASE } from '../../api';
 import './marcador.css';
+
+export function getTeamTag(team) {
+  if (!team) return 'TBD';
+  if (team.tag && typeof team.tag === 'string' && team.tag.trim().length > 0) {
+    return team.tag.trim().slice(0, 4).toUpperCase();
+  }
+  const raw = (team.name || '').trim();
+  if (!raw || raw.toUpperCase() === 'SELECCIONAR' || raw.toUpperCase() === 'TBD') {
+    return 'TBD';
+  }
+
+  const clean = raw.toUpperCase();
+  if (clean.includes('GORIL')) return 'GOR';
+  if (clean.includes('MONO') || clean.includes('MONKEY')) return 'MON';
+  if (clean.includes('CHIMP')) return 'CHP';
+  if (clean.includes('ORANG')) return 'ORA';
+  if (clean.includes('BABUIN') || clean.includes('BABOON')) return 'BAB';
+  if (clean.includes('HERETICS')) return 'THB';
+  if (clean.includes('KOI')) return 'KOI';
+  if (clean.includes('GIANTS')) return 'GIA';
+  if (clean.includes('FNATIC')) return 'FNC';
+  if (clean.includes('SENTINEL')) return 'SEN';
+  if (clean.includes('FUSION')) return 'FSN';
+
+  if (/^[A-Za-z0-9]{2,4}$/.test(raw)) {
+    return raw.toUpperCase();
+  }
+
+  const words = raw.split(/\s+/).filter(Boolean);
+  if (words.length >= 3) {
+    return (words[0][0] + words[1][0] + words[2][0]).toUpperCase();
+  }
+  if (words.length === 2) {
+    const w1 = words[0];
+    const w2 = words[1];
+    if (w1.length >= 1 && w2.length >= 2) {
+      return (w1[0] + w2.slice(0, 2)).toUpperCase();
+    }
+  }
+
+  const alphanum = raw.replace(/[^a-zA-Z0-9]/g, '');
+  return alphanum.slice(0, 3).toUpperCase() || 'TBD';
+}
 
 export default function OverlayScoreboard() {
   const [match, setMatch] = useState({
@@ -48,6 +91,43 @@ export default function OverlayScoreboard() {
   const s2 = match.team2?.score ?? 0;
   const m1 = match.team1?.mapsWon ?? 0;
   const m2 = match.team2?.mapsWon ?? 0;
+
+  // Animaciones para subida y bajada de puntuación
+  const prevS1 = useRef(s1);
+  const prevS2 = useRef(s2);
+  const [score1Anim, setScore1Anim] = useState('');
+  const [score2Anim, setScore2Anim] = useState('');
+  const [score1Delta, setScore1Delta] = useState(0);
+  const [score2Delta, setScore2Delta] = useState(0);
+
+  useEffect(() => {
+    if (prevS1.current !== s1) {
+      const diff = s1 - prevS1.current;
+      setScore1Delta(diff);
+      setScore1Anim(diff > 0 ? 'score-up' : 'score-down');
+      const timer = setTimeout(() => {
+        setScore1Anim('');
+        setScore1Delta(0);
+      }, 1000);
+      prevS1.current = s1;
+      return () => clearTimeout(timer);
+    }
+  }, [s1]);
+
+  useEffect(() => {
+    if (prevS2.current !== s2) {
+      const diff = s2 - prevS2.current;
+      setScore2Delta(diff);
+      setScore2Anim(diff > 0 ? 'score-up' : 'score-down');
+      const timer = setTimeout(() => {
+        setScore2Anim('');
+        setScore2Delta(0);
+      }, 1000);
+      prevS2.current = s2;
+      return () => clearTimeout(timer);
+    }
+  }, [s2]);
+
   const rawFormat = (match.format || 'BO3').toLowerCase();
   const formatClass = rawFormat.includes('bo1') ? 'format-bo1' : rawFormat.includes('bo5') ? 'format-bo5' : 'format-bo3';
 
@@ -65,6 +145,9 @@ export default function OverlayScoreboard() {
   const team2Side = isSwapped ? 'DEFENSOR' : 'ATACANTE';
   const team1SideClass = isSwapped ? 'team-side-attacker' : 'team-side-defender';
   const team2SideClass = isSwapped ? 'team-side-defender' : 'team-side-attacker';
+
+  const t1Tag = getTeamTag(match.team1);
+  const t2Tag = getTeamTag(match.team2);
 
   return (
     <div
@@ -103,48 +186,57 @@ export default function OverlayScoreboard() {
             <div className="match-point-badge" id="mp-left" style={{ display: isMatchPointT1 ? 'block' : 'none' }}>
               MATCH POINT
             </div>
+            
             <div className="map-wins-container" id="maps-left" title="Mapas ganados">
               <div className={`map-win-dot ${m1 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
               <div className={`map-win-dot ${m1 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
               <div className={`map-win-dot ${m1 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
             </div>
-            <div className="team-info">
-              <div className="team-identity-block">
-                <span id="name-left" className="team-name" title={match.team1?.name || 'SELECCIONAR'}>
-                  {match.team1?.name || 'SELECCIONAR'}
-                </span>
-                <span className={`team-side-indicator ${team1SideClass}`}>
-                  {team1Side}
-                </span>
+
+            <div className="team-info team-info-left">
+              <div className={`team-side-indicator ${team1SideClass}`}>
+                {team1Side}
               </div>
+              <span id="name-left" className="team-tag" title={match.team1?.name || 'SELECCIONAR'}>
+                {t1Tag}
+              </span>
               <div className="logo-box">
                 <img
                   id="img-left"
                   src={match.team1?.logo || '/logo1.png'}
-                  alt="Logo A"
+                  alt={t1Tag}
                   onError={(e) => { e.target.src = '/logo1.png'; }}
                 />
               </div>
             </div>
-            <div className="score-box" id="score-left" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {s1}
+
+            <div className={`score-box ${score1Anim}`} id="score-left" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <span className="score-num">{s1}</span>
+              {score1Delta !== 0 && (
+                <span className={`score-delta delta-${score1Delta > 0 ? 'up' : 'down'}`}>
+                  {score1Delta > 0 ? `+${score1Delta}` : score1Delta}
+                </span>
+              )}
             </div>
           </div>
         </div>
 
-        {/* CENTRO DEL TORNEO */}
+        {/* CENTRO DEL TORNEO REDISEÑADO CON MONOS OFICIALES Y COPA */}
         <div className="tournament-center">
-          <div className="row-top">
-            <span className="main-title" id="display-title">Copa Primate</span>
+          <div className="center-top-row">
+            <img src="/copa-logo.png" className="center-cup-icon" alt="Copa" />
+            <span className="main-title" id="display-title">COPA PRIMATE</span>
           </div>
 
           <div className="row-bottom">
-            <div className="monkey-pad left-pad" id="monkey-pad-left">
-              <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Copa Primate" />
+            <div className="monkey-pad left-pad" id="monkey-pad-left" title="Monito Oficial">
+              <img src="/monito-izq.png" className="monkey-avatar monkey-left-img" id="monkeyLeft" alt="Mono Izquierda" />
             </div>
-            <span className="sub-title" id="display-subtitle">VOL.III</span>
-            <div className="monkey-pad right-pad" id="monkey-pad-right">
-              <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Copa Primate" />
+            <div className="vol-pill">
+              <span className="sub-title" id="display-subtitle">VOL. III</span>
+            </div>
+            <div className="monkey-pad right-pad" id="monkey-pad-right" title="Monito Oficial">
+              <img src="/monito-der.png" className="monkey-avatar monkey-right-img" id="monkeyRight" alt="Mono Derecha" />
             </div>
           </div>
 
@@ -154,32 +246,38 @@ export default function OverlayScoreboard() {
         {/* EQUIPO DERECHA */}
         <div className="team-glow-container team-right" id="glow-container-right">
           <div className="team-wrapper" id="wrapper-right">
-            <div className="score-box" id="score-right" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {s2}
+            <div className={`score-box ${score2Anim}`} id="score-right" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <span className="score-num">{s2}</span>
+              {score2Delta !== 0 && (
+                <span className={`score-delta delta-${score2Delta > 0 ? 'up' : 'down'}`}>
+                  {score2Delta > 0 ? `+${score2Delta}` : score2Delta}
+                </span>
+              )}
             </div>
-            <div className="team-info">
+
+            <div className="team-info team-info-right">
               <div className="logo-box">
                 <img
                   id="img-right"
                   src={match.team2?.logo || '/logo2.png'}
-                  alt="Logo B"
+                  alt={t2Tag}
                   onError={(e) => { e.target.src = '/logo2.png'; }}
                 />
               </div>
-              <div className="team-identity-block" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
-                <span id="name-right" className="team-name" title={match.team2?.name || 'SELECCIONAR'}>
-                  {match.team2?.name || 'SELECCIONAR'}
-                </span>
-                <span className={`team-side-indicator ${team2SideClass}`}>
-                  {team2Side}
-                </span>
+              <span id="name-right" className="team-tag" title={match.team2?.name || 'SELECCIONAR'}>
+                {t2Tag}
+              </span>
+              <div className={`team-side-indicator ${team2SideClass}`}>
+                {team2Side}
               </div>
             </div>
+
             <div className="map-wins-container" id="maps-right" title="Mapas ganados">
               <div className={`map-win-dot ${m2 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
               <div className={`map-win-dot ${m2 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
               <div className={`map-win-dot ${m2 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
             </div>
+
             <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
               MATCH POINT
             </div>
