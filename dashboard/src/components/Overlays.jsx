@@ -88,8 +88,8 @@ export default function Overlays() {
 
   const currentMatch = matches.find((m) => m.id === selectedMatchId) || matches[0] || {
     id: 1,
-    t1: { name: 'Los Monos', logo: '/monkeys.jpg' },
-    t2: { name: 'Gorilas', logo: '/gorilas.jpg' },
+    t1: { name: 'Los Monos', logo: '/logo1.png' },
+    t2: { name: 'Gorilas', logo: '/logo2.png' },
     map: 'Ascent',
     date: 'Jornada 1',
     format: 'BO1 (Swiftplay)'
@@ -132,13 +132,13 @@ export default function Overlays() {
       {/* PANEL MAESTRO: CONTROL DE QUÉ MOSTRAR EN STREAM */}
       <div className="glass-card" style={{
         padding: '24px',
-        background: 'linear-gradient(135deg, rgba(145, 70, 255, 0.15) 0%, rgba(255, 179, 0, 0.1) 100%)',
-        border: '2px solid rgba(145, 70, 255, 0.4)',
+        background: 'linear-gradient(135deg, rgba(192, 132, 252, 0.15) 0%, rgba(0, 245, 212, 0.1) 100%)',
+        border: '2px solid rgba(192, 132, 252, 0.4)',
         boxShadow: '0 12px 35px rgba(0,0,0,0.6)',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px', marginBottom: '18px' }}>
           <div>
-            <span style={{ fontSize: '11px', color: '#ffb300', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '11px', color: '#00f5d4', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase' }}>
               ENLACE MAESTRO UNIFICADO PARA OBS
             </span>
             <h3 style={{ margin: '4px 0 6px', color: '#fff', fontSize: '20px' }}>
@@ -187,7 +187,7 @@ export default function Overlays() {
         {/* SELECTOR DE ESCENAS EN STREAM */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
           {[
-            { id: 'scoreboard', label: 'Marcador HUD', icon: '🍌', desc: 'Puntuación y bananas' },
+            { id: 'scoreboard', label: 'Marcador HUD', icon: '💎', desc: 'Puntuación y radianita' },
             { id: 'roulette', label: 'Ruleta de Mapas', icon: '🎰', desc: 'Sorteo animado en vivo' },
             { id: 'matchup', label: 'Pantalla Versus', icon: '⚔️', desc: 'Previa de los dos equipos' },
             { id: 'ticker', label: 'Ticker Inferior', icon: '📰', desc: 'Cinta inferior de noticias' },
@@ -200,8 +200,8 @@ export default function Overlays() {
                 type="button"
                 onClick={() => handleSetOverlayMode(item.id)}
                 style={{
-                  background: isActive ? 'linear-gradient(135deg, rgba(255, 179, 0, 0.25) 0%, rgba(255, 179, 0, 0.08) 100%)' : 'rgba(0,0,0,0.4)',
-                  border: isActive ? '2px solid #ffb300' : '1px solid rgba(255,255,255,0.1)',
+                  background: isActive ? 'linear-gradient(135deg, rgba(192, 132, 252, 0.25) 0%, rgba(0, 245, 212, 0.1) 100%)' : 'rgba(0,0,0,0.4)',
+                  border: isActive ? '2px solid #00f5d4' : '1px solid rgba(255,255,255,0.1)',
                   borderRadius: '12px',
                   padding: '14px 12px',
                   cursor: 'pointer',
@@ -209,19 +209,19 @@ export default function Overlays() {
                   display: 'flex',
                   flexDirection: 'column',
                   gap: '6px',
-                  boxShadow: isActive ? '0 0 18px rgba(255, 179, 0, 0.35)' : 'none',
+                  boxShadow: isActive ? '0 0 18px rgba(0, 245, 212, 0.35)' : 'none',
                   transition: 'all 0.2s ease',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '20px' }}>{item.icon}</span>
                   {isActive && (
-                    <span style={{ fontSize: '10px', fontWeight: 900, background: '#ffb300', color: '#000', padding: '2px 8px', borderRadius: '4px', letterSpacing: '0.8px' }}>
+                    <span style={{ fontSize: '10px', fontWeight: 900, background: '#00f5d4', color: '#08080b', padding: '2px 8px', borderRadius: '4px', letterSpacing: '0.8px' }}>
                       EN STREAM
                     </span>
                   )}
                 </div>
-                <strong style={{ color: isActive ? '#ffb300' : '#fff', fontSize: '14px' }}>
+                <strong style={{ color: isActive ? '#00f5d4' : '#fff', fontSize: '14px' }}>
                   {item.label}
                 </strong>
                 <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
@@ -238,7 +238,7 @@ export default function Overlays() {
             marginTop: '16px',
             padding: '14px 18px',
             background: 'rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,179,0,0.3)',
+            border: '1px solid rgba(192, 132, 252, 0.3)',
             borderRadius: '10px',
             display: 'flex',
             justifyContent: 'space-between',
@@ -264,8 +264,8 @@ export default function Overlays() {
               disabled={isSpinningLive}
               onClick={handleTriggerRouletteSpin}
               style={{
-                background: 'linear-gradient(90deg, #ff4655, #ffb300)',
-                color: '#000',
+                background: 'linear-gradient(90deg, #c084fc, #00f5d4)',
+                color: '#08080b',
                 fontWeight: 900,
                 fontSize: '13px',
                 padding: '10px 20px',
@@ -309,7 +309,7 @@ export default function Overlays() {
                   {m.t1?.name} vs {m.t2?.name} ({m.map || 'Sin mapa'} · {m.date || 'Jornada'})
                 </option>
               ))}
-              {matches.length === 0 && <option value="">Los Monos vs Gorilas (Partido de Demostración)</option>}
+              {matches.length === 0 && <option value="">Thunder Buddies vs Entry Baiters (Demostración)</option>}
             </select>
           </div>
 
@@ -365,9 +365,9 @@ export default function Overlays() {
           style={{
             width: '100%',
             height: '360px',
-            background: 'linear-gradient(135deg, #091a13 0%, #040c08 100%)',
+            background: 'linear-gradient(135deg, #08080b 0%, #0f1923 100%)',
             borderRadius: '12px',
-            border: '2px solid rgba(255,255,255,0.1)',
+            border: '2px solid rgba(192, 132, 252, 0.25)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
@@ -377,7 +377,7 @@ export default function Overlays() {
           }}
         >
           {/* Fondo simulando juego / gameplay */}
-          <div style={{ position: 'absolute', inset: 0, opacity: 0.15, background: 'radial-gradient(circle, rgba(255,179,0,0.3) 0%, transparent 70%)' }} />
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.15, background: 'radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, transparent 70%)' }} />
 
           {/* OVERLAY TIPO SCOREBOARD */}
           {overlayStyle === 'scoreboard' && (
@@ -388,33 +388,33 @@ export default function Overlays() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '16px',
-                background: 'rgba(10, 15, 12, 0.9)',
-                border: '1px solid rgba(255, 179, 0, 0.4)',
+                background: 'rgba(15, 25, 35, 0.95)',
+                border: '1px solid rgba(192, 132, 252, 0.35)',
                 borderRadius: '10px',
                 padding: '10px 24px',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.8), 0 0 15px rgba(255,179,0,0.2)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.8), 0 0 15px rgba(192, 132, 252, 0.2)',
                 backdropFilter: 'blur(12px)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src={currentMatch.t1?.logo || '/monkeys.jpg'} alt="" style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'cover' }} />
+                <img src={currentMatch.t1?.logo || '/logo1.png'} alt="" style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'contain' }} />
                 <span style={{ color: '#fff', fontWeight: 700, fontSize: '16px' }}>{currentMatch.t1?.name}</span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.6)', padding: '4px 16px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontSize: '24px', fontWeight: 900, color: 'var(--primary)', fontFamily: "'Bebas Neue', sans-serif" }}>{customScore1}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(0,0,0,0.6)', padding: '4px 16px', borderRadius: '6px', border: '1px solid rgba(192, 132, 252, 0.2)' }}>
+                <span style={{ fontSize: '24px', fontWeight: 900, color: '#00f5d4', fontFamily: "'Bebas Neue', sans-serif", fontVariantNumeric: 'tabular-nums' }}>{customScore1}</span>
                 <span style={{ color: 'var(--text-muted)', fontSize: '16px' }}>-</span>
-                <span style={{ fontSize: '24px', fontWeight: 900, color: 'var(--primary)', fontFamily: "'Bebas Neue', sans-serif" }}>{customScore2}</span>
+                <span style={{ fontSize: '24px', fontWeight: 900, color: '#ff4655', fontFamily: "'Bebas Neue', sans-serif", fontVariantNumeric: 'tabular-nums' }}>{customScore2}</span>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ color: '#fff', fontWeight: 700, fontSize: '16px' }}>{currentMatch.t2?.name}</span>
-                <img src={currentMatch.t2?.logo || '/gorilas.jpg'} alt="" style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'cover' }} />
+                <img src={currentMatch.t2?.logo || '/logo2.png'} alt="" style={{ width: '30px', height: '30px', borderRadius: '6px', objectFit: 'contain' }} />
               </div>
 
               <div style={{ borderLeft: '1px solid rgba(255,255,255,0.15)', paddingLeft: '14px', fontSize: '11px', color: 'var(--text-muted)', textAlign: 'right' }}>
-                <div>MAPA: <strong style={{ color: '#fff' }}>{currentMatch.map || 'Ascent'}</strong></div>
-                <div>RONDA: <strong style={{ color: 'var(--primary)' }}>{customRound}</strong></div>
+                <div>MAPA: <strong style={{ color: '#00f5d4' }}>{currentMatch.map || 'Ascent'}</strong></div>
+                <div>RONDA: <strong style={{ color: '#c084fc' }}>{customRound}</strong></div>
               </div>
             </div>
           )}
@@ -426,30 +426,30 @@ export default function Overlays() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '40px',
-                background: 'rgba(12, 20, 16, 0.95)',
+                background: 'rgba(15, 25, 35, 0.95)',
                 padding: '30px 50px',
                 borderRadius: '16px',
-                border: '2px solid var(--border-gold)',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.8)',
+                border: '1.5px solid rgba(192, 132, 252, 0.4)',
+                boxShadow: '0 12px 40px rgba(0,0,0,0.8), 0 0 25px rgba(192, 132, 252, 0.2)',
               }}
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <img src={currentMatch.t1?.logo || '/monkeys.jpg'} alt="" style={{ width: '80px', height: '80px', borderRadius: '14px', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                <img src={currentMatch.t1?.logo || '/logo1.png'} alt="" style={{ width: '80px', height: '80px', borderRadius: '14px', objectFit: 'contain', border: '2px solid #00f5d4' }} />
                 <h4 style={{ margin: 0, color: '#fff', fontSize: '18px' }}>{currentMatch.t1?.name}</h4>
-                <span style={{ fontSize: '11px', color: 'var(--primary)', background: 'rgba(255,179,0,0.15)', padding: '2px 8px', borderRadius: '4px' }}>Equipo A</span>
+                <span style={{ fontSize: '11px', color: '#00f5d4', background: 'rgba(0, 245, 212, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid #00f5d4' }}>Lado Defensor</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontSize: '38px', fontWeight: 900, color: 'var(--primary)', fontFamily: "'Bebas Neue', sans-serif" }}>VS</span>
+                <span style={{ fontSize: '38px', fontWeight: 900, color: '#c084fc', fontFamily: "'Bebas Neue', sans-serif" }}>VS</span>
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.5)', padding: '2px 10px', borderRadius: '6px' }}>
                   {currentMatch.format || 'BO3'} · FASE DE LIGA
                 </span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <img src={currentMatch.t2?.logo || '/gorilas.jpg'} alt="" style={{ width: '80px', height: '80px', borderRadius: '14px', objectFit: 'cover', border: '2px solid var(--primary)' }} />
+                <img src={currentMatch.t2?.logo || '/logo2.png'} alt="" style={{ width: '80px', height: '80px', borderRadius: '14px', objectFit: 'contain', border: '2px solid #ff4655' }} />
                 <h4 style={{ margin: 0, color: '#fff', fontSize: '18px' }}>{currentMatch.t2?.name}</h4>
-                <span style={{ fontSize: '11px', color: 'var(--primary)', background: 'rgba(255,179,0,0.15)', padding: '2px 8px', borderRadius: '4px' }}>Equipo B</span>
+                <span style={{ fontSize: '11px', color: '#ff4655', background: 'rgba(255, 70, 85, 0.15)', padding: '2px 8px', borderRadius: '4px', border: '1px solid #ff4655' }}>Lado Atacante</span>
               </div>
             </div>
           )}
@@ -462,8 +462,8 @@ export default function Overlays() {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                background: 'rgba(6, 15, 11, 0.95)',
-                borderTop: '2px solid var(--primary)',
+                background: 'linear-gradient(90deg, rgba(8, 8, 11, 0.98) 0%, rgba(15, 25, 35, 0.96) 50%, rgba(8, 8, 11, 0.98) 100%)',
+                borderTop: '2px solid #c084fc',
                 padding: '10px 24px',
                 display: 'flex',
                 alignItems: 'center',
@@ -473,12 +473,12 @@ export default function Overlays() {
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ background: 'var(--primary)', color: '#000', padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '11px' }}>
+                <span style={{ background: 'linear-gradient(90deg, #c084fc, #00f5d4)', color: '#08080b', padding: '2px 8px', borderRadius: '4px', fontWeight: 800, fontSize: '11px' }}>
                   COPA PRIMATE 2026
                 </span>
                 <span>🔴 Siguiente partido: <strong>{currentMatch.t1?.name}</strong> vs <strong>{currentMatch.t2?.name}</strong> ({currentMatch.date})</span>
               </div>
-              <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>Canal de Twitch: twitch.tv/makacagotica</span>
+              <span style={{ color: '#c084fc', fontSize: '12px', fontWeight: 700 }}>Canal de Twitch: twitch.tv/makacagotica</span>
             </div>
           )}
         </div>

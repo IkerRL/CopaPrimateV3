@@ -25,7 +25,7 @@ export const PAST_EDITIONS = [
       name: 'Golden Sex',
       players: ['Max', 'Broken'],
       logo: '/logos-v1/logo2.png',
-      score: '3 - 2',
+      score: '3 - 0',
       runnerUp: 'TETONES: Equipo Nacional de Somalia',
     },
     stats: {
@@ -71,7 +71,7 @@ export const PAST_EDITIONS = [
         ],
       },
     ],
-    // Bracket Final Vol. I con victoria 3 - 2 de Max y Broken (Golden Sex)
+    // Bracket Final Vol. I con victoria 3 - 0 de Max y Broken (Golden Sex)
     bracket: {
       qf: [
         { t1: 'Hijas del Kaos', logo1: '/logos-v1/logo8.png', s1: 0, t2: 'Golden Sex', logo2: '/logos-v1/logo2.png', s2: 2, winner: 'Golden Sex' },
@@ -90,9 +90,9 @@ export const PAST_EDITIONS = [
           s1: 3,
           t2: 'TETONES: Equipo Nacional de Somalia',
           logo2: '/logos-v1/logo11.png',
-          s2: 2,
+          s2: 0,
           winner: 'Golden Sex',
-          note: '¡Campeones de la Copa Primate Vol. I! Max y Broken se coronaron tras vencer 3-2 a TETONES en un partidazo épico retransmitido en Twitch por MakacaGótica.',
+          note: '¡Campeones de la Copa Primate Vol. I! Max y Broken se coronaron tras vencer 3-0 a TETONES en un partidazo épico retransmitido en Twitch por MakacaGótica.',
         },
       ],
     },

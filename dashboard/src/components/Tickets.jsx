@@ -31,7 +31,7 @@ export default function Tickets({ onExtract }) {
   // Panel de gestión y aprobación dentro del ticket
   const [showRosterPanel, setShowRosterPanel] = useState(false);
   const [ticketTeamName, setTicketTeamName] = useState('');
-  const [ticketLogo, setTicketLogo] = useState('/monkeys.jpg');
+  const [ticketLogo, setTicketLogo] = useState('/copa-logo.png');
   const [allowOverLimit, setAllowOverLimit] = useState(false);
   const [isHidden, setIsHidden] = useState(true); // Ocultos por defecto para esta copa
   const [ticketPlayers, setTicketPlayers] = useState([
@@ -148,7 +148,7 @@ export default function Tickets({ onExtract }) {
     const urls = [];
     const regex = /tracker\.gg\/valorant\/profile\/riot\/([^/\n\r?]+)/gi;
     const statsMap = {};
-    let foundLogo = '/monkeys.jpg';
+    let foundLogo = '/copa-logo.png';
 
     msgs.forEach(m => {
       const text = m.content || '';

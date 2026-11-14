@@ -146,9 +146,9 @@ export default function TeamsPage() {
               onClick={() => setZoomTeam(team)}
               title="Haz clic para ver estadísticas detalladas por jugador"
             >
-              <div className="team-banner"><img src={team.logo || '/monkeys.jpg'} alt="" /></div>
+              <div className="team-banner"><img src={team.logo || '/copa-logo.png'} alt="" /></div>
               <div className="team-crest-frame">
-                <img src={team.logo || '/monkeys.jpg'} alt={team.name} className="team-logo" />
+                <img src={team.logo || '/copa-logo.png'} alt={team.name} className="team-logo" />
               </div>
 
               <div className="team-body">
@@ -376,7 +376,7 @@ export default function TeamsPage() {
             {/* Cabecera del equipo en zoom */}
             <div className="team-zoom-header">
               <div className="team-zoom-logo-box">
-                <img src={zoomTeam.logo || '/monkeys.jpg'} alt={zoomTeam.name} />
+                <img src={zoomTeam.logo || '/copa-logo.png'} alt={zoomTeam.name} />
               </div>
               <div className="team-zoom-title-area">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

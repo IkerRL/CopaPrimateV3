@@ -187,7 +187,7 @@ export default function HomePage() {
               <span className="tmt-vol">VOL. I (2026)</span>
               <img src="/logos-v1/logo2.png" alt="Golden Sex" />
               <div className="tmt-badge-info">
-                <strong>Golden Sex (3-2)</strong>
+                <strong>Golden Sex (3-0)</strong>
                 <span>Max & Broken 🏆</span>
               </div>
             </div>

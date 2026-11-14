@@ -59,7 +59,7 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   inset: 0;
   z-index: -3;
-  background: url('/Gemini_Generated_Image_906nex906nex906n.png') center / cover no-repeat;
+  background: #08080b;
   transform: scale(1.05);
 }
 

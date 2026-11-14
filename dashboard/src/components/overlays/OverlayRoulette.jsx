@@ -384,9 +384,9 @@ export default function OverlayRoulette() {
             position: 'absolute',
             bottom: '15px',
             right: '15px',
-            background: 'rgba(255, 179, 0, 0.2)',
-            border: '1px solid #ffb300',
-            color: '#ffb300',
+            background: 'rgba(0, 245, 212, 0.15)',
+            border: '1px solid #00f5d4',
+            color: '#00f5d4',
             padding: '6px 14px',
             borderRadius: '20px',
             fontSize: '11px',
@@ -396,7 +396,7 @@ export default function OverlayRoulette() {
             display: 'flex',
             alignItems: 'center',
             gap: '6px',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.6)',
+            boxShadow: '0 4px 15px rgba(0, 245, 212, 0.3)',
           }}
         >
           🔊 Clic para activar sonido en directo

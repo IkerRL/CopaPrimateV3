@@ -38,7 +38,7 @@ export default function Teams({ initialTeam }) {
   const [ticketSource, setTicketSource] = useState(null);
   const [ticketId, setTicketId] = useState(null);
   const [teamName, setTeamName] = useState('');
-  const [teamLogo, setTeamLogo] = useState('/monkeys.jpg');
+  const [teamLogo, setTeamLogo] = useState('/copa-logo.png');
   const [allowOverLimit, setAllowOverLimit] = useState(false);
   const [isHidden, setIsHidden] = useState(true); // Oculto por defecto para esta copa
   const [statusMessage, setStatusMessage] = useState(null);
@@ -405,7 +405,7 @@ export default function Teams({ initialTeam }) {
             <input 
               type="text" 
               className="premium-input" 
-              placeholder="/monkeys.jpg o https://..."
+              placeholder="/copa-logo.png o https://..."
               value={teamLogo}
               onChange={e => setTeamLogo(e.target.value)}
               style={{ marginTop: '4px', fontSize: '12px', padding: '6px 10px' }}
@@ -655,7 +655,7 @@ export default function Teams({ initialTeam }) {
             <div key={team.id} className="glass-card" style={{ padding: '18px', background: 'rgba(0,0,0,0.3)', position: 'relative' }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '12px' }}>
                 <img 
-                  src={team.logo || '/monkeys.jpg'} 
+                  src={team.logo || '/copa-logo.png'} 
                   alt={team.name} 
                   style={{ width: '44px', height: '44px', borderRadius: '8px', objectFit: 'cover', border: '1px solid var(--glass-border)' }} 
                 />

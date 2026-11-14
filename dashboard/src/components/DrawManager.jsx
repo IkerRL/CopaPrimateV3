@@ -68,8 +68,8 @@ export default function DrawManager() {
     setTimeout(() => {
       const shuffled = [...teams].sort(() => 0.5 - Math.random());
       const half = Math.ceil(shuffled.length / 2);
-      const groupA = shuffled.slice(0, half).map(t => ({ name: t.name, logo: t.logo || '/monkeys.jpg' }));
-      const groupB = shuffled.slice(half).map(t => ({ name: t.name, logo: t.logo || '/monkeys.jpg' }));
+      const groupA = shuffled.slice(0, half).map(t => ({ name: t.name, logo: t.logo || '/copa-logo.png' }));
+      const groupB = shuffled.slice(half).map(t => ({ name: t.name, logo: t.logo || '/copa-logo.png' }));
 
       const newGroups = { A: groupA, B: groupB };
       setGroups(newGroups);
@@ -295,7 +295,7 @@ export default function DrawManager() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {gTeams.map((t, idx) => (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'rgba(255,255,255,0.03)', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--glass-border)' }}>
-                  <img src={t.logo || '/monkeys.jpg'} alt={t.name} style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
+                  <img src={t.logo || '/copa-logo.png'} alt={t.name} style={{ width: '36px', height: '36px', borderRadius: '6px', objectFit: 'cover' }} />
                   <strong style={{ color: '#fff', fontSize: '15px' }}>{t.name}</strong>
                 </div>
               ))}
@@ -367,7 +367,7 @@ export default function DrawManager() {
                   {/* Enfrentamiento */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                      <img src={m.t1?.logo || '/monkeys.jpg'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <img src={m.t1?.logo || '/copa-logo.png'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
                       <span style={{ color: '#fff', fontSize: '14px', fontWeight: '600' }}>{m.t1?.name}</span>
                     </div>
 
@@ -380,7 +380,7 @@ export default function DrawManager() {
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px', flex: 1 }}>
                       <span style={{ color: '#fff', fontSize: '14px', fontWeight: '600', textAlign: 'right' }}>{m.t2?.name}</span>
-                      <img src={m.t2?.logo || '/gorilas.jpg'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
+                      <img src={m.t2?.logo || '/copa-logo.png'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
                     </div>
                   </div>
                 </div>

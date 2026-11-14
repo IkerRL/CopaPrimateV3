@@ -178,7 +178,7 @@ export default function StandingsPage() {
                   style={{ '--c': PODIUM_COLORS[t.rank] || 'var(--primary)', animationDelay: `${[150, 0, 300][i]}ms` }}
                 >
                   {t.rank === 1 && <Crown className="crown" size={30} />}
-                  <img src={t.logo || '/monkeys.jpg'} alt={t.team} />
+                  <img src={t.logo || '/copa-logo.png'} alt={t.team} />
                   <h3>{t.team}</h3>
                   <div className="pts">{t.points} PTS</div>
                   <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -230,7 +230,7 @@ export default function StandingsPage() {
                         </td>
                         <td className="left">
                           <div className="team-cell">
-                            <img src={t.logo || '/monkeys.jpg'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
+                            <img src={t.logo || '/copa-logo.png'} alt="" style={{ width: '34px', height: '34px', borderRadius: '6px', objectFit: 'cover' }} />
                             <div>
                               <strong style={{ color: '#fff', fontSize: '15px' }}>{t.team}</strong>
                               {t.group && <span style={{ marginLeft: '6px', fontSize: '11px', color: 'var(--text-muted)' }}>Gr. {t.group}</span>}

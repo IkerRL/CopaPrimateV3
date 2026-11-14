@@ -1,97 +1,51 @@
 /* ==========================================================================
-   VARIABLES DE TEMA E IDENTIDAD - TRIBAL MAKAKO (SKEWED JUNGLE)
+   VARIABLES DE TEMA E IDENTIDAD - VALORANT FUSIÓN
    ========================================================================== */
 #main-scoreboard,
 .main-container,
 .timer-overlay {
-    /* TEMA POR DEFECTO: JUNGLE TEMPLE (Moss & Wood) */
-    --team-left-color: #2e7d32;
-    /* Verde Musgo */
-    --team-left-glow: rgba(46, 125, 50, 0.3);
+    /* FUSIÓN DESIGN TOKENS */
+    --team-left-color: #00f5d4;
+    /* Neon Cyan / Defensor */
+    --team-left-glow: rgba(0, 245, 212, 0.4);
 
-    --team-right-color: #ffa000;
-    /* Amarillo Plátano / Oro */
-    --team-right-glow: rgba(255, 160, 0, 0.3);
+    --team-right-color: #ff4655;
+    /* Valorant Crimson / Atacante */
+    --team-right-glow: rgba(255, 70, 85, 0.4);
 
-    --accent-red: #ffa000;
-    --accent-red-hover: #ffb300;
+    --val-purple: #c084fc;
+    --val-cyan: #00f5d4;
+    --val-crimson: #ff4655;
+    --val-dark: #08080b;
 
-    --wood-color-light: #4e2e1a;
-    /* Madera Clara */
-    --wood-color-dark: #27140b;
-    /* Madera Oscura */
-    --wood-border: #795548;
-    /* Borde de tronco */
+    --panel-bg: rgba(15, 25, 35, 0.95);
+    --panel-border: rgba(192, 132, 252, 0.28);
 
-    --stone-color: #212529;
-    /* Piedra Pizarra */
-    --stone-border: #3c4043;
+    --text-primary: #f5f5f7;
+    --text-muted: rgba(245, 245, 247, 0.65);
+    --marcador-text-primary: #f5f5f7;
+    --marcador-text-muted: rgba(245, 245, 247, 0.65);
 
-    --panel-bg: rgba(26, 17, 12, 0.99);
-    /* Consola de caoba oscura */
-
-    --text-primary: #ece5db;
-    --text-muted: rgba(236, 229, 219, 0.6);
-    --marcador-text-primary: #ece5db;
-    /* Blanco Coco */
-    --marcador-text-muted: rgba(236, 229, 219, 0.6);
-
-    --skew-angle: -10deg;
-    /* RETORNAMOS LA INCLINACIÓN ORIGINAL */
-    --glass-blur: 0px;
-    /* SIN DIFUMINADO */
-    --warning-gradient: radial-gradient(circle, rgba(255, 160, 0, 0.4) 0%, rgba(39, 20, 11, 0.7) 100%);
-    --warning-pulse: rgba(255, 160, 0, 0.6);
-}
-
-[data-theme="cyberpunk"] #main-scoreboard,
-[data-theme="cyberpunk"] .main-container {
-    --team-left-color: #b91c1c;
-    --team-left-glow: rgba(185, 28, 28, 0.3);
-    --team-right-color: #d97706;
-    --team-right-glow: rgba(217, 119, 6, 0.3);
-    --accent-red: #d97706;
-    --accent-red-hover: #f59e0b;
-    --wood-color-light: #3e2723;
-    --wood-color-dark: #1b0a00;
-    --wood-border: #5d4037;
-    --stone-color: #1c1917;
-    --stone-border: #3f3f46;
-    --panel-bg: rgba(20, 15, 12, 0.99);
-    --warning-gradient: radial-gradient(circle, rgba(185, 28, 28, 0.4) 0%, rgba(69, 10, 10, 0.7) 100%);
-    --warning-pulse: rgba(185, 28, 28, 0.6);
-}
-
-[data-theme="retrowave"] #main-scoreboard,
-[data-theme="retrowave"] .main-container {
-    --team-left-color: #0f766e;
-    --team-left-glow: rgba(15, 118, 110, 0.3);
-    --team-right-color: #b45309;
-    --team-right-glow: rgba(180, 83, 9, 0.3);
-    --accent-red: #b45309;
-    --accent-red-hover: #d97706;
-    --wood-color-light: #44352a;
-    --wood-color-dark: #241c16;
-    --wood-border: #5c4a3c;
-    --stone-color: #292524;
-    --stone-border: #44403c;
-    --panel-bg: rgba(30, 25, 22, 0.99);
-    --warning-gradient: radial-gradient(circle, rgba(180, 83, 9, 0.4) 0%, rgba(66, 30, 3, 0.7) 100%);
-    --warning-pulse: rgba(180, 83, 9, 0.6);
+    --skew-angle: -4deg;
+    --glass-blur: 8px;
+    --warning-gradient: radial-gradient(circle, rgba(192, 132, 252, 0.25) 0%, rgba(8, 8, 11, 0.9) 100%);
+    --warning-pulse: rgba(192, 132, 252, 0.6);
 }
 
 /* ==========================================================================
-   MARCADOR HUD PRINCIPAL (TABLONES DE MADERA SÓLIDOS CON INCLINACIÓN -10DEG)
+   MARCADOR HUD PRINCIPAL (FUSIÓN RESPONSIVE CONTAINER)
    ========================================================================== */
 .main-container {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
-    animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    padding-top: 25px;
-    /* Espacio para las lianas central */
+    align-items: center;
+    max-width: min(92vw, 1150px);
+    margin: 0 auto;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.85));
+    animation: slideIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding-top: 10px;
+    box-sizing: border-box;
 }
 
 .main-container.timer-active {
@@ -103,43 +57,45 @@
 .team-glow-container {
     position: relative;
     transition: all 0.3s;
+    display: flex;
+    align-items: center;
 }
 
-/* Tablón de Madera Sólida Inclinada (SIN DIFUMINADO) */
+/* ==========================================================================
+   CARD DE EQUIPO TÁCTICA
+   ========================================================================== */
 .team-wrapper {
     display: flex;
-    background: linear-gradient(135deg, var(--wood-color-light) 0%, var(--wood-color-dark) 100%);
-    height: 60px;
+    background: linear-gradient(135deg, rgba(15, 25, 35, 0.96) 0%, rgba(8, 8, 11, 0.98) 100%);
+    height: 64px;
     align-items: center;
     transform: skew(var(--skew-angle));
-    border: 2px solid var(--wood-border);
-    border-bottom: 4px solid rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(192, 132, 252, 0.22);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.65), inset 0 2px 4px rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     box-sizing: border-box;
+    position: relative;
 }
 
 .team-left .team-wrapper {
-    border-bottom-color: var(--team-left-color);
+    border-bottom: 3px solid var(--team-left-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 15px rgba(0, 245, 212, 0.18);
 }
 
 .team-right .team-wrapper {
-    border-bottom-color: var(--team-right-color);
+    border-bottom: 3px solid var(--team-right-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 15px rgba(255, 70, 85, 0.18);
 }
 
 .team-left .team-wrapper:hover {
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 245, 212, 0.3);
     transform: skew(var(--skew-angle)) translateY(-1px);
-    border-color: #3e8e41;
-    border-bottom-color: var(--team-left-color);
 }
 
 .team-right .team-wrapper:hover {
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.8), 0 0 20px rgba(255, 70, 85, 0.3);
     transform: skew(var(--skew-angle)) translateY(-1px);
-    border-color: #f5b041;
-    border-bottom-color: var(--team-right-color);
 }
 
 /* Efecto de resina brillante al cambiar marcador */
@@ -150,24 +106,32 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    background: linear-gradient(120deg, transparent, rgba(192, 132, 252, 0.12), transparent);
     transform: skew(var(--skew-angle)) translateX(-100%);
     pointer-events: none;
     z-index: 4;
 }
 
 .team-wrapper.shine-active::before {
-    animation: shineSweep 1.8s ease-in-out;
+    animation: shineSweep 1.6s ease-in-out;
 }
 
-/* Contenido dentro del tablón (Inclinación revertida para mantener alineación limpia) */
+/* Contenido dentro del tablón */
 .team-info {
     display: flex;
     align-items: center;
-    padding: 0 16px;
+    padding: 0 14px;
     transform: skew(calc(var(--skew-angle) * -1));
     position: relative;
     z-index: 6;
+    gap: 8px;
+}
+
+.team-identity-block {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
 }
 
 .logo-box {
@@ -177,205 +141,121 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin: 0 10px;
+    margin: 0 6px;
+    flex-shrink: 0;
 }
 
 .logo-box img {
-    width: 44px;
-    height: 44px;
-    max-width: 44px;
-    max-height: 44px;
+    width: 42px;
+    height: 42px;
+    max-width: 42px;
+    max-height: 42px;
     object-fit: contain;
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.45));
-    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
     z-index: 6;
 }
 
 .team-wrapper:hover .logo-box img {
-    transform: scale(1.15) rotate(4deg);
+    transform: scale(1.12);
 }
 
 .team-name {
     color: var(--text-primary);
-    font-size: 1.25rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    font-family: 'Outfit', sans-serif;
-    text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.9), -1px -1px 0px rgba(255, 255, 255, 0.06);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    font-family: 'Outfit', 'Inter', sans-serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
 }
 
-/* Hojas Selváticas Decorativas en CSS (sin emoticonos) en las esquinas */
-.leaf-deco {
-    position: absolute;
-    width: 10px;
-    height: 16px;
-    background: #2e7d32;
-    border-radius: 0 100% 0 100%;
-    pointer-events: none;
-    z-index: 10;
-    box-shadow: 1px 2px 3px rgba(0, 0, 0, 0.5);
-    transition: transform 0.3s;
+/* Indicador de Lado Táctico */
+.team-side-indicator {
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    display: inline-block;
+    width: fit-content;
 }
 
-.team-left .leaf-1 {
-    top: -7px;
-    left: 20px;
-    transform: skew(calc(var(--skew-angle) * -1)) rotate(-15deg);
-    background: #388e3c;
+.team-side-defender {
+    color: #00f5d4;
+    background: rgba(0, 245, 212, 0.12);
+    border: 1px solid rgba(0, 245, 212, 0.35);
 }
 
-.team-left .leaf-2 {
-    bottom: -7px;
-    left: 45px;
-    transform: skew(calc(var(--skew-angle) * -1)) rotate(45deg);
-    background: #2e7d32;
-}
-
-.team-right .leaf-1 {
-    top: -7px;
-    right: 20px;
-    transform: skew(calc(var(--skew-angle) * -1)) rotate(15deg);
-    background: #388e3c;
-}
-
-.team-right .leaf-2 {
-    bottom: -7px;
-    right: 45px;
-    transform: skew(calc(var(--skew-angle) * -1)) rotate(-45deg);
-    background: #2e7d32;
+.team-side-attacker {
+    color: #ff4655;
+    background: rgba(255, 70, 85, 0.12);
+    border: 1px solid rgba(255, 70, 85, 0.35);
 }
 
 /* ==========================================================================
-   EL MARCADOR DE RONDAS (PIEDRA MACIZA TALLADA)
+   EL MARCADOR DE RONDAS TÁCTICO
    ========================================================================== */
 .score-box {
-    width: 80px;
+    width: 76px;
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 2.7rem;
+    font-family: 'JetBrains Mono', 'Rajdhani', monospace;
+    font-size: 2.6rem;
     font-weight: 900;
-    background: linear-gradient(180deg, #2c302e 0%, #161817 100%);
-    /* Piedra pizarra sólida */
-    border: 3px solid var(--stone-border);
+    font-variant-numeric: tabular-nums;
+    background: linear-gradient(180deg, #131b26 0%, #0a0f16 100%);
+    border: 1px solid rgba(192, 132, 252, 0.3);
     cursor: pointer;
     user-select: none;
     position: relative;
     z-index: 5;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Efecto tallado 3D */
-    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.1), -1px -1px 1px rgba(0, 0, 0, 0.9);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.7), 0 3px 6px rgba(0, 0, 0, 0.45);
     box-sizing: border-box;
+    color: #ffffff;
 }
 
 .team-left .score-box {
-    color: #ffd200;
-    /* Plátano Activo */
-    border-right: 3px solid var(--team-left-color);
+    color: #00f5d4;
+    text-shadow: 0 0 14px rgba(0, 245, 212, 0.45);
+    border-right: 2px solid var(--team-left-color);
 }
 
 .team-right .score-box {
-    color: #ffd200;
-    border-left: 3px solid var(--team-right-color);
+    color: #ff4655;
+    text-shadow: 0 0 14px rgba(255, 70, 85, 0.45);
+    border-left: 2px solid var(--team-right-color);
 }
 
 .score-box:hover {
-    filter: brightness(1.1);
-}
-
-/* Brackets esquineros mecánicos en el score */
-.score-box::before,
-.score-box::after {
-    content: '';
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    border: 1.5px solid rgba(255, 255, 255, 0.15);
-    pointer-events: none;
-    transform: skew(calc(var(--skew-angle) * -1));
-}
-
-.score-box::before {
-    top: 4px;
-    left: 4px;
-    border-right: none;
-    border-bottom: none;
-}
-
-.score-box::after {
-    bottom: 4px;
-    right: 4px;
-    border-left: none;
-    border-top: none;
+    filter: brightness(1.15);
 }
 
 /* ==========================================================================
-   CENTRO DEL TORNEO (TABLÓN DE MADERA COLGADO POR LIANAS)
+   CENTRO DEL TORNEO (FUSIÓN SLEEK MODULE)
    ========================================================================== */
 .tournament-center {
-    background: linear-gradient(180deg, #3d2414 0%, #22130a 100%);
-    border: 3.5px double #7c4d32;
-    border-radius: 14px;
-    width: 320px;
-    height: 90px;
-    margin: -10px 10px 0 10px;
+    background: linear-gradient(180deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%);
+    border: 1px solid rgba(192, 132, 252, 0.35);
+    border-radius: 12px;
+    width: 300px;
+    height: 84px;
+    margin: 0 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.65), inset 0 2px 4px rgba(255, 255, 255, 0.08);
-    clip-path: polygon(5% 0, 95% 0, 100% 100%, 0% 100%);
-}
-
-/* Ropes/Lianas para colgar el panel central */
-.tournament-center::before {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: 24px;
-    width: 4px;
-    height: 20px;
-    background: linear-gradient(90deg, #5c3e21, #2e1d0f);
-    border-radius: 2px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    z-index: -1;
-}
-
-.tournament-center::after {
-    content: '';
-    position: absolute;
-    top: -20px;
-    right: 24px;
-    width: 4px;
-    height: 20px;
-    background: linear-gradient(90deg, #5c3e21, #2e1d0f);
-    border-radius: 2px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    z-index: -1;
-}
-
-/* Hojas decorativas de enredadera en la unión de lianas */
-.tournament-center .row-top::before {
-    content: '🍃';
-    position: absolute;
-    top: -5px;
-    left: 18px;
-    font-size: 1.1rem;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
-}
-
-.tournament-center .row-top::after {
-    content: '🍃';
-    position: absolute;
-    top: -5px;
-    right: 18px;
-    font-size: 1.1rem;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8), 0 0 20px rgba(192, 132, 252, 0.15);
+    z-index: 10;
 }
 
 .center-accent-bar {
@@ -383,11 +263,12 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--team-left-color), var(--team-right-color));
+    height: 3px;
+    background: linear-gradient(90deg, var(--team-left-color), var(--val-purple), var(--team-right-color));
     z-index: 1;
-    opacity: 0.85;
+    opacity: 0.9;
     pointer-events: none;
+    border-radius: 0 0 12px 12px;
 }
 
 .row-top {
@@ -396,82 +277,97 @@
 }
 
 .main-title {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 1.7rem;
-    color: #ffeb3b;
-    /* Amarillo Banana */
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 1.45rem;
+    color: #c084fc;
     font-weight: 900;
-    letter-spacing: 2px;
-    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.1), -1px -1px 2px rgba(0, 0, 0, 0.9);
-    animation: breathingGlow 3s infinite alternate ease-in-out;
-}
-
-@keyframes breathingGlow {
-    0% {
-        filter: drop-shadow(0 0 1px rgba(255, 235, 59, 0.15));
-    }
-
-    100% {
-        filter: drop-shadow(0 0 6px rgba(255, 235, 59, 0.5));
-    }
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    text-shadow: 0 0 12px rgba(192, 132, 252, 0.45);
 }
 
 .row-bottom {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 15px;
+    gap: 12px;
     position: relative;
     z-index: 5;
 }
 
 .sub-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 1.15rem;
-    color: #ffa000;
-    letter-spacing: 4px;
-    font-weight: 900;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.85);
+    font-size: 0.95rem;
+    color: #00f5d4;
+    letter-spacing: 3px;
+    font-weight: 800;
+    text-shadow: 0 0 8px rgba(0, 245, 212, 0.4);
     transition: all 0.3s;
 }
 
-/* Soportes para los monos (sin círculos) */
+/* Metadata de mapa y ronda en el centro */
+.hud-center-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 2px;
+    z-index: 5;
+}
+
+.hud-map-name {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1.5px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    text-transform: uppercase;
+}
+
+.hud-round-counter {
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: #00f5d4;
+    background: rgba(0, 245, 212, 0.12);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1.5px;
+    border: 1px solid rgba(0, 245, 212, 0.32);
+    font-variant-numeric: tabular-nums;
+    text-transform: uppercase;
+}
+
+/* Soportes para logo del torneo */
 .monkey-pad {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     cursor: pointer;
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-.monkey-pad.left-pad {}
-
-.monkey-pad.right-pad {}
-
 .monkey-pad:hover {
-    transform: scale(1.2) rotate(8deg);
+    transform: scale(1.15);
 }
 
 .vol-logo {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     transition: all 0.3s;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
-}
-
-.monkey-pad:hover .vol-logo {
-    transform: scale(1.1);
+    filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.5));
 }
 
 /* ==========================================================================
-   NÚCLEOS DE MAPAS (PLÁTANOS WIGGLING DE LA SELVA)
+   PIPS DE RADIANITA (MAP WINS)
    ========================================================================== */
 .map-wins-container {
     display: flex;
     gap: 8px;
-    padding: 0 15px;
+    padding: 0 12px;
     height: 100%;
     align-items: center;
     justify-content: center;
@@ -481,31 +377,37 @@
 }
 
 .map-win-dot {
-    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid rgba(192, 132, 252, 0.35);
+    background: rgba(15, 25, 35, 0.7);
+    transform: rotate(45deg);
+    transition: all 0.25s ease;
     cursor: pointer;
-    filter: grayscale(100%) opacity(0.18) drop-shadow(0 0 1px black);
-    transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-radius: 2px;
     user-select: none;
-    transform: skew(calc(var(--skew-angle) * -1));
 }
 
 .map-win-dot:hover {
-    transform: skew(calc(var(--skew-angle) * -1)) scale(1.2);
+    transform: rotate(45deg) scale(1.2);
+    border-color: #c084fc;
 }
 
-.map-win-dot.active {
-    filter: drop-shadow(0 2px 4px rgba(255, 210, 0, 0.65)) !important;
-    animation: bananaWiggle 1s infinite alternate ease-in-out;
+.team-left .map-win-dot.active {
+    background: #00f5d4;
+    border-color: #00f5d4;
+    box-shadow: 0 0 10px #00f5d4, 0 0 4px #00f5d4;
+    transform: rotate(45deg) scale(1.15);
 }
 
-@keyframes bananaWiggle {
-    0% {
-        transform: skew(calc(var(--skew-angle) * -1)) scale(1.3) rotate(-12deg);
-    }
-
-    100% {
-        transform: skew(calc(var(--skew-angle) * -1)) scale(1.3) rotate(12deg);
-    }
+.team-right .map-win-dot.active {
+    background: #ff4655;
+    border-color: #ff4655;
+    box-shadow: 0 0 10px #ff4655, 0 0 4px #ff4655;
+    transform: rotate(45deg) scale(1.15);
 }
 
 /* Ocultar según formato */
@@ -518,26 +420,25 @@
 }
 
 /* ==========================================================================
-   ALERTA DE MATCH POINT (CARTEL ROJO RÚSTICO)
+   ALERTA DE MATCH POINT
    ========================================================================== */
 .match-point-badge {
     position: absolute;
     top: -24px;
-    background: #c62828;
-    /* Rojo peligro */
+    background: #ff4655;
     color: white;
     font-family: 'Rajdhani', sans-serif;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 900;
-    padding: 3px 14px;
+    padding: 2px 12px;
     border-radius: 4px;
-    letter-spacing: 2px;
-    border: 2px solid #5f0909;
+    letter-spacing: 1.5px;
+    border: 1px solid #ff7b88;
     z-index: 50;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
     display: none;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    animation: mp-wood-pulse 1s infinite alternate ease-in-out;
+    box-shadow: 0 4px 14px rgba(255, 70, 85, 0.6);
+    animation: mp-pulse 1s infinite alternate ease-in-out;
 }
 
 #mp-left {
@@ -550,20 +451,20 @@
     transform: skew(calc(var(--skew-angle) * -1));
 }
 
-@keyframes mp-wood-pulse {
+@keyframes mp-pulse {
     0% {
         transform: skew(calc(var(--skew-angle) * -1)) translateY(0) scale(1);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 4px 10px rgba(255, 70, 85, 0.5);
     }
 
     100% {
         transform: skew(calc(var(--skew-angle) * -1)) translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 15px rgba(198, 40, 40, 0.4);
+        box-shadow: 0 6px 18px rgba(255, 70, 85, 0.8);
     }
 }
 
 /* ==========================================================================
-   OVERLAY DEL TEMPORIZADOR EN PANTALLA (CON LOGS DE MADERA Y SIN DIFUMINADO)
+   OVERLAY DE PAUSA TÉCNICA
    ========================================================================== */
 .timer-overlay {
     display: flex;
@@ -575,127 +476,74 @@
     width: 100vw;
     height: 100vh;
     z-index: 999;
-    background: rgba(4, 5, 8, 0.9);
+    background: rgba(8, 8, 11, 0.94);
+    backdrop-filter: blur(10px);
     transition: background 0.5s ease;
     animation: fadeIn 0.4s ease;
 }
 
-.timer-overlay.tech-pause {
-    background: var(--warning-gradient);
-    animation: pulseWarningBg 3s infinite alternate;
-}
-
-@keyframes pulseWarningBg {
-    0% {
-        opacity: 0.9;
-    }
-
-    100% {
-        opacity: 1;
-    }
-}
-
 .timer-card {
     text-align: center;
-    background: linear-gradient(135deg, var(--wood-color-light) 0%, var(--wood-color-dark) 100%);
-    border: 3.5px double var(--wood-border);
-    padding: 40px 60px;
+    background: linear-gradient(135deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%);
+    border: 1.5px solid #c084fc;
+    padding: 36px 56px;
     border-radius: 16px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(192, 132, 252, 0.25);
     max-width: 500px;
     width: 85%;
-    animation: scaleUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.timer-overlay.tech-pause .timer-card {
-    border-color: white;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 45px var(--warning-pulse);
-}
-
-.timer-emoticon {
-    font-size: 5rem;
-    margin-bottom: 15px;
-    display: inline-block;
-    animation: emojiBounce 1.5s infinite ease-in-out alternate;
-}
-
-@keyframes emojiBounce {
-    0% {
-        transform: translateY(0);
-    }
-
-    100% {
-        transform: translateY(-15px) scale(1.1);
-    }
+    animation: scaleUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .timer-title {
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
     font-size: 2.2rem;
-    color: #ffeb3b;
+    color: #c084fc;
     font-weight: 900;
     letter-spacing: 3px;
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.9);
+    margin-bottom: 16px;
+    text-shadow: 0 0 15px rgba(192, 132, 252, 0.4);
 }
 
 .timer-countdown {
-    font-family: 'Rajdhani', sans-serif;
-    font-size: 5.5rem;
+    font-family: 'JetBrains Mono', 'Rajdhani', monospace;
+    font-size: 5rem;
     font-weight: 900;
     color: white;
     letter-spacing: 2px;
-    text-shadow: 2px 2px 3px rgba(0, 0, 0, 0.9);
-    margin-bottom: 20px;
-}
-
-.timer-overlay.tech-pause .timer-countdown {
-    color: #ffffff;
-    text-shadow: 0 0 25px var(--warning-pulse), 2px 2px 3px rgba(0, 0, 0, 0.9);
+    text-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
+    margin-bottom: 16px;
+    font-variant-numeric: tabular-nums;
 }
 
 .btn-timer-cancel {
-    background: var(--accent-red);
-    border: none;
-    color: black;
+    background: linear-gradient(135deg, #ff4655 0%, #b91c1c 100%);
+    border: 1px solid #ff4655;
+    color: white;
     padding: 10px 30px;
-    font-weight: 900;
+    font-weight: 800;
     font-size: 0.9rem;
     cursor: pointer;
     text-transform: uppercase;
     letter-spacing: 2px;
-    clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
+    border-radius: 6px;
     transition: all 0.2s;
-    font-family: 'Rajdhani', sans-serif;
+    font-family: 'Outfit', sans-serif;
     margin-top: 10px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 14px rgba(255, 70, 85, 0.4);
 }
 
 .btn-timer-cancel:hover {
-    background: var(--accent-red-hover);
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.6);
+    filter: brightness(1.15);
+    transform: scale(1.04);
 }
 
 /* ==========================================================================
    MICRO-ANIMACIONES Y TRANSICIONES
    ========================================================================== */
-@keyframes tabFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-100px);
+        transform: translateY(-80px);
     }
 
     to {
@@ -707,7 +555,7 @@
 @keyframes scaleUp {
     from {
         opacity: 0;
-        transform: scale(0.8);
+        transform: scale(0.9);
     }
 
     to {
@@ -740,126 +588,7 @@
     }
 }
 
-@keyframes popScore {
-    0% {
-        transform: scale(1);
-    }
-
-    30% {
-        transform: scale(1.2);
-        filter: brightness(1.2);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-.pop-anim {
-    animation: popScore 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Red sync */
-.pulse-icon {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-    position: relative;
-}
-
-.pulse-icon::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    animation: status-pulse 1.5s infinite;
-    opacity: 0.4;
-}
-
-.pulse-icon.red {
-    background: #ff4655;
-}
-
-.pulse-icon.red::after {
-    border: 3px solid #ff4655;
-}
-
-.pulse-icon.yellow {
-    background: #ffd700;
-}
-
-.pulse-icon.yellow::after {
-    border: 3px solid #ffd700;
-}
-
-.pulse-icon.green {
-    background: #00ff88;
-}
-
-.pulse-icon.green::after {
-    border: 3px solid #00ff88;
-}
-
-@keyframes status-pulse {
-    0% {
-        transform: scale(1);
-        opacity: 0.8;
-    }
-
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
-
-.status-badge {
-    font-size: 0.75rem;
-    padding: 3px 8px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-.status-badge.status-disconnected {
-    background: rgba(255, 70, 85, 0.15);
-    color: #ff4655;
-    border: 1px solid #ff4655;
-}
-
-.status-badge.status-connecting {
-    background: rgba(255, 215, 0, 0.15);
-    color: #ffd700;
-    border: 1px solid #ffd700;
-}
-
-.status-badge.status-connected {
-    background: rgba(0, 255, 136, 0.15);
-    color: #00ff88;
-    border: 1px solid #00ff88;
-}
-
-/* ==========================================================================
-   MODO OBS / MODOS PANTALLA
-   ========================================================================== */
-.pantalla-mode .admin-trigger-btn,
-.obs-mode .admin-trigger-btn,
-.pantalla-mode .admin-console,
-.obs-mode .admin-console,
-.pantalla-mode .modal,
-.obs-mode .modal,
-.pantalla-mode .btn-timer-cancel,
-.obs-mode .btn-timer-cancel {
-    display: none !important;
-}
-
-.pantalla-mode .team-wrapper,
-.pantalla-mode .score-box,
-.pantalla-mode .map-win-dot,
-.pantalla-mode .monkey-pad {
-    cursor: default !important;
-}
-
+/* Modo OBS / Pantalla */
 .obs-mode {
     pointer-events: none !important;
 }

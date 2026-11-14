@@ -20,7 +20,7 @@ export const TEAMS = [
   {
     id: 1,
     name: 'Los Monos',
-    logo: '/monkeys.jpg',
+    logo: '/logo1.png',
     hidden: false,
     cupsPlayed: '3 Copas (2026)',
     cupsCount: 3,
@@ -67,7 +67,7 @@ export const TEAMS = [
   {
     id: 2,
     name: 'Gorilas',
-    logo: '/gorilas.jpg',
+    logo: '/logo2.png',
     hidden: false,
     cupsPlayed: '2 Copas (2026)',
     cupsCount: 2,
@@ -212,7 +212,7 @@ export const STANDINGS = [
   { 
     rank: 1, 
     team: 'Los Monos', 
-    logo: '/monkeys.jpg', 
+    logo: '/logo1.png', 
     p: 3, 
     w: 3, 
     l: 0, 
@@ -266,7 +266,7 @@ export const STANDINGS = [
   { 
     rank: 4, 
     team: 'Gorilas', 
-    logo: '/gorilas.jpg', 
+    logo: '/logo2.png', 
     p: 3, 
     w: 0, 
     l: 3, 

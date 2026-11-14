@@ -6,11 +6,12 @@ export default function OverlayScoreboard() {
   const [match, setMatch] = useState({
     active: true,
     status: 'LIVE',
-    team1: { name: 'SELECCIONAR', logo: '/monkeys.jpg', score: 0, mapsWon: 0 },
-    team2: { name: 'SELECCIONAR', logo: '/gorilas.jpg', score: 0, mapsWon: 0 },
+    team1: { name: 'SELECCIONAR', logo: '/logo1.png', score: 0, mapsWon: 0 },
+    team2: { name: 'SELECCIONAR', logo: '/logo2.png', score: 0, mapsWon: 0 },
     map: '',
     round: 0,
     format: 'BO3',
+    side: 'DEF vs ATK',
     mvp: '',
     notes: '',
   });
@@ -30,7 +31,7 @@ export default function OverlayScoreboard() {
             setMatch(data.match);
           }
         }
-      } catch (err) {}
+      } catch {}
     };
 
     fetchLive();
@@ -54,6 +55,12 @@ export default function OverlayScoreboard() {
   const isMatchPointT2 = s2 >= 12 && s2 > s1;
   const isPause = String(match.status || '').toUpperCase().includes('PAUSA');
   const isVisible = match.active !== false;
+
+  const isSwapped = (match.side || '').toLowerCase().includes('atk vs def') || (match.side || '').toLowerCase() === 'swapped';
+  const team1Side = isSwapped ? 'ATACANTE' : 'DEFENSOR';
+  const team2Side = isSwapped ? 'DEFENSOR' : 'ATACANTE';
+  const team1SideClass = isSwapped ? 'team-side-attacker' : 'team-side-defender';
+  const team2SideClass = isSwapped ? 'team-side-defender' : 'team-side-attacker';
 
   return (
     <div
@@ -89,30 +96,33 @@ export default function OverlayScoreboard() {
         {/* EQUIPO IZQUIERDA */}
         <div className="team-glow-container team-left" id="glow-container-left">
           <div className="team-wrapper" id="wrapper-left">
-            <div className="leaf-deco leaf-1"></div>
-            <div className="leaf-deco leaf-2"></div>
             <div className="match-point-badge" id="mp-left" style={{ display: isMatchPointT1 ? 'block' : 'none' }}>
               MATCH POINT
             </div>
             <div className="map-wins-container" id="maps-left" title="Mapas ganados">
-              <div className={`map-win-dot ${m1 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
-              <div className={`map-win-dot ${m1 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
-              <div className={`map-win-dot ${m1 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
+              <div className={`map-win-dot map-win-pip ${m1 > 0 ? 'active' : ''}`} data-idx="0" />
+              <div className={`map-win-dot map-win-pip ${m1 > 1 ? 'active' : ''}`} data-idx="1" />
+              <div className={`map-win-dot map-win-pip ${m1 > 2 ? 'active' : ''}`} data-idx="2" />
             </div>
             <div className="team-info">
-              <span id="name-left" className="team-name">
-                {match.team1?.name || 'SELECCIONAR'}
-              </span>
+              <div className="team-identity-block">
+                <span id="name-left" className="team-name" title={match.team1?.name || 'SELECCIONAR'}>
+                  {match.team1?.name || 'SELECCIONAR'}
+                </span>
+                <span className={`team-side-indicator ${team1SideClass}`}>
+                  {team1Side}
+                </span>
+              </div>
               <div className="logo-box">
                 <img
                   id="img-left"
-                  src={match.team1?.logo || '/monkeys.jpg'}
+                  src={match.team1?.logo || '/logo1.png'}
                   alt="Logo A"
-                  onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                  onError={(e) => { e.target.src = '/logo1.png'; }}
                 />
               </div>
             </div>
-            <div className="score-box" id="score-left">
+            <div className="score-box" id="score-left" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {s1}
             </div>
           </div>
@@ -126,41 +136,54 @@ export default function OverlayScoreboard() {
 
           <div className="row-bottom">
             <div className="monkey-pad left-pad" id="monkey-pad-left">
-              <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Vol.III" />
+              <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Copa Primate" />
             </div>
             <span className="sub-title" id="display-subtitle">VOL.III</span>
             <div className="monkey-pad right-pad" id="monkey-pad-right">
-              <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Vol.III" />
+              <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Copa Primate" />
             </div>
           </div>
-          <div className="center-accent-bar"></div>
+
+          <div className="hud-center-meta">
+            <span className="hud-map-name">
+              {match.map ? match.map.toUpperCase() : 'MAPA TÁCTICO'}
+            </span>
+            <span className="hud-round-counter">
+              RONDA {match.round ?? 0}
+            </span>
+          </div>
+
+          <div className="center-accent-bar" />
         </div>
 
         {/* EQUIPO DERECHA */}
         <div className="team-glow-container team-right" id="glow-container-right">
           <div className="team-wrapper" id="wrapper-right">
-            <div className="leaf-deco leaf-1"></div>
-            <div className="leaf-deco leaf-2"></div>
-            <div className="score-box" id="score-right">
+            <div className="score-box" id="score-right" style={{ fontVariantNumeric: 'tabular-nums' }}>
               {s2}
             </div>
             <div className="team-info">
               <div className="logo-box">
                 <img
                   id="img-right"
-                  src={match.team2?.logo || '/gorilas.jpg'}
+                  src={match.team2?.logo || '/logo2.png'}
                   alt="Logo B"
-                  onError={(e) => { e.target.src = '/gorilas.jpg'; }}
+                  onError={(e) => { e.target.src = '/logo2.png'; }}
                 />
               </div>
-              <span id="name-right" className="team-name">
-                {match.team2?.name || 'SELECCIONAR'}
-              </span>
+              <div className="team-identity-block" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
+                <span id="name-right" className="team-name" title={match.team2?.name || 'SELECCIONAR'}>
+                  {match.team2?.name || 'SELECCIONAR'}
+                </span>
+                <span className={`team-side-indicator ${team2SideClass}`}>
+                  {team2Side}
+                </span>
+              </div>
             </div>
             <div className="map-wins-container" id="maps-right" title="Mapas ganados">
-              <div className={`map-win-dot ${m2 > 2 ? 'active' : ''}`} data-idx="2">🍌</div>
-              <div className={`map-win-dot ${m2 > 1 ? 'active' : ''}`} data-idx="1">🍌</div>
-              <div className={`map-win-dot ${m2 > 0 ? 'active' : ''}`} data-idx="0">🍌</div>
+              <div className={`map-win-dot map-win-pip ${m2 > 2 ? 'active' : ''}`} data-idx="2" />
+              <div className={`map-win-dot map-win-pip ${m2 > 1 ? 'active' : ''}`} data-idx="1" />
+              <div className={`map-win-dot map-win-pip ${m2 > 0 ? 'active' : ''}`} data-idx="0" />
             </div>
             <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
               MATCH POINT
@@ -169,16 +192,18 @@ export default function OverlayScoreboard() {
         </div>
       </div>
 
-      {/* PAUSA TÉCNICA ORIGINAL DE MARCADOR-MAIN */}
+      {/* PAUSA TÉCNICA VALORANT FUSIÓN */}
       {isPause && (
         <div className="timer-overlay tech-pause" id="timer-overlay">
           <div className="timer-card">
-            <div className="timer-emoticon" id="timer-emoticon">🍌🐒</div>
-            <div className="timer-title" id="timer-title" style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '2.5rem', color: '#ffb300', fontWeight: 900, letterSpacing: '4px' }}>
+            <div className="timer-title" id="timer-title">
               PAUSA TÉCNICA
             </div>
-            <div className="timer-countdown" id="timer-countdown" style={{ fontFamily: "'Rajdhani', sans-serif", fontSize: '1.2rem', color: '#fff', marginTop: '10px', letterSpacing: '2px' }}>
-              VOLVEMOS EN BREVE
+            <div className="timer-countdown" id="timer-countdown">
+              PAUSA
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', letterSpacing: '1px' }}>
+              PARTIDO EN PAUSA POR DECISIÓN ARBITRAL
             </div>
           </div>
         </div>

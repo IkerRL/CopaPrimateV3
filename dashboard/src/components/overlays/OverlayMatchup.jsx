@@ -5,11 +5,12 @@ export default function OverlayMatchup() {
   const [match, setMatch] = useState({
     active: true,
     status: 'LIVE',
-    team1: { name: 'Los Monos', logo: '/monkeys.jpg', score: 0 },
-    team2: { name: 'Gorilas', logo: '/gorilas.jpg', score: 0 },
+    team1: { name: 'Los Monos', logo: '/logo1.png', score: 0 },
+    team2: { name: 'Gorilas', logo: '/logo2.png', score: 0 },
     map: 'Ascent',
     round: 0,
     format: 'BO3',
+    side: 'DEF vs ATK',
     mvp: '',
     notes: '',
   });
@@ -25,9 +26,11 @@ export default function OverlayMatchup() {
         const res = await fetch(`${API_URL}/public/live-match?overlay=1`);
         if (res.ok) {
           const data = await res.json();
-          if (mounted && data.match) setMatch(data.match);
+          if (mounted && data.match) {
+            setMatch(data.match);
+          }
         }
-      } catch (err) {}
+      } catch {}
     };
 
     fetchLive();
@@ -35,10 +38,20 @@ export default function OverlayMatchup() {
     return () => {
       mounted = false;
       clearInterval(interval);
+      document.body.style.background = '';
+      document.documentElement.style.background = '';
     };
   }, []);
 
   const isVisible = match.active !== false;
+
+  const isSwapped = (match.side || '').toLowerCase().includes('atk vs def') || (match.side || '').toLowerCase() === 'swapped';
+  const team1Side = isSwapped ? 'LADO ROJO / ATACANTE' : 'LADO AZUL / DEFENSOR';
+  const team2Side = isSwapped ? 'LADO AZUL / DEFENSOR' : 'LADO ROJO / ATACANTE';
+  const team1Color = isSwapped ? '#ff4655' : '#00f5d4';
+  const team2Color = isSwapped ? '#00f5d4' : '#ff4655';
+  const team1Glow = isSwapped ? 'rgba(255, 70, 85, 0.4)' : 'rgba(0, 245, 212, 0.4)';
+  const team2Glow = isSwapped ? 'rgba(0, 245, 212, 0.4)' : 'rgba(255, 70, 85, 0.4)';
 
   return (
     <div style={{
@@ -69,11 +82,11 @@ export default function OverlayMatchup() {
         }
       `}</style>
       <div style={{
-        background: 'linear-gradient(135deg, rgba(20, 26, 22, 0.96) 0%, rgba(10, 14, 12, 0.98) 100%)',
-        border: '3px solid #ffb300',
+        background: 'linear-gradient(135deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%)',
+        border: '1.5px solid rgba(192, 132, 252, 0.4)',
         borderRadius: '24px',
         padding: '40px 60px',
-        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 179, 0, 0.25)',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(192, 132, 252, 0.22)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -89,19 +102,29 @@ export default function OverlayMatchup() {
         animation: 'matchupPopIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         willChange: 'transform, opacity, filter',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', zIndex: 1 }}>
-          <img src="/monito-der.png" alt="" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+        {/* Glow de fondo */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(circle at center, rgba(192, 132, 252, 0.12) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Encabezado */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', zIndex: 1 }}>
+          <img src="/copa-logo.png" alt="Logo" style={{ width: '54px', height: '54px', objectFit: 'contain', filter: 'drop-shadow(0 0 14px rgba(192,132,252,0.5))' }} />
           <div style={{ textAlign: 'center' }}>
-            <span style={{ fontSize: '13px', color: '#ffb300', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: '13px', color: '#c084fc', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase' }}>
               COPA PRIMATE 2026
             </span>
             <h2 style={{ margin: 0, fontSize: '28px', color: '#fff', fontWeight: 900, letterSpacing: '1px' }}>
               ENFRENTAMIENTO OFICIAL
             </h2>
           </div>
-          <img src="/monito-izq.png" alt="" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+          <img src="/copa-logo.png" alt="Logo" style={{ width: '54px', height: '54px', objectFit: 'contain', filter: 'drop-shadow(0 0 14px rgba(192,132,252,0.5))' }} />
         </div>
 
+        {/* CONTENEDOR VERSUS */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: '1fr auto 1fr',
@@ -110,22 +133,23 @@ export default function OverlayMatchup() {
           width: '100%',
           zIndex: 1,
         }}>
+          {/* EQUIPO 1 */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center' }}>
             <div style={{
               width: '120px',
               height: '120px',
               borderRadius: '20px',
-              background: 'rgba(0,0,0,0.5)',
-              border: '3px solid #2e7d32',
+              background: 'rgba(0,0,0,0.6)',
+              border: `3px solid ${team1Color}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(46, 125, 50, 0.4)',
+              boxShadow: `0 10px 30px rgba(0,0,0,0.8), 0 0 20px ${team1Glow}`,
             }}>
               <img
-                src={match.team1?.logo || '/monkeys.jpg'}
+                src={match.team1?.logo || '/logo1.png'}
                 alt=""
-                onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                onError={(e) => { e.target.src = '/logo1.png'; }}
                 style={{ width: '90px', height: '90px', objectFit: 'contain' }}
               />
             </div>
@@ -134,56 +158,59 @@ export default function OverlayMatchup() {
             </h3>
             <span style={{
               fontSize: '12px',
-              color: '#4caf50',
+              color: team1Color,
               fontWeight: 800,
-              background: 'rgba(76, 175, 80, 0.15)',
+              background: isSwapped ? 'rgba(255, 70, 85, 0.15)' : 'rgba(0, 245, 212, 0.15)',
+              border: `1px solid ${team1Color}`,
               padding: '3px 12px',
               borderRadius: '6px',
             }}>
-              LADO AZUL / DEFENSOR
+              {team1Side}
             </span>
           </div>
 
+          {/* VS Y METADATOS */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <span style={{
               fontSize: '64px',
               fontWeight: 900,
-              color: '#ffb300',
+              color: '#c084fc',
               fontFamily: "'Rajdhani', 'Bebas Neue', sans-serif",
               lineHeight: 1,
-              textShadow: '0 0 25px rgba(255, 179, 0, 0.8)',
+              textShadow: '0 0 25px rgba(192, 132, 252, 0.8)',
             }}>
               VS
             </span>
             <div style={{
               background: 'rgba(0,0,0,0.6)',
-              border: '1px solid rgba(255,255,255,0.15)',
+              border: '1px solid rgba(192, 132, 252, 0.3)',
               borderRadius: '8px',
               padding: '6px 16px',
               textAlign: 'center',
             }}>
-              <div style={{ fontSize: '13px', color: '#ffb300', fontWeight: 800, letterSpacing: '1.5px' }}>
-                FASE DE LIGA
+              <div style={{ fontSize: '13px', color: '#00f5d4', fontWeight: 800, letterSpacing: '1.5px' }}>
+                {match.format || 'BO3'} · FASE DE LIGA
               </div>
             </div>
           </div>
 
+          {/* EQUIPO 2 */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px', textAlign: 'center' }}>
             <div style={{
               width: '120px',
               height: '120px',
               borderRadius: '20px',
-              background: 'rgba(0,0,0,0.5)',
-              border: '3px solid #ffb300',
+              background: 'rgba(0,0,0,0.6)',
+              border: `3px solid ${team2Color}`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 20px rgba(255, 179, 0, 0.4)',
+              boxShadow: `0 10px 30px rgba(0,0,0,0.8), 0 0 20px ${team2Glow}`,
             }}>
               <img
-                src={match.team2?.logo || '/gorilas.jpg'}
+                src={match.team2?.logo || '/logo2.png'}
                 alt=""
-                onError={(e) => { e.target.src = '/gorilas.jpg'; }}
+                onError={(e) => { e.target.src = '/logo2.png'; }}
                 style={{ width: '90px', height: '90px', objectFit: 'contain' }}
               />
             </div>
@@ -192,24 +219,27 @@ export default function OverlayMatchup() {
             </h3>
             <span style={{
               fontSize: '12px',
-              color: '#ffb300',
+              color: team2Color,
               fontWeight: 800,
-              background: 'rgba(255, 179, 0, 0.15)',
+              background: isSwapped ? 'rgba(0, 245, 212, 0.15)' : 'rgba(255, 70, 85, 0.15)',
+              border: `1px solid ${team2Color}`,
               padding: '3px 12px',
               borderRadius: '6px',
             }}>
-              LADO ROJO / ATACANTE
+              {team2Side}
             </span>
           </div>
         </div>
 
+        {/* PIE CON ESTADO O NOTA */}
         {match.notes && (
           <div style={{
-            background: 'rgba(0,0,0,0.4)',
+            background: 'rgba(0,0,0,0.5)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '8px',
             padding: '8px 20px',
             fontSize: '13px',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'rgba(255,255,255,0.8)',
             textAlign: 'center',
             maxWidth: '80%',
             zIndex: 1,
@@ -221,4 +251,3 @@ export default function OverlayMatchup() {
     </div>
   );
 }
-

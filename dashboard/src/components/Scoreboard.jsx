@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
-  Play, Pause, CheckCircle2, RefreshCw, Trophy, Radio, 
-  Plus, Minus, Flame, Tv, Eye, Sparkles, Check, X, Bell,
-  Copy, ExternalLink, Layers, CheckCircle
+  Radio, Tv, ExternalLink, Layers, 
+  RotateCcw, AlertTriangle, X
 } from 'lucide-react';
 import { apiFetch } from '../api';
+import ConfirmModal from './ConfirmModal';
 import './overlays/marcador.css';
 
 const STATUSES = [
@@ -14,38 +14,62 @@ const STATUSES = [
   { id: 'PENDIENTE', label: '⏳ PROGRAMADO', color: '#a6a6a6' },
 ];
 
+const OVERLAY_SCENES = [
+  { id: 'scoreboard', label: 'Marcador HUD' },
+  { id: 'matchup', label: '⚔️ Previa Versus' },
+  { id: 'roulette', label: '🎰 Ruleta Mapas' },
+  { id: 'ticker', label: '📰 Ticker Noticias' },
+  { id: 'hidden', label: '🙈 Ocultar Todo' },
+];
+
 export default function Scoreboard() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [copiedOverlay, setCopiedOverlay] = useState(false);
+  const [copiedLive, setCopiedLive] = useState(false);
   const [autoSync, setAutoSync] = useState(true);
+  const [activeOverlayMode, setActiveOverlayMode] = useState('scoreboard');
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirmar',
+    confirmStyle: 'danger',
+    onConfirm: null,
+  });
   const firstRender = useRef(true);
 
   const [matchData, setMatchData] = useState({
     active: true,
     status: 'LIVE',
-    team1: { name: 'Los Monos', logo: '/monkeys.jpg', score: 11, mapsWon: 1 },
-    team2: { name: 'Gorilas', logo: '/gorilas.jpg', score: 9, mapsWon: 0 },
+    team1: { name: 'Los Monos', logo: '/logo1.png', score: 11, mapsWon: 1, side: 'DEFENSOR' },
+    team2: { name: 'Gorilas', logo: '/logo2.png', score: 9, mapsWon: 0, side: 'ATACANTE' },
     map: 'Ascent',
-    round: 21,
+    round: 20,
     format: 'BO3',
-    side: 'Attackers vs Defenders',
+    side: 'DEF vs ATK',
     mvp: 'TenZ#NA1',
-    notes: 'Ronda 21: Compra completa. Gorilas defendiendo el site de B.',
+    notes: 'Ronda 20: Compra completa. Defensa en A.',
   });
 
-  // URL del overlay para OBS (funciona tanto en el puerto de la web como del dashboard)
+  // URLs de overlays para OBS
   const obsOrigin = window.location.origin.replace(':5174', ':5173');
-  const overlayUrl = `${obsOrigin}/overlay/scoreboard`;
+  const overlayScoreboardUrl = `${obsOrigin}/overlay/scoreboard`;
+  const overlayLiveUrl = `${obsOrigin}/overlay/live`;
 
-  const copyOverlay = (url = overlayUrl) => {
-    navigator.clipboard.writeText(url);
-    setCopiedOverlay(true);
-    setTimeout(() => setCopiedOverlay(false), 2500);
+  const copyToClipboard = (text, type) => {
+    navigator.clipboard.writeText(text);
+    if (type === 'live') {
+      setCopiedLive(true);
+      setTimeout(() => setCopiedLive(false), 2500);
+    } else {
+      setCopiedOverlay(true);
+      setTimeout(() => setCopiedOverlay(false), 2500);
+    }
   };
 
-  // Auto-sincronización con OBS cuando cambia el tanteo si autoSync está activado
+  // Auto-sincronización con OBS cuando cambia el tanteo
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
@@ -71,6 +95,7 @@ export default function Scoreboard() {
   useEffect(() => {
     fetchTeams();
     fetchLiveMatch();
+    fetchOverlayMode();
   }, []);
 
   const fetchTeams = async () => {
@@ -90,8 +115,18 @@ export default function Scoreboard() {
       if (data.match) {
         setMatchData({
           ...data.match,
-          team1: { ...data.match.team1, mapsWon: data.match.team1?.mapsWon || 0 },
-          team2: { ...data.match.team2, mapsWon: data.match.team2?.mapsWon || 0 },
+          team1: {
+            ...data.match.team1,
+            logo: data.match.team1?.logo || '/logo1.png',
+            mapsWon: data.match.team1?.mapsWon || 0,
+            side: data.match.team1?.side || 'DEFENSOR',
+          },
+          team2: {
+            ...data.match.team2,
+            logo: data.match.team2?.logo || '/logo2.png',
+            mapsWon: data.match.team2?.mapsWon || 0,
+            side: data.match.team2?.side || 'ATACANTE',
+          },
         });
       }
     } catch (e) {
@@ -99,44 +134,39 @@ export default function Scoreboard() {
     }
   };
 
+  const fetchOverlayMode = async () => {
+    try {
+      const res = await apiFetch(`/overlay-state`);
+      const data = await res.json();
+      if (data?.mode) {
+        setActiveOverlayMode(data.mode);
+      }
+    } catch {}
+  };
+
+  const handleSetOverlayMode = async (mode) => {
+    setActiveOverlayMode(mode);
+    try {
+      await apiFetch(`/overlay-state`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode })
+      });
+      setFeedback({ type: 'success', text: `🎬 Escena activa en OBS cambiada a: ${mode.toUpperCase()}` });
+    } catch {
+      setFeedback({ type: 'error', text: 'Error al cambiar la escena en OBS' });
+    }
+  };
+
+  // Cambio de rondas desacoplado de wipe automático
   const handleScoreChange = (teamKey, delta) => {
     setMatchData(prev => {
       const currentScore = prev[teamKey]?.score || 0;
       const nextScore = Math.max(0, currentScore + delta);
+      const otherTeamKey = teamKey === 'team1' ? 'team2' : 'team1';
+      const otherScore = prev[otherTeamKey]?.score || 0;
+      const totalRounds = nextScore + otherScore;
 
-      // Al llegar a 13 rondas se gana el mapa: se resetea a 0 el marcador y en BO3/BO5 se añade un plátano
-      if (nextScore >= 13) {
-        const format = (prev.format || 'BO3').toUpperCase();
-        const maxBananas = format === 'BO5' ? 3 : format === 'BO1' ? 1 : 2;
-        const currentMapsWon = prev[teamKey]?.mapsWon || 0;
-        const newMapsWon = Math.min(maxBananas, currentMapsWon + 1);
-        const winnerName = prev[teamKey]?.name || (teamKey === 'team1' ? 'Equipo Izquierda' : 'Equipo Derecha');
-
-        setTimeout(() => {
-          setFeedback({
-            type: 'success',
-            text: `🍌 ¡${winnerName} ha ganado el mapa con 13 rondas! Marcador reseteado a 0 y +1 plátano sumado.`
-          });
-        }, 80);
-
-        return {
-          ...prev,
-          round: 0,
-          team1: {
-            ...prev.team1,
-            score: 0,
-            mapsWon: teamKey === 'team1' ? newMapsWon : (prev.team1?.mapsWon || 0)
-          },
-          team2: {
-            ...prev.team2,
-            score: 0,
-            mapsWon: teamKey === 'team2' ? newMapsWon : (prev.team2?.mapsWon || 0)
-          }
-        };
-      }
-
-      const totalRounds = (teamKey === 'team1' ? nextScore : (prev.team1?.score || 0)) + 
-                          (teamKey === 'team2' ? nextScore : (prev.team2?.score || 0));
       return {
         ...prev,
         round: totalRounds,
@@ -148,6 +178,7 @@ export default function Scoreboard() {
     });
   };
 
+  // Cambio manual de mapas ganados (+1 / -1)
   const handleBananaChange = (teamKey, delta) => {
     setMatchData(prev => ({
       ...prev,
@@ -158,6 +189,125 @@ export default function Scoreboard() {
     }));
   };
 
+  // Otorgar victoria de mapa con confirmación
+  const requestAwardMap = (teamKey) => {
+    const winnerName = matchData[teamKey]?.name || (teamKey === 'team1' ? 'Equipo Izquierda' : 'Equipo Derecha');
+    setConfirmConfig({
+      isOpen: true,
+      title: '🏆 ¿Confirmar Victoria de Mapa?',
+      message: `¿Declarar a ${winnerName} ganador de este mapa? Se sumará +1 mapa ganado y el tanteo de rondas volverá a 0 - 0.`,
+      confirmText: 'Confirmar Victoria de Mapa',
+      confirmStyle: 'success',
+      onConfirm: () => {
+        setMatchData(prev => {
+          const format = (prev.format || 'BO3').toUpperCase();
+          const maxMaps = format === 'BO5' ? 3 : format === 'BO1' ? 1 : 2;
+          const currentMapsWon = prev[teamKey]?.mapsWon || 0;
+          const newMapsWon = Math.min(maxMaps, currentMapsWon + 1);
+
+          return {
+            ...prev,
+            round: 0,
+            team1: {
+              ...prev.team1,
+              score: 0,
+              mapsWon: teamKey === 'team1' ? newMapsWon : (prev.team1?.mapsWon || 0)
+            },
+            team2: {
+              ...prev.team2,
+              score: 0,
+              mapsWon: teamKey === 'team2' ? newMapsWon : (prev.team2?.mapsWon || 0)
+            }
+          };
+        });
+        setFeedback({
+          type: 'success',
+          text: `🏆 ¡${winnerName} ha ganado el mapa! +1 mapa sumado y rondas reiniciadas a 0-0.`
+        });
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
+  };
+
+  // Reiniciar solo rondas del mapa actual
+  const requestResetRounds = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '🔄 ¿Reiniciar Marcador de Rondas?',
+      message: '¿Estás seguro de reiniciar las rondas a 0 - 0 para ambos equipos en el mapa actual?',
+      confirmText: 'Reiniciar Rondas (0-0)',
+      confirmStyle: 'warning',
+      onConfirm: () => {
+        setMatchData(prev => ({
+          ...prev,
+          round: 0,
+          team1: { ...prev.team1, score: 0 },
+          team2: { ...prev.team2, score: 0 },
+        }));
+        setFeedback({ type: 'success', text: 'Marcador de rondas restablecido a 0 - 0.' });
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
+  };
+
+  // Reiniciar partido completo (mapas y rondas)
+  const requestResetFullMatch = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '⚠️ ¿Reiniciar Todo el Partido?',
+      message: 'Esta acción borrará todos los mapas ganados y rondas de ambos equipos. ¿Deseas continuar?',
+      confirmText: 'Reiniciar Todo el Encuentro',
+      confirmStyle: 'danger',
+      onConfirm: () => {
+        setMatchData(prev => ({
+          ...prev,
+          round: 0,
+          team1: { ...prev.team1, score: 0, mapsWon: 0 },
+          team2: { ...prev.team2, score: 0, mapsWon: 0 },
+        }));
+        setFeedback({ type: 'success', text: 'Partido reiniciado por completo (0-0 mapas, 0-0 rondas).' });
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
+  };
+
+  // Finalizar partido con guardia
+  const requestEndMatch = () => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '🏁 ¿Finalizar Encuentro Oficial?',
+      message: 'El estado del partido se actualizará a FINALIZADO y se notificará en pantalla.',
+      confirmText: 'Finalizar Partido',
+      confirmStyle: 'primary',
+      onConfirm: () => {
+        setMatchData(prev => ({ ...prev, status: 'FINALIZADO' }));
+        setFeedback({ type: 'success', text: 'Encuentro marcado como FINALIZADO.' });
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
+  };
+
+  // Cambio de lados a la mitad del partido (Halftime side-swap)
+  const handleSwapSides = () => {
+    setMatchData(prev => {
+      const isCurrentlySwapped = (prev.side || '').toLowerCase().includes('atk vs def') || (prev.side || '').toLowerCase() === 'swapped';
+      const newSideStr = isCurrentlySwapped ? 'DEF vs ATK' : 'ATK vs DEF';
+      const t1Side = isCurrentlySwapped ? 'DEFENSOR' : 'ATACANTE';
+      const t2Side = isCurrentlySwapped ? 'ATACANTE' : 'DEFENSOR';
+
+      return {
+        ...prev,
+        side: newSideStr,
+        team1: { ...prev.team1, side: t1Side },
+        team2: { ...prev.team2, side: t2Side },
+      };
+    });
+    setFeedback({
+      type: 'success',
+      text: '🔄 ¡Lados cambiados (Halftime Side-Swap)! Roles de Defensor y Atacante invertidos.'
+    });
+  };
+
   const handleSelectTeam = (teamKey, teamName) => {
     const found = teams.find(t => t.name === teamName);
     setMatchData(prev => ({
@@ -165,7 +315,7 @@ export default function Scoreboard() {
       [teamKey]: {
         ...prev[teamKey],
         name: teamName,
-        logo: found?.logo || (teamKey === 'team1' ? '/monkeys.jpg' : '/gorilas.jpg'),
+        logo: found?.logo || (teamKey === 'team1' ? '/logo1.png' : '/logo2.png'),
       }
     }));
   };
@@ -203,21 +353,40 @@ export default function Scoreboard() {
 
   const s1 = matchData.team1?.score || 0;
   const s2 = matchData.team2?.score || 0;
+  const m1 = matchData.team1?.mapsWon || 0;
+  const m2 = matchData.team2?.mapsWon || 0;
   const isMatchPointT1 = s1 >= 12 && s1 > s2;
   const isMatchPointT2 = s2 >= 12 && s2 > s1;
 
-  const maxBananas = matchData.format === 'BO1' ? 1 : matchData.format === 'BO5' ? 3 : 2;
+  const isSwapped = (matchData.side || '').toLowerCase().includes('atk vs def') || (matchData.side || '').toLowerCase() === 'swapped';
+  const team1Side = isSwapped ? 'ATACANTE' : 'DEFENSOR';
+  const team2Side = isSwapped ? 'DEFENSOR' : 'ATACANTE';
+  const team1SideClass = isSwapped ? 'team-side-attacker' : 'team-side-defender';
+  const team2SideClass = isSwapped ? 'team-side-defender' : 'team-side-attacker';
 
   return (
-    <div style={{ maxWidth: '1150px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '26px' }}>
+    <div style={{ maxWidth: '1150px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '22px' }}>
+      {/* Modal de confirmación accesible */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        confirmStyle={confirmConfig.confirmStyle}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig(c => ({ ...c, isOpen: false }))}
+      />
+
       {/* Header */}
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
         <div>
-          <span style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 800, letterSpacing: '1px' }}>
-            CONTROL DE TRANSMISIÓN OFICIAL
+          <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 800, letterSpacing: '1.2px', textTransform: 'uppercase' }}>
+            CONTROL DE TRANSMISIÓN VALORANT FUSIÓN
           </span>
-          <h2>Marcador Oficial de la Copa Primate</h2>
-          <p>Maneja los puntos, mapas ganados con plátanos 🍌, formato y sincronización directa con el LiveBanner.</p>
+          <h2 style={{ margin: '4px 0 6px 0', fontSize: '26px', fontWeight: 900 }}>Marcador Oficial de la Copa Primate</h2>
+          <p style={{ margin: 0, color: 'rgba(255,255,255,0.7)', fontSize: '14px' }}>
+            Gestión en tiempo real de rondas, mapas ganados, control de escenas OBS y sincronización instantánea.
+          </p>
         </div>
 
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -226,8 +395,10 @@ export default function Scoreboard() {
             onClick={() => handleSaveLiveMatch(!matchData.active)}
             className="btn-secondary"
             style={{
-              borderColor: matchData.active ? 'var(--danger)' : 'var(--success)',
-              color: matchData.active ? 'var(--danger)' : 'var(--success)',
+              borderColor: matchData.active ? 'var(--danger)' : '#00f5d4',
+              color: matchData.active ? 'var(--danger)' : '#00f5d4',
+              padding: '8px 16px',
+              fontWeight: 700,
             }}
           >
             {matchData.active ? '⏸️ Desactivar LiveBanner' : '🔴 Activar LiveBanner'}
@@ -238,35 +409,115 @@ export default function Scoreboard() {
             onClick={() => handleSaveLiveMatch(true)}
             className="btn-primary"
             disabled={loading}
-            style={{ background: 'var(--primate-orange)', color: '#000', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}
+            style={{
+              background: 'linear-gradient(135deg, #c084fc 0%, #9333ea 100%)',
+              color: '#fff',
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 20px',
+              border: 'none',
+              borderRadius: '8px',
+              boxShadow: '0 4px 14px rgba(192, 132, 252, 0.4)',
+            }}
           >
             <Radio size={18} /> Publicar Marcador
           </button>
         </div>
       </div>
 
-      {/* BARRA DE ENLACE DIRECTO PARA EL OVERLAY DE OBS */}
-      <div className="glass-card" style={{
-        padding: '18px 24px',
-        background: 'linear-gradient(90deg, rgba(145, 70, 255, 0.12) 0%, rgba(255, 179, 0, 0.08) 100%)',
-        border: '1px solid rgba(145, 70, 255, 0.35)',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '14px',
-      }}>
+      {/* OBS SCENE SWITCHER BAR (1-CLICK EMISSION TOGGLE) */}
+      <div
+        className="glass-card"
+        style={{
+          padding: '16px 20px',
+          background: 'linear-gradient(90deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%)',
+          border: '1.5px solid rgba(192, 132, 252, 0.35)',
+          borderRadius: '14px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.6)',
+        }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '34px', height: '34px', borderRadius: '8px', background: 'rgba(145, 70, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9146ff' }}>
-              <Tv size={18} />
+            <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(192, 132, 252, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#c084fc' }}>
+              <Layers size={18} />
             </div>
             <div>
-              <h4 style={{ margin: 0, color: '#fff', fontSize: '15px' }}>
-                Overlay para OBS Studio (Fuente de Navegador)
+              <h4 style={{ margin: 0, color: '#fff', fontSize: '14px', fontWeight: 800 }}>
+                Controlador de Escena OBS en Directo (Unified Stream Switcher)
               </h4>
-              <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>
-                Pega este enlace en OBS como <em>Browser Source</em> (1920x1080 o 1920x160 con fondo transparente).
+              <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+                Cambia instantáneamente la visualización en pantalla con 1 clic para los casters.
               </p>
             </div>
+          </div>
+          <span style={{ fontSize: '11px', background: 'rgba(0, 245, 212, 0.15)', color: '#00f5d4', padding: '3px 10px', borderRadius: '20px', fontWeight: 800, border: '1px solid rgba(0, 245, 212, 0.3)' }}>
+            ESCENA ACTIVA: {activeOverlayMode.toUpperCase()}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          {OVERLAY_SCENES.map((scene) => {
+            const isActive = activeOverlayMode === scene.id;
+            return (
+              <button
+                key={scene.id}
+                type="button"
+                onClick={() => handleSetOverlayMode(scene.id)}
+                style={{
+                  flex: 1,
+                  minWidth: '130px',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  border: isActive ? '1.5px solid #00f5d4' : '1px solid rgba(255, 255, 255, 0.12)',
+                  background: isActive ? 'rgba(0, 245, 212, 0.18)' : 'rgba(255, 255, 255, 0.04)',
+                  color: isActive ? '#00f5d4' : 'rgba(255, 255, 255, 0.8)',
+                  fontSize: '13px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isActive ? '0 0 16px rgba(0, 245, 212, 0.3)' : 'none',
+                }}
+              >
+                <span>{scene.label}</span>
+                {isActive && (
+                  <span style={{ fontSize: '9px', background: '#ff4655', color: '#fff', padding: '1px 5px', borderRadius: '3px', fontWeight: 900 }}>
+                    EN DIRECTO
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ENLACES OBS STUDIO */}
+      <div
+        className="glass-card"
+        style={{
+          padding: '16px 20px',
+          background: 'rgba(15, 25, 35, 0.85)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Tv size={16} color="#c084fc" />
+            <span style={{ fontSize: '13px', color: '#fff', fontWeight: 700 }}>
+              Fuentes de Navegador para OBS Studio (Browser Sources 1920x1080 transparentes)
+            </span>
           </div>
 
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', color: '#fff' }}>
@@ -274,83 +525,120 @@ export default function Scoreboard() {
               type="checkbox"
               checked={autoSync}
               onChange={(e) => setAutoSync(e.target.checked)}
-              style={{ accentColor: 'var(--primary)', cursor: 'pointer' }}
+              style={{ accentColor: '#c084fc', cursor: 'pointer' }}
             />
             <span>Auto-enviar cambios al instante a OBS</span>
           </label>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            readOnly
-            value={overlayUrl}
-            style={{
-              flex: 1,
-              minWidth: '280px',
-              background: 'rgba(0,0,0,0.6)',
-              border: '1px solid rgba(255,255,255,0.15)',
-              borderRadius: '8px',
-              padding: '10px 14px',
-              color: '#00ff88',
-              fontSize: '13px',
-              fontFamily: 'monospace',
-              outline: 'none',
-            }}
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          {/* Master Unified Overlay */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="text"
+              readOnly
+              value={overlayLiveUrl}
+              style={{
+                flex: 1,
+                background: 'rgba(0,0,0,0.6)',
+                border: '1px solid rgba(192, 132, 252, 0.3)',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                color: '#00f5d4',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                outline: 'none',
+              }}
+              title="Overlay Unificado que alterna automáticamente escenas"
+            />
+            <button
+              type="button"
+              onClick={() => copyToClipboard(overlayLiveUrl, 'live')}
+              style={{
+                padding: '8px 14px',
+                background: copiedLive ? '#00f5d4' : '#c084fc',
+                color: '#08080b',
+                fontWeight: 800,
+                fontSize: '12px',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {copiedLive ? '¡Copiado!' : 'Copiar Live'}
+            </button>
+            <a
+              href={overlayLiveUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: '#c084fc', padding: '6px', display: 'flex', alignItems: 'center' }}
+              title="Abrir en pestaña nueva"
+            >
+              <ExternalLink size={16} />
+            </a>
+          </div>
 
-          <button
-            type="button"
-            className="btn-primary"
-            onClick={() => copyOverlay(overlayUrl)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 18px',
-              background: copiedOverlay ? 'var(--success)' : 'var(--primary)',
-              color: '#000',
-              fontWeight: 800,
-              fontSize: '13px',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            {copiedOverlay ? <Check size={16} /> : <Copy size={16} />}
-            {copiedOverlay ? '¡Copiado!' : 'Copiar Link para OBS'}
-          </button>
-
-          <a
-            href={overlayUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-secondary"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '10px 16px',
-              fontSize: '13px',
-              textDecoration: 'none',
-              borderRadius: '8px',
-            }}
-          >
-            <ExternalLink size={15} /> Abrir Overlay ↗
-          </a>
+          {/* Marcador HUD Direct Link */}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <input
+              type="text"
+              readOnly
+              value={overlayScoreboardUrl}
+              style={{
+                flex: 1,
+                background: 'rgba(0,0,0,0.6)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: '6px',
+                padding: '8px 10px',
+                color: 'rgba(255,255,255,0.8)',
+                fontSize: '12px',
+                fontFamily: 'monospace',
+                outline: 'none',
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => copyToClipboard(overlayScoreboardUrl, 'scoreboard')}
+              style={{
+                padding: '8px 14px',
+                background: copiedOverlay ? '#00f5d4' : 'rgba(255,255,255,0.1)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: '12px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {copiedOverlay ? '¡Copiado!' : 'Copiar HUD'}
+            </button>
+            <a
+              href={overlayScoreboardUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: 'rgba(255,255,255,0.7)', padding: '6px', display: 'flex', alignItems: 'center' }}
+              title="Abrir en pestaña nueva"
+            >
+              <ExternalLink size={16} />
+            </a>
+          </div>
         </div>
       </div>
 
       {feedback && (
         <div style={{
-          padding: '14px 20px',
+          padding: '12px 18px',
           borderRadius: '8px',
-          background: feedback.type === 'success' ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 70, 85, 0.15)',
-          border: `1px solid ${feedback.type === 'success' ? 'var(--success)' : 'var(--danger)'}`,
-          color: feedback.type === 'success' ? 'var(--success)' : 'var(--danger)',
+          background: feedback.type === 'success' ? 'rgba(0, 245, 212, 0.15)' : 'rgba(255, 70, 85, 0.15)',
+          border: `1px solid ${feedback.type === 'success' ? '#00f5d4' : '#ff4655'}`,
+          color: feedback.type === 'success' ? '#00f5d4' : '#ff4655',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
+          fontWeight: 600,
+          fontSize: '13px',
         }}>
           <span>{feedback.text}</span>
           <button type="button" onClick={() => setFeedback(null)} style={{ background: 'transparent', border: 'none', color: 'inherit', cursor: 'pointer' }}>
@@ -359,21 +647,61 @@ export default function Scoreboard() {
         </div>
       )}
 
-      {/* MARCADOR ESTILO MARCADOR-MAIN CON PLÁTANOS Y MONITOS */}
+      {/* BANNER INFORMATIVO DE PUNTO DE MAPA (CUANDO SCORE >= 12) */}
+      {(s1 >= 12 || s2 >= 12) && (
+        <div
+          style={{
+            padding: '14px 20px',
+            borderRadius: '10px',
+            background: 'linear-gradient(90deg, rgba(255, 70, 85, 0.25) 0%, rgba(192, 132, 252, 0.2) 100%)',
+            border: '1.5px solid #ff4655',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertTriangle size={20} color="#ff4655" />
+            <span style={{ fontSize: '13px', color: '#fff', fontWeight: 700 }}>
+              ⚡ <strong>PUNTO DE MAPA:</strong> {s1 >= 12 ? matchData.team1?.name : matchData.team2?.name} está a punto de ganar el mapa ({s1} - {s2}). Haz clic en &quot;Gana Mapa&quot; para confirmar victoria oficial.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => requestAwardMap(s1 >= s2 ? 'team1' : 'team2')}
+            style={{
+              padding: '6px 16px',
+              background: '#ff4655',
+              border: 'none',
+              borderRadius: '6px',
+              color: '#fff',
+              fontWeight: 800,
+              fontSize: '12px',
+              cursor: 'pointer',
+            }}
+          >
+            🏆 Declarar Ganador a {s1 >= s2 ? matchData.team1?.name : matchData.team2?.name}
+          </button>
+        </div>
+      )}
+
+      {/* MARCADOR HUD INTERACTIVO (1:1 CON STREAM OVERLAY) */}
       <div
         className="glass-card"
         style={{
-          padding: '36px 30px',
-          background: 'radial-gradient(ellipse at 50% 50%, rgba(15, 30, 22, 0.98) 0%, rgba(6, 15, 10, 0.98) 100%)',
-          border: '2px solid var(--border-gold)',
+          padding: '28px 24px',
+          background: 'linear-gradient(135deg, rgba(15, 25, 35, 0.98) 0%, rgba(8, 8, 11, 0.98) 100%)',
+          border: '1.5px solid rgba(192, 132, 252, 0.35)',
           boxShadow: '0 16px 48px rgba(0,0,0,0.85)',
-          borderRadius: '20px',
+          borderRadius: '18px',
           position: 'relative',
         }}
       >
         {/* Cabecera superior del marcador */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span
               style={{
                 background: matchData.status === 'LIVE' ? '#ff4655' : 'rgba(255,255,255,0.1)',
@@ -383,14 +711,32 @@ export default function Scoreboard() {
                 padding: '4px 12px',
                 borderRadius: '20px',
                 letterSpacing: '1px',
-                animation: matchData.status === 'LIVE' ? 'pulse 2s infinite' : 'none',
               }}
             >
               {STATUSES.find((s) => s.id === matchData.status)?.label || 'PARTIDO'}
             </span>
-            <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>
-              Ronda {matchData.round}
-            </span>
+
+            {/* Botón de cambio de lados (Halftime side-swap) */}
+            <button
+              type="button"
+              onClick={handleSwapSides}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'rgba(0, 245, 212, 0.12)',
+                border: '1px solid rgba(0, 245, 212, 0.35)',
+                color: '#00f5d4',
+                padding: '4px 12px',
+                borderRadius: '6px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+              title="Cambiar roles de Defensor / Atacante entre equipos"
+            >
+              <RotateCcw size={14} /> Cambiar Lados
+            </button>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -400,8 +746,8 @@ export default function Scoreboard() {
                 type="button"
                 onClick={() => setMatchData({ ...matchData, format: fmt })}
                 style={{
-                  background: matchData.format === fmt ? 'var(--primary)' : 'rgba(255,255,255,0.06)',
-                  color: matchData.format === fmt ? '#000' : 'var(--text-muted)',
+                  background: matchData.format === fmt ? '#c084fc' : 'rgba(255,255,255,0.06)',
+                  color: matchData.format === fmt ? '#08080b' : 'rgba(255,255,255,0.7)',
                   border: 'none',
                   padding: '4px 12px',
                   borderRadius: '6px',
@@ -416,44 +762,47 @@ export default function Scoreboard() {
           </div>
         </div>
 
-        {/* VISUAL OFICIAL IDÉNTICO A MARCADOR-MAIN */}
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0 24px', overflowX: 'auto' }}>
+        {/* VISUAL INTERACTIVO 1:1 CON OverlayScoreboard */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px 0 20px', overflowX: 'auto' }}>
           <div className={`main-container format-${(matchData.format || 'BO3').toLowerCase()}`} id="main-scoreboard">
             {/* EQUIPO IZQUIERDA */}
             <div className="team-glow-container team-left" id="glow-container-left">
               <div className="team-wrapper" id="wrapper-left">
-                <div className="leaf-deco leaf-1"></div>
-                <div className="leaf-deco leaf-2"></div>
                 <div className="match-point-badge" id="mp-left" style={{ display: isMatchPointT1 ? 'block' : 'none' }}>
                   MATCH POINT
                 </div>
-                <div className="map-wins-container" id="maps-left" title="Mapas ganados (Haz clic para sumar o restar)">
+                <div className="map-wins-container" id="maps-left" title="Mapas ganados (Haz clic para alternar)">
                   <div
-                    className={`map-win-dot ${(matchData.team1?.mapsWon || 0) > 0 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m1 > 0 ? 'active' : ''}`}
                     data-idx="0"
-                    onClick={() => handleBananaChange('team1', (matchData.team1?.mapsWon || 0) >= 1 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team1', m1 >= 1 ? -1 : 1)}
+                  />
                   <div
-                    className={`map-win-dot ${(matchData.team1?.mapsWon || 0) > 1 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m1 > 1 ? 'active' : ''}`}
                     data-idx="1"
-                    onClick={() => handleBananaChange('team1', (matchData.team1?.mapsWon || 0) >= 2 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team1', m1 >= 2 ? -1 : 1)}
+                  />
                   <div
-                    className={`map-win-dot ${(matchData.team1?.mapsWon || 0) > 2 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m1 > 2 ? 'active' : ''}`}
                     data-idx="2"
-                    onClick={() => handleBananaChange('team1', (matchData.team1?.mapsWon || 0) >= 3 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team1', m1 >= 3 ? -1 : 1)}
+                  />
                 </div>
                 <div className="team-info">
-                  <span id="name-left" className="team-name">
-                    {matchData.team1?.name || 'SELECCIONAR'}
-                  </span>
+                  <div className="team-identity-block">
+                    <span id="name-left" className="team-name" title={matchData.team1?.name || 'SELECCIONAR'}>
+                      {matchData.team1?.name || 'SELECCIONAR'}
+                    </span>
+                    <span className={`team-side-indicator ${team1SideClass}`}>
+                      {team1Side}
+                    </span>
+                  </div>
                   <div className="logo-box">
                     <img
                       id="img-left"
-                      src={matchData.team1?.logo || '/monkeys.jpg'}
+                      src={matchData.team1?.logo || '/logo1.png'}
                       alt="Logo A"
-                      onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                      onError={(e) => { e.target.src = '/logo1.png'; }}
                     />
                   </div>
                 </div>
@@ -461,8 +810,8 @@ export default function Scoreboard() {
                   className="score-box"
                   id="score-left"
                   onClick={() => handleScoreChange('team1', 1)}
-                  onContextMenu={(e) => { e.preventDefault(); handleScoreChange('team1', -1); }}
-                  title="Clic izquierdo: +1 ronda | Clic derecho: -1 ronda"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                  title="Clic: +1 ronda"
                 >
                   {s1}
                 </div>
@@ -477,27 +826,35 @@ export default function Scoreboard() {
 
               <div className="row-bottom">
                 <div className="monkey-pad left-pad" id="monkey-pad-left">
-                  <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Vol.III" />
+                  <img src="/copa-logo.png" className="vol-logo" id="monkeyLeft" alt="Copa Primate" />
                 </div>
                 <span className="sub-title" id="display-subtitle">VOL.III</span>
                 <div className="monkey-pad right-pad" id="monkey-pad-right">
-                  <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Vol.III" />
+                  <img src="/copa-logo.png" className="vol-logo monkey-right" id="monkeyRight" alt="Copa Primate" />
                 </div>
               </div>
-              <div className="center-accent-bar"></div>
+
+              <div className="hud-center-meta">
+                <span className="hud-map-name">
+                  {matchData.map ? matchData.map.toUpperCase() : 'MAPA TÁCTICO'}
+                </span>
+                <span className="hud-round-counter">
+                  RONDA {matchData.round ?? 0}
+                </span>
+              </div>
+
+              <div className="center-accent-bar" />
             </div>
 
             {/* EQUIPO DERECHA */}
             <div className="team-glow-container team-right" id="glow-container-right">
               <div className="team-wrapper" id="wrapper-right">
-                <div className="leaf-deco leaf-1"></div>
-                <div className="leaf-deco leaf-2"></div>
                 <div
                   className="score-box"
                   id="score-right"
                   onClick={() => handleScoreChange('team2', 1)}
-                  onContextMenu={(e) => { e.preventDefault(); handleScoreChange('team2', -1); }}
-                  title="Clic izquierdo: +1 ronda | Clic derecho: -1 ronda"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                  title="Clic: +1 ronda"
                 >
                   {s2}
                 </div>
@@ -505,31 +862,36 @@ export default function Scoreboard() {
                   <div className="logo-box">
                     <img
                       id="img-right"
-                      src={matchData.team2?.logo || '/gorilas.jpg'}
+                      src={matchData.team2?.logo || '/logo2.png'}
                       alt="Logo B"
-                      onError={(e) => { e.target.src = '/gorilas.jpg'; }}
+                      onError={(e) => { e.target.src = '/logo2.png'; }}
                     />
                   </div>
-                  <span id="name-right" className="team-name">
-                    {matchData.team2?.name || 'SELECCIONAR'}
-                  </span>
+                  <div className="team-identity-block" style={{ alignItems: 'flex-end', textAlign: 'right' }}>
+                    <span id="name-right" className="team-name" title={matchData.team2?.name || 'SELECCIONAR'}>
+                      {matchData.team2?.name || 'SELECCIONAR'}
+                    </span>
+                    <span className={`team-side-indicator ${team2SideClass}`}>
+                      {team2Side}
+                    </span>
+                  </div>
                 </div>
-                <div className="map-wins-container" id="maps-right" title="Mapas ganados (Haz clic para sumar o restar)">
+                <div className="map-wins-container" id="maps-right" title="Mapas ganados (Haz clic para alternar)">
                   <div
-                    className={`map-win-dot ${(matchData.team2?.mapsWon || 0) > 2 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m2 > 2 ? 'active' : ''}`}
                     data-idx="2"
-                    onClick={() => handleBananaChange('team2', (matchData.team2?.mapsWon || 0) >= 3 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team2', m2 >= 3 ? -1 : 1)}
+                  />
                   <div
-                    className={`map-win-dot ${(matchData.team2?.mapsWon || 0) > 1 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m2 > 1 ? 'active' : ''}`}
                     data-idx="1"
-                    onClick={() => handleBananaChange('team2', (matchData.team2?.mapsWon || 0) >= 2 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team2', m2 >= 2 ? -1 : 1)}
+                  />
                   <div
-                    className={`map-win-dot ${(matchData.team2?.mapsWon || 0) > 0 ? 'active' : ''}`}
+                    className={`map-win-dot map-win-pip ${m2 > 0 ? 'active' : ''}`}
                     data-idx="0"
-                    onClick={() => handleBananaChange('team2', (matchData.team2?.mapsWon || 0) >= 1 ? -1 : 1)}
-                  >🍌</div>
+                    onClick={() => handleBananaChange('team2', m2 >= 1 ? -1 : 1)}
+                  />
                 </div>
                 <div className="match-point-badge" id="mp-right" style={{ display: isMatchPointT2 ? 'block' : 'none' }}>
                   MATCH POINT
@@ -539,30 +901,36 @@ export default function Scoreboard() {
           </div>
         </div>
 
-        {/* CONTENEDOR DE CONTROLES DE ADMINISTRACIÓN */}
+        {/* PANEL DE CONTROL DIRECTO "PARA TONTOS" (GRANDES BOTONES DE 1 CLIC) */}
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'grid',
+            gridTemplateColumns: '1fr auto 1fr',
             gap: '20px',
-            background: 'rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255, 179, 0, 0.25)',
-            borderRadius: '16px',
-            padding: '20px 24px',
-            marginTop: '10px',
+            background: 'rgba(8, 8, 11, 0.7)',
+            border: '1px solid rgba(192, 132, 252, 0.25)',
+            borderRadius: '14px',
+            padding: '20px',
+            alignItems: 'center',
           }}
         >
-          {/* LADO IZQUIERDO: EQUIPO 1 */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
-            <div style={{ flex: 1 }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                Equipo Izquierda:
-              </label>
+          {/* CONTROL EQUIPO 1 (IZQUIERDA) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <select
                 value={matchData.team1?.name}
                 onChange={(e) => handleSelectTeam('team1', e.target.value)}
-                style={{ background: '#0a1610', border: '1px solid var(--glass-border)', color: '#fff', padding: '6px 10px', borderRadius: '6px', fontSize: '14px', fontWeight: 700, width: '100%', outline: 'none' }}
+                style={{
+                  flex: 1,
+                  background: 'rgba(15, 25, 35, 0.9)',
+                  border: '1px solid rgba(0, 245, 212, 0.4)',
+                  color: '#fff',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  outline: 'none',
+                }}
               >
                 {teams.map((t) => (
                   <option key={t.name} value={t.name}>{t.name}</option>
@@ -571,81 +939,202 @@ export default function Scoreboard() {
               </select>
             </div>
 
-            {/* Botones +/- Izquierda */}
-            <div style={{ display: 'flex', gap: '4px' }}>
+            {/* Botones Grandes de Ronda para Equipo 1 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => handleScoreChange('team1', 1)}
-                style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid var(--success)', color: 'var(--success)', width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', fontWeight: 900, fontSize: '16px' }}
-                title="Sumar 1 ronda"
+                style={{
+                  height: '46px',
+                  background: 'linear-gradient(135deg, #00f5d4 0%, #0d9488 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#08080b',
+                  fontSize: '15px',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(0, 245, 212, 0.3)',
+                }}
               >
-                +
+                +1 Ronda ({s1})
               </button>
               <button
                 type="button"
                 onClick={() => handleScoreChange('team1', -1)}
-                style={{ background: 'rgba(255,70,85,0.15)', border: '1px solid var(--danger)', color: 'var(--danger)', width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', fontWeight: 900, fontSize: '16px' }}
-                title="Restar 1 ronda"
+                style={{
+                  height: '46px',
+                  background: 'rgba(255, 70, 85, 0.15)',
+                  border: '1.5px solid #ff4655',
+                  borderRadius: '8px',
+                  color: '#ff4655',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                -
+                -1 Ronda
+              </button>
+            </div>
+
+            {/* Controles de Mapa para Equipo 1 */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => requestAwardMap('team1')}
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  background: 'rgba(192, 132, 252, 0.2)',
+                  border: '1.5px solid #c084fc',
+                  borderRadius: '6px',
+                  color: '#c084fc',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                🏆 Gana Mapa ({m1})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBananaChange('team1', 1)}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+                title="Sumar mapa manual"
+              >
+                + Mapa
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBananaChange('team1', -1)}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+                title="Restar mapa manual"
+              >
+                - Mapa
               </button>
             </div>
           </div>
 
-          {/* CENTRO: RONDA */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', minWidth: '130px' }}>
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
-              Ronda Actual
+          {/* CENTRO: ACCIONES GLOBALES Y RONDA */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', minWidth: '160px' }}>
+            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 700 }}>
+              Control de Rondas
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 type="button"
                 onClick={() => setMatchData(prev => ({ ...prev, round: Math.max(0, (prev.round || 0) - 1) }))}
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--glass-border)', color: '#fff', width: '28px', height: '28px', borderRadius: '6px', cursor: 'pointer', fontWeight: 800 }}
-                title="Restar ronda"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 900,
+                }}
               >-</button>
-              <strong style={{ fontSize: '18px', color: '#ffb300', fontFamily: "'Rajdhani', sans-serif", minWidth: '26px', textAlign: 'center' }}>
+              <strong style={{ fontSize: '20px', color: '#00f5d4', fontFamily: 'JetBrains Mono, monospace', minWidth: '40px', textAlign: 'center' }}>
                 {matchData.round}
               </strong>
               <button
                 type="button"
                 onClick={() => setMatchData(prev => ({ ...prev, round: (prev.round || 0) + 1 }))}
-                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid var(--glass-border)', color: '#fff', width: '28px', height: '28px', borderRadius: '6px', cursor: 'pointer', fontWeight: 800 }}
-                title="Sumar ronda"
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 900,
+                }}
               >+</button>
+            </div>
+
+            {/* Acciones de Reseteo Protegidas */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginTop: '4px' }}>
+              <button
+                type="button"
+                onClick={requestResetRounds}
+                style={{
+                  padding: '6px 10px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  borderRadius: '6px',
+                  color: 'rgba(255,255,255,0.8)',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🔄 Reset Rondas (0-0)
+              </button>
+              <button
+                type="button"
+                onClick={requestResetFullMatch}
+                style={{
+                  padding: '6px 10px',
+                  background: 'rgba(255, 70, 85, 0.1)',
+                  border: '1px solid rgba(255, 70, 85, 0.3)',
+                  borderRadius: '6px',
+                  color: '#ff4655',
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                ⚠️ Reset Partido
+              </button>
             </div>
           </div>
 
-          {/* LADO DERECHO: EQUIPO 2 */}
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '14px', position: 'relative' }}>
-            {/* Botones +/- Derecha */}
-            <div style={{ display: 'flex', gap: '4px' }}>
-              <button
-                type="button"
-                onClick={() => handleScoreChange('team2', -1)}
-                style={{ background: 'rgba(255,70,85,0.15)', border: '1px solid var(--danger)', color: 'var(--danger)', width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', fontWeight: 900, fontSize: '16px' }}
-                title="Restar 1 ronda"
-              >
-                -
-              </button>
-              <button
-                type="button"
-                onClick={() => handleScoreChange('team2', 1)}
-                style={{ background: 'rgba(0,255,136,0.15)', border: '1px solid var(--success)', color: 'var(--success)', width: '32px', height: '32px', borderRadius: '6px', cursor: 'pointer', fontWeight: 900, fontSize: '16px' }}
-                title="Sumar 1 ronda"
-              >
-                +
-              </button>
-            </div>
-
-            <div style={{ flex: 1, textAlign: 'right' }}>
-              <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>
-                Equipo Derecha:
-              </label>
+          {/* CONTROL EQUIPO 2 (DERECHA) */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <select
                 value={matchData.team2?.name}
                 onChange={(e) => handleSelectTeam('team2', e.target.value)}
-                style={{ background: '#0a1610', border: '1px solid var(--glass-border)', color: '#fff', padding: '6px 10px', borderRadius: '6px', fontSize: '14px', fontWeight: 700, width: '100%', outline: 'none', textAlign: 'right' }}
+                style={{
+                  flex: 1,
+                  background: 'rgba(15, 25, 35, 0.9)',
+                  border: '1px solid rgba(255, 70, 85, 0.4)',
+                  color: '#fff',
+                  padding: '8px 10px',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  outline: 'none',
+                  textAlign: 'right',
+                }}
               >
                 {teams.map((t) => (
                   <option key={t.name} value={t.name}>{t.name}</option>
@@ -653,29 +1142,159 @@ export default function Scoreboard() {
                 {teams.length === 0 && <option value="Gorilas">Gorilas</option>}
               </select>
             </div>
+
+            {/* Botones Grandes de Ronda para Equipo 2 */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => handleScoreChange('team2', 1)}
+                style={{
+                  height: '46px',
+                  background: 'linear-gradient(135deg, #ff4655 0%, #b91c1c 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: '#ffffff',
+                  fontSize: '15px',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  boxShadow: '0 4px 12px rgba(255, 70, 85, 0.3)',
+                }}
+              >
+                +1 Ronda ({s2})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleScoreChange('team2', -1)}
+                style={{
+                  height: '46px',
+                  background: 'rgba(255, 70, 85, 0.15)',
+                  border: '1.5px solid #ff4655',
+                  borderRadius: '8px',
+                  color: '#ff4655',
+                  fontSize: '14px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                -1 Ronda
+              </button>
+            </div>
+
+            {/* Controles de Mapa para Equipo 2 */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => requestAwardMap('team2')}
+                style={{
+                  flex: 1,
+                  padding: '8px',
+                  background: 'rgba(192, 132, 252, 0.2)',
+                  border: '1.5px solid #c084fc',
+                  borderRadius: '6px',
+                  color: '#c084fc',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+              >
+                🏆 Gana Mapa ({m2})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBananaChange('team2', 1)}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+                title="Sumar mapa manual"
+              >
+                + Mapa
+              </button>
+              <button
+                type="button"
+                onClick={() => handleBananaChange('team2', -1)}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '6px',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                }}
+                title="Restar mapa manual"
+              >
+                - Mapa
+              </button>
+            </div>
           </div>
         </div>
 
         {/* AJUSTES RÁPIDOS INFERIORES */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
-
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '5px', fontWeight: 700 }}>
               ESTADO DEL ENCUENTRO
             </label>
-            <select
-              value={matchData.status}
-              onChange={(e) => setMatchData({ ...matchData, status: e.target.value })}
-              style={{ width: '100%', background: '#0a1610', border: '1px solid var(--glass-border)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
-            >
-              {STATUSES.map((s) => (
-                <option key={s.id} value={s.id}>{s.label}</option>
-              ))}
-            </select>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <select
+                value={matchData.status}
+                onChange={(e) => setMatchData({ ...matchData, status: e.target.value })}
+                style={{ flex: 1, background: '#0a0f16', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 10px', borderRadius: '6px', fontSize: '13px' }}
+              >
+                {STATUSES.map((s) => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={requestEndMatch}
+                style={{
+                  padding: '8px 12px',
+                  background: 'rgba(0, 255, 136, 0.15)',
+                  border: '1px solid #00ff88',
+                  color: '#00ff88',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🏁 Finalizar
+              </button>
+            </div>
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '11px', color: 'var(--text-muted)', marginBottom: '5px' }}>
+            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '5px', fontWeight: 700 }}>
+              MAPA EN DISPUTA
+            </label>
+            <input
+              type="text"
+              value={matchData.map || ''}
+              onChange={(e) => setMatchData({ ...matchData, map: e.target.value })}
+              placeholder="Ascent, Bind, Haven..."
+              style={{ width: '100%', background: '#0a0f16', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '11px', color: 'rgba(255,255,255,0.6)', marginBottom: '5px', fontWeight: 700 }}>
               NOTAS DEL CASTER (TWITCH)
             </label>
             <input
@@ -683,7 +1302,7 @@ export default function Scoreboard() {
               value={matchData.notes || ''}
               onChange={(e) => setMatchData({ ...matchData, notes: e.target.value })}
               placeholder="Comentarios de la ronda actual"
-              style={{ width: '100%', background: '#0a1610', border: '1px solid var(--glass-border)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
+              style={{ width: '100%', background: '#0a0f16', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '13px' }}
             />
           </div>
         </div>

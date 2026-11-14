@@ -24,7 +24,7 @@ const NAV = [
   { id: 'overview', label: 'Inicio & Novedades', icon: LayoutDashboard },
   { id: 'web-manager', label: 'Gestión Web Oficial 🌐', icon: Globe },
   { id: 'draw', label: 'Grupos & Sorteo de Liga', icon: Trophy },
-  { id: 'scoreboard', label: 'Marcador Oficial 🍌', icon: Radio },
+  { id: 'scoreboard', label: 'Marcador Oficial', icon: Radio },
   { id: 'map-roulette', label: 'Ruleta de Mapas', icon: Compass },
   { id: 'randomizer', label: 'Randomizer de Armas', icon: Dices },
   { id: 'overlays', label: 'Overlays para Stream', icon: Tv },
@@ -34,16 +34,7 @@ const NAV = [
   { id: 'announcements', label: 'Anuncios Oficiales', icon: Megaphone },
 ];
 
-function App() {
-  const currentPath = window.location.pathname;
-  if (currentPath.startsWith('/overlay')) {
-    if (currentPath.includes('roulette')) return <OverlayRoulette />;
-    if (currentPath.includes('matchup')) return <OverlayMatchup />;
-    if (currentPath.includes('ticker')) return <OverlayTicker />;
-    if (currentPath.includes('scoreboard')) return <OverlayScoreboard />;
-    return <OverlayLive />;
-  }
-
+function DashboardMain() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
   const [sessionExpired, setSessionExpired] = useState(false);
   const [twitchUser, setTwitchUser] = useState(() => getTwitchUser());
@@ -238,4 +229,16 @@ function App() {
   );
 }
 
-export default App;
+export default function App() {
+  const currentPath = window.location.pathname;
+  if (currentPath.startsWith('/overlay')) {
+    if (currentPath.includes('roulette')) return <OverlayRoulette />;
+    if (currentPath.includes('matchup')) return <OverlayMatchup />;
+    if (currentPath.includes('ticker')) return <OverlayTicker />;
+    if (currentPath.includes('scoreboard')) return <OverlayScoreboard />;
+    return <OverlayLive />;
+  }
+
+  return <DashboardMain />;
+}
+

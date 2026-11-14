@@ -179,8 +179,8 @@ export default function OverlayLive() {
               top: 0,
               bottom: 0,
               width: '40vw',
-              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 179, 0, 0.15) 25%, rgba(255, 255, 255, 0.5) 50%, rgba(76, 175, 80, 0.2) 75%, transparent 100%)',
-              boxShadow: '0 0 50px rgba(255, 179, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.8)',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(192, 132, 252, 0.2) 25%, rgba(255, 255, 255, 0.6) 50%, rgba(0, 245, 212, 0.25) 75%, transparent 100%)',
+              boxShadow: '0 0 50px rgba(192, 132, 252, 0.6), 0 0 20px rgba(0, 245, 212, 0.8)',
               animation: 'overlaySweepFlare 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards',
             }}
           />

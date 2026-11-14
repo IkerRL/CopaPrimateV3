@@ -4,6 +4,7 @@ import {
   RotateCcw, Sparkles, User, Award, CheckCircle2, ChevronDown, ChevronRight, Edit3, Crosshair, X
 } from 'lucide-react';
 import { apiFetch } from '../api';
+import ConfirmModal from './ConfirmModal';
 import './copaGrupos.css';
 
 const MAPS = ['Ascent', 'Bind', 'Haven', 'Split', 'Sunset', 'Lotus', 'Abyss', 'Icebox', 'Breeze', 'Fracture', 'Pearl'];
@@ -37,7 +38,7 @@ const DEFAULT_GRUPOS = {
     { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png", grupo: 'D' },
     { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png", grupo: 'D' },
     { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png", grupo: 'D' },
-    { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/gorilas.jpg", grupo: 'D' }
+    { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png", grupo: 'D' }
   ]
 };
 
@@ -124,6 +125,14 @@ export default function CopaGruposLiga() {
   const [saveStatus, setSaveStatus] = useState(null);
   const [statsMatch, setStatsMatch] = useState(null);
   const [savingStats, setSavingStats] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: 'Confirmar',
+    confirmStyle: 'warning',
+    onConfirm: null,
+  });
 
   const audioCtxRef = useRef(null);
 
@@ -233,6 +242,21 @@ export default function CopaGruposLiga() {
   const hideAll = () => {
     playClickSound();
     setRevealedTeams([]);
+  };
+
+  // Guardia de confirmación para el sorteo
+  const requestEjecutarSorteo = (animado = true) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '⚠️ ¿Ejecutar Nuevo Sorteo de Liga?',
+      message: 'Esta acción reorganizará los cruces de todos los grupos y sobrescribirá el calendario oficial del torneo.',
+      confirmText: 'Sortear Grupos',
+      confirmStyle: 'warning',
+      onConfirm: () => {
+        ejecutarSorteo(animado);
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
   };
 
   // Ejecución del Sorteo
@@ -369,6 +393,21 @@ export default function CopaGruposLiga() {
     } finally {
       setSavingStats(false);
     }
+  };
+
+  // Guardia de confirmación para enviar partido al marcador en directo
+  const requestSendToLiveScoreboard = (match) => {
+    setConfirmConfig({
+      isOpen: true,
+      title: '⚡ ¿Enviar al Marcador en Directo?',
+      message: `¿Deseas enviar el partido ${match.t1.name} vs ${match.t2.name} al Marcador Oficial en directo? Se sobrescribirá el partido actual en emisión.`,
+      confirmText: 'Enviar a Emisión',
+      confirmStyle: 'primary',
+      onConfirm: () => {
+        handleSendToLiveScoreboard(match);
+        setConfirmConfig(c => ({ ...c, isOpen: false }));
+      }
+    });
   };
 
   // Enviar partido directamente al marcador en directo
@@ -589,7 +628,7 @@ export default function CopaGruposLiga() {
                           src={team.logo}
                           className="copa-team-logo"
                           alt={team.name}
-                          onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                          onError={(e) => { e.target.src = '/logo1.png'; }}
                         />
                         <div className="copa-team-info">
                           <div className="copa-team-name">{team.name}</div>
@@ -624,7 +663,7 @@ export default function CopaGruposLiga() {
 
             <div
               className={`sorteo-ball-interactive ${isSpinningBall ? 'spinning' : ''}`}
-              onClick={() => !isSpinningBall && ejecutarSorteo(true)}
+              onClick={() => !isSpinningBall && requestEjecutarSorteo(true)}
               title="Haz clic para sortear"
             >
               🐒
@@ -635,7 +674,7 @@ export default function CopaGruposLiga() {
                 type="button"
                 className="btn-v-action"
                 disabled={isSpinningBall}
-                onClick={() => ejecutarSorteo(true)}
+                onClick={() => requestEjecutarSorteo(true)}
               >
                 <Shuffle size={16} /> {isSpinningBall ? 'SORTEANDO PARTIDOS...' : 'SORTEO ALEATORIO ANIMADO'}
               </button>
@@ -644,7 +683,7 @@ export default function CopaGruposLiga() {
                 type="button"
                 className="btn-v-secondary"
                 disabled={isSpinningBall}
-                onClick={() => ejecutarSorteo(false)}
+                onClick={() => requestEjecutarSorteo(false)}
               >
                 <Sparkles size={16} /> REORDENAR CRUCES CLÁSICOS
               </button>
@@ -771,7 +810,7 @@ export default function CopaGruposLiga() {
                                 src={team.logo}
                                 style={{ width: '18px', height: '18px', objectFit: 'contain' }}
                                 alt={team.name}
-                                onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                                onError={(e) => { e.target.src = '/logo1.png'; }}
                               />
                               <span style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>
                                 {team.name}
@@ -829,7 +868,7 @@ export default function CopaGruposLiga() {
                                   src={m.t1.logo}
                                   className="copa-match-logo"
                                   alt={m.t1.name}
-                                  onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                                  onError={(e) => { e.target.src = '/logo1.png'; }}
                                 />
                                 <span className="copa-match-name" title={m.t1.name}>
                                   {m.t1.name}
@@ -862,7 +901,7 @@ export default function CopaGruposLiga() {
                                   src={m.t2.logo}
                                   className="copa-match-logo"
                                   alt={m.t2.name}
-                                  onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+                                  onError={(e) => { e.target.src = '/logo1.png'; }}
                                 />
                               </div>
                             </div>
@@ -886,7 +925,7 @@ export default function CopaGruposLiga() {
                                 <button
                                   type="button"
                                   className="btn-send-live"
-                                  onClick={() => handleSendToLiveScoreboard(m)}
+                                  onClick={() => requestSendToLiveScoreboard(m)}
                                   title="Enviar al marcador oficial en directo"
                                 >
                                   ⚡ MARCADOR EN VIVO
@@ -915,7 +954,7 @@ export default function CopaGruposLiga() {
               src={zoomedTeam.logo}
               className="copa-zoom-logo"
               alt={zoomedTeam.name}
-              onError={(e) => { e.target.src = '/monkeys.jpg'; }}
+              onError={(e) => { e.target.src = '/logo1.png'; }}
             />
             <div className={`copa-group-badge ${zoomedTeam.grupo}`} style={{ position: 'static', display: 'inline-block', marginBottom: '8px' }}>
               GRUPO {zoomedTeam.grupo}
@@ -1228,6 +1267,16 @@ export default function CopaGruposLiga() {
           </div>
         </div>
       )}
+      {/* ConfirmModal para acciones del sorteo y envío a emisión */}
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        confirmStyle={confirmConfig.confirmStyle}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig(c => ({ ...c, isOpen: false }))}
+      />
     </div>
   );
 }

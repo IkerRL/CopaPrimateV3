@@ -1,30 +1,26 @@
 /* ===== VALORANT ROULETTE - CÓDIGO ORIGINAL MAPAS-MAIN (SCOPED) ===== */
 
 .val-roulette-root {
-    --v-red: #4CAF50;
-    --v-red-hover: #66BB6A;
-    --v-dark: #081C15;
-    --v-panel: rgba(26, 17, 12, 0.95);
-    --v-panel-border: #795548;
-    --v-cyan: #ffa000;
+    --v-red: #ff4655;
+    --v-red-hover: #ff7b88;
+    --v-dark: #08080b;
+    --v-panel: rgba(15, 25, 35, 0.95);
+    --v-panel-border: rgba(192, 132, 252, 0.3);
+    --v-cyan: #00f5d4;
+    --v-purple: #c084fc;
     --v-gray: #B0BEC5;
-    --v-white: #ece5db;
+    --v-white: #f5f5f7;
     --font-titles: 'Montserrat', 'Rajdhani', sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
 
-    /* TEMA TRIBAL MAKAKO (style2.css) */
-    --team-left-color: #2e7d32;
-    --team-right-color: #ffa000;
-    --accent-red: #ffa000;
-    --accent-red-hover: #ffb300;
-    --wood-color-light: #4e2e1a;
-    --wood-color-dark: #27140b;
-    --wood-border: #795548;
-    --stone-color: #212529;
-    --stone-border: #3c4043;
-    --panel-bg: rgba(26, 17, 12, 0.99);
-    --text-primary: #ece5db;
-    --skew-angle: -10deg;
+    /* FUSIÓN DESIGN TOKENS */
+    --team-left-color: #00f5d4;
+    --team-right-color: #ff4655;
+    --accent-red: #ff4655;
+    --accent-red-hover: #ff7b88;
+    --panel-bg: rgba(15, 25, 35, 0.95);
+    --text-primary: #f5f5f7;
+    --skew-angle: 0deg;
 
     position: relative;
     width: 100%;
@@ -36,7 +32,7 @@
     font-family: var(--font-body);
     overflow: hidden;
     color: var(--v-white);
-    background: linear-gradient(rgba(13, 38, 22, 0.75), rgba(8, 28, 15, 0.85)), url('/Gemini_Generated_Image_906nex906nex906n.png') no-repeat center center;
+    background: linear-gradient(135deg, #08080b 0%, #0f1923 50%, #08080b 100%);
     background-size: cover;
     box-sizing: border-box;
     border-radius: 12px;
@@ -157,7 +153,7 @@
 .val-roulette-root .lobby-content {
     width: 100%;
     background: var(--panel-bg);
-    border: 3px solid var(--wood-border);
+    border: 1.5px solid var(--v-panel-border);
     padding: 30px;
     position: relative;
     border-radius: 16px;
@@ -357,10 +353,10 @@
 
 .val-roulette-root .v-btn-play {
     font-family: var(--font-titles);
-    background: linear-gradient(135deg, var(--wood-color-light) 0%, var(--wood-color-dark) 100%);
-    border: 2px solid var(--wood-border);
-    border-bottom: 4px solid var(--accent-red);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, #7c3aed 0%, #c084fc 100%);
+    border: 2px solid rgba(192, 132, 252, 0.6);
+    border-bottom: 4px solid #00f5d4;
+    color: #ffffff;
     padding: 16px 90px;
     font-size: 28px;
     cursor: pointer;
@@ -368,9 +364,10 @@
     font-weight: 700;
     letter-spacing: 2px;
     position: relative;
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.65), inset 0 2px 4px rgba(255, 255, 255, 0.08);
-    transform: skew(var(--skew-angle));
+    box-shadow: 0 6px 20px rgba(192, 132, 252, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: none;
     outline: none;
+    border-radius: 6px;
 }
 
 .val-roulette-root .v-btn-play::before {
@@ -382,14 +379,14 @@
 }
 
 .val-roulette-root .v-btn-play:hover {
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
-    transform: skew(var(--skew-angle)) translateY(-1px);
-    border-bottom-color: var(--accent-red-hover);
+    box-shadow: 0 8px 25px rgba(192, 132, 252, 0.6);
+    transform: translateY(-2px);
+    border-bottom-color: #00f5d4;
 }
 
 .val-roulette-root .v-btn-play:active {
     transform: translateY(2px);
-    box-shadow: 0 4px 15px rgba(255, 179, 0, 0.3);
+    box-shadow: 0 4px 15px rgba(192, 132, 252, 0.3);
 }
 
 .val-roulette-root .v-btn-play:disabled {
@@ -571,14 +568,14 @@
 
 .val-roulette-root .reward-content {
     background: var(--v-panel);
-    border: 2px solid rgba(76, 175, 80, 0.5);
+    border: 2px solid rgba(0, 245, 212, 0.5);
     padding: 40px 60px;
     text-align: center;
     position: relative;
     max-width: 500px;
     width: 90%;
     border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(76, 175, 80, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 245, 212, 0.25);
     animation: valScaleUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1.15) forwards;
 }
 

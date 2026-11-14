@@ -23,9 +23,11 @@ export default function OverlayTicker() {
         const res = await fetch(`${API_URL}/public/live-match?overlay=1`);
         if (res.ok) {
           const data = await res.json();
-          if (mounted && data.match) setMatch(data.match);
+          if (mounted && data.match) {
+            setMatch(data.match);
+          }
         }
-      } catch (err) {}
+      } catch {}
     };
 
     fetchLive();
@@ -33,6 +35,8 @@ export default function OverlayTicker() {
     return () => {
       mounted = false;
       clearInterval(interval);
+      document.body.style.background = '';
+      document.documentElement.style.background = '';
     };
   }, []);
 
@@ -65,13 +69,13 @@ export default function OverlayTicker() {
       `}</style>
       <div style={{
         width: '100%',
-        background: 'linear-gradient(90deg, #101612 0%, #17241c 50%, #101612 100%)',
-        borderTop: '3px solid #ffb300',
+        background: 'linear-gradient(90deg, rgba(8, 8, 11, 0.98) 0%, rgba(15, 25, 35, 0.96) 50%, rgba(8, 8, 11, 0.98) 100%)',
+        borderTop: '2px solid #c084fc',
         padding: '12px 30px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        boxShadow: '0 -10px 25px rgba(0,0,0,0.85)',
+        boxShadow: '0 -10px 25px rgba(0,0,0,0.85), 0 -2px 15px rgba(192, 132, 252, 0.3)',
         boxSizing: 'border-box',
         transform: isVisible ? 'translateY(0)' : 'translateY(100%)',
         opacity: isVisible ? 1 : 0,
@@ -79,38 +83,46 @@ export default function OverlayTicker() {
         animation: 'tickerSlideUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards',
         willChange: 'transform, opacity',
       }}>
+        {/* Lado izquierdo con marca */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
           <span style={{
-            background: 'linear-gradient(90deg, #ffb300, #ff8c00)',
-            color: '#000',
+            background: 'linear-gradient(90deg, #c084fc, #00f5d4)',
+            color: '#08080b',
             fontWeight: 900,
             fontSize: '12px',
-            padding: '3px 10px',
+            padding: '4px 12px',
             borderRadius: '4px',
-            letterSpacing: '1px',
+            letterSpacing: '1.2px',
+            textTransform: 'uppercase',
           }}>
             COPA PRIMATE 2026
           </span>
 
           <span style={{ color: '#fff', fontSize: '15px', fontWeight: 700 }}>
-            🔴 <span style={{ color: '#ffb300' }}>{match.team1?.name || 'Equipo 1'}</span> ({match.team1?.score || 0}) vs <span style={{ color: '#ffb300' }}>{match.team2?.name || 'Equipo 2'}</span> ({match.team2?.score || 0})
+            🔴 <span style={{ color: '#00f5d4', fontWeight: 800 }}>{match.team1?.name || 'Equipo 1'}</span> (<span style={{ fontVariantNumeric: 'tabular-nums' }}>{match.team1?.score || 0}</span>) vs <span style={{ color: '#ff4655', fontWeight: 800 }}>{match.team2?.name || 'Equipo 2'}</span> (<span style={{ fontVariantNumeric: 'tabular-nums' }}>{match.team2?.score || 0}</span>)
             {match.map && match.map !== 'TBD' && (
-              <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: '12px', fontSize: '13px' }}>
-                · Mapa: {match.map}
+              <span style={{ color: '#c084fc', marginLeft: '14px', fontSize: '13px', fontWeight: 800, background: 'rgba(192, 132, 252, 0.12)', border: '1px solid rgba(192, 132, 252, 0.3)', padding: '2px 8px', borderRadius: '4px' }}>
+                MAPA: {match.map.toUpperCase()}
+              </span>
+            )}
+            {match.round > 0 && (
+              <span style={{ color: 'rgba(255,255,255,0.7)', marginLeft: '10px', fontSize: '13px' }}>
+                · RONDA {match.round}
               </span>
             )}
           </span>
         </div>
 
+        {/* Lado derecho con canal */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: '13px', fontWeight: 600 }}>
             EN DIRECTO EN:
           </span>
           <span style={{
-            color: '#9146ff',
-            background: 'rgba(145, 70, 255, 0.15)',
-            border: '1px solid rgba(145, 70, 255, 0.4)',
-            padding: '3px 10px',
+            color: '#c084fc',
+            background: 'rgba(192, 132, 252, 0.15)',
+            border: '1px solid rgba(192, 132, 252, 0.4)',
+            padding: '3px 12px',
             borderRadius: '6px',
             fontWeight: 800,
             fontSize: '13px',
@@ -122,4 +134,3 @@ export default function OverlayTicker() {
     </div>
   );
 }
-

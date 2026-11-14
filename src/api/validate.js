@@ -117,7 +117,7 @@ export function groups(g) {
 
 export function liveMatch(m) {
     if (!m || typeof m !== 'object') throw new ValidationError('Datos de partido inválidos');
-    const side = (t) => ({ ...matchTeam(t), score: num(t?.score, 0, 99, 0), mapsWon: num(t?.mapsWon, 0, 10, 0) });
+    const side = (t) => ({ ...matchTeam(t), score: num(t?.score, 0, 99, 0), mapsWon: num(t?.mapsWon, 0, 10, 0), side: str(t?.side, 20) });
     return {
         active: bool(m.active, true),
         status: str(m.status, 20) || 'LIVE',

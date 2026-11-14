@@ -94,8 +94,7 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   inset: 0;
   z-index: -3;
-  background: url('/Gemini_Generated_Image_906nex906nex906n.png') center / cover no-repeat;
-  transform: scale(1.05);
+  background: #08080b;
 }
 
 .bg-overlay {
@@ -103,9 +102,9 @@ h1, h2, h3, h4, h5, h6 {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse at 50% 0%, rgba(255, 179, 0, 0.12), transparent 55%),
-    radial-gradient(ellipse at 0% 100%, rgba(47, 191, 113, 0.12), transparent 50%),
-    linear-gradient(180deg, rgba(4, 13, 9, 0.72) 0%, rgba(4, 13, 9, 0.88) 60%, rgba(4, 13, 9, 0.96) 100%);
+    radial-gradient(ellipse at 50% 0%, rgba(192, 132, 252, 0.12), transparent 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(0, 245, 212, 0.10), transparent 50%),
+    linear-gradient(180deg, rgba(8, 8, 11, 0.75) 0%, rgba(8, 8, 11, 0.92) 60%, #08080b 100%);
 }
 
 .noise-overlay {

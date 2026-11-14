@@ -107,7 +107,7 @@ export default function MatchesPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     {(gTeams || []).map((t, idx) => (
                       <div key={idx} className="group-team-row">
-                        <img src={t.logo || '/monkeys.jpg'} alt="" className="group-team-logo" />
+                        <img src={t.logo || '/copa-logo.png'} alt="" className="group-team-logo" />
                         <span style={{ color: '#fff', fontSize: '15px', fontWeight: '600' }}>{t.name}</span>
                       </div>
                     ))}
@@ -208,7 +208,7 @@ export default function MatchesPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1, textAlign: 'center' }}>
                           <div style={{ position: 'relative' }}>
                             <img
-                              src={m.t1?.logo || '/monkeys.jpg'}
+                              src={m.t1?.logo || '/copa-logo.png'}
                               alt={m.t1?.name}
                               className={`match-team-crest ${winner === 1 ? 'winner' : ''}`}
                             />
@@ -239,7 +239,7 @@ export default function MatchesPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', flex: 1, textAlign: 'center' }}>
                           <div style={{ position: 'relative' }}>
                             <img
-                              src={m.t2?.logo || '/gorilas.jpg'}
+                              src={m.t2?.logo || '/copa-logo.png'}
                               alt={m.t2?.name}
                               className={`match-team-crest ${winner === 2 ? 'winner' : ''}`}
                             />
