@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Shuffle, Eye, EyeOff, Radio, Save, Play, 
-  RotateCcw, Sparkles, User, Award, CheckCircle2, ChevronDown, ChevronRight, Edit3, Crosshair, X
+  RotateCcw, Sparkles, User, Award, CheckCircle2, ChevronDown, ChevronRight, Edit3, Crosshair, X, Layers
 } from 'lucide-react';
 import { apiFetch } from '../api';
 import ConfirmModal from './ConfirmModal';
@@ -41,6 +41,53 @@ const DEFAULT_GRUPOS = {
     { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png", grupo: 'D' }
   ]
 };
+
+const BOMBOS_DATA = [
+  {
+    bombo: 1,
+    title: 'Bombo 1 · Cabezas de Serie',
+    color: '#00f5d4',
+    teams: [
+      { id: 'A1', name: "Thunder Buddies", jugadores: ["Brrokeen", "Pipe"], logo: "/logo3.png" },
+      { id: 'B1', name: "Entry Baiters", jugadores: ["レックウザ", "Militantedelsoe"], logo: "/logo5.png" },
+      { id: 'C1', name: "Sakura", jugadores: ["Gustavo", "Carlos"], logo: "/logo14.png" },
+      { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png" }
+    ]
+  },
+  {
+    bombo: 2,
+    title: 'Bombo 2',
+    color: '#c084fc',
+    teams: [
+      { id: 'A2', name: "Los Akrtona2", jugadores: ["Kira", "Serax"], logo: "/logo2.png" },
+      { id: 'B2', name: "Dream Team", jugadores: ["JoKker", "Pepardo"], logo: "/logo7.png" },
+      { id: 'C2', name: "Soul Resonance", jugadores: ["KrypT", "Charly"], logo: "/logo11.png" },
+      { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png" }
+    ]
+  },
+  {
+    bombo: 3,
+    title: 'Bombo 3',
+    color: '#ff4655',
+    teams: [
+      { id: 'A3', name: "Chuu-Chuu 100% MAX", jugadores: ["MakaQuillo", "Max"], logo: "/logo8.png" },
+      { id: 'B3', name: "Makaco Ninja-Pelocho", jugadores: ["MakacoNinja", "Iker 😎"], logo: "/logo6.png" },
+      { id: 'C3', name: "Stranger Picks", jugadores: ["TheDori", "Sotomi"], logo: "/logo9.png" },
+      { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png" }
+    ]
+  },
+  {
+    bombo: 4,
+    title: 'Bombo 4',
+    color: '#fbbf24',
+    teams: [
+      { id: 'A4', name: "REHENKARMACIÓN", jugadores: ["Satha", "Makflat"], logo: "/logo1.png" },
+      { id: 'B4', name: "Kizuna", jugadores: ["Alezita", "Sarix"], logo: "/logo4.png" },
+      { id: 'C4', name: "MARIIKS", jugadores: ["Acid", "Bru"], logo: "/logo10.png" },
+      { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png" }
+    ]
+  }
+];
 
 // Generador de cruces de fase de liga balanceados
 function generarCalendarioLiga(gruposData) {
@@ -133,6 +180,27 @@ export default function CopaGruposLiga() {
     confirmStyle: 'warning',
     onConfirm: null,
   });
+
+  const [drawingTeam, setDrawingTeam] = useState(null);
+  const [isAutoDrawing, setIsAutoDrawing] = useState(false);
+  const autoDrawTimerRef = useRef(null);
+
+  const broadcastSorteoState = (customGrupos = grupos, customDrawing = drawingTeam, spinning = isSpinningBall, customRevealed = revealedTeams, phase = activePhase) => {
+    apiFetch('/overlay-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'sorteo',
+        sorteo: {
+          activePhase: phase,
+          grupos: customGrupos,
+          revealedTeams: customRevealed,
+          drawingTeam: customDrawing,
+          isSpinning: spinning,
+        }
+      })
+    }).catch(() => {});
+  };
 
   const audioCtxRef = useRef(null);
 
@@ -228,62 +296,158 @@ export default function CopaGruposLiga() {
   // Controles de revelación
   const toggleReveal = (teamName) => {
     playClickSound();
-    setRevealedTeams(prev => 
-      prev.includes(teamName) ? prev.filter(t => t !== teamName) : [...prev, teamName]
-    );
+    setRevealedTeams(prev => {
+      const updated = prev.includes(teamName) ? prev.filter(t => t !== teamName) : [...prev, teamName];
+      broadcastSorteoState(grupos, drawingTeam, isSpinningBall, updated);
+      return updated;
+    });
   };
 
   const revealAll = () => {
     playClickSound();
     const allNames = Object.values(grupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, allNames);
   };
 
   const hideAll = () => {
     playClickSound();
     setRevealedTeams([]);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, []);
   };
 
-  // Guardia de confirmación para el sorteo
-  const requestEjecutarSorteo = (animado = true) => {
-    setConfirmConfig({
-      isOpen: true,
-      title: '⚠️ ¿Ejecutar Nuevo Sorteo de Liga?',
-      message: 'Esta acción reorganizará los cruces de todos los grupos y sobrescribirá el calendario oficial del torneo.',
-      confirmText: 'Sortear Grupos',
-      confirmStyle: 'warning',
-      onConfirm: () => {
-        ejecutarSorteo(animado);
-        setConfirmConfig(c => ({ ...c, isOpen: false }));
-      }
-    });
-  };
-
-  // Ejecución del Sorteo
-  const ejecutarSorteo = (animado = true) => {
-    playClickSound();
-    if (animado) {
-      setIsSpinningBall(true);
-      setTimeout(() => {
-        // Mezclar internamente equipos en los grupos manteniendo balance
-        const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
-        const nuevosGrupos = {
-          A: shuffle(grupos.A),
-          B: shuffle(grupos.B),
-          C: shuffle(grupos.C),
-          D: shuffle(grupos.D)
-        };
-        const nuevoCalendario = generarCalendarioLiga(nuevosGrupos);
-        setGrupos(nuevosGrupos);
-        setJornadas(nuevoCalendario);
-        setIsSpinningBall(false);
-        saveLigaState(nuevoCalendario);
-      }, 1500);
-    } else {
-      const nuevoCalendario = generarCalendarioLiga(grupos);
-      setJornadas(nuevoCalendario);
-      saveLigaState(nuevoCalendario);
+  // Extraer una bola de forma individual
+  const extraerSiguienteBola = () => {
+    if (isSpinningBall) return;
+    const currentTeams = Object.values(grupos).flat();
+    const count = currentTeams.length;
+    if (count >= 16) {
+      alert('¡El sorteo ya está completo con los 16 equipos asignados!');
+      return;
     }
+
+    playClickSound();
+    setIsSpinningBall(true);
+    broadcastSorteoState(grupos, null, true);
+
+    const potIdx = Math.floor(count / 4);
+    const targetGroup = ['A', 'B', 'C', 'D'][count % 4];
+    const potTeams = BOMBOS_DATA[potIdx].teams;
+    const available = potTeams.filter(t => !currentTeams.some(c => c.name === t.name));
+    const chosen = available[Math.floor(Math.random() * available.length)];
+    const teamWithGroup = { ...chosen, grupo: targetGroup, id: `${targetGroup}${potIdx + 1}` };
+
+    setTimeout(() => {
+      setIsSpinningBall(false);
+      setDrawingTeam({ ...teamWithGroup, targetGroup });
+      const nextGrupos = {
+        ...grupos,
+        [targetGroup]: [...(grupos[targetGroup] || []), teamWithGroup]
+      };
+      setGrupos(nextGrupos);
+      const nextRevealed = [...revealedTeams, chosen.name];
+      setRevealedTeams(nextRevealed);
+
+      if (count + 1 === 16) {
+        const cal = generarCalendarioLiga(nextGrupos);
+        setJornadas(cal);
+        saveLigaState(cal);
+      }
+
+      broadcastSorteoState(nextGrupos, { ...teamWithGroup, targetGroup }, false, nextRevealed);
+    }, 900);
+  };
+
+  // Sorteo Automático Paso a Paso
+  const toggleSorteoAutomatico = () => {
+    if (isAutoDrawing) {
+      if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
+      setIsAutoDrawing(false);
+      return;
+    }
+
+    const currentTeams = Object.values(grupos).flat();
+    let localGrupos = currentTeams.length >= 16 ? { A: [], B: [], C: [], D: [] } : { ...grupos };
+    if (currentTeams.length >= 16) {
+      setGrupos(localGrupos);
+      setRevealedTeams([]);
+    }
+
+    setIsAutoDrawing(true);
+    autoDrawTimerRef.current = setInterval(() => {
+      const allAssigned = Object.values(localGrupos).flat();
+      if (allAssigned.length >= 16) {
+        clearInterval(autoDrawTimerRef.current);
+        setIsAutoDrawing(false);
+        return;
+      }
+
+      const potIdx = Math.floor(allAssigned.length / 4);
+      const targetGroup = ['A', 'B', 'C', 'D'][allAssigned.length % 4];
+      const available = BOMBOS_DATA[potIdx].teams.filter(t => !allAssigned.some(c => c.name === t.name));
+      const chosen = available[Math.floor(Math.random() * available.length)];
+      const teamWithGroup = { ...chosen, grupo: targetGroup, id: `${targetGroup}${potIdx + 1}` };
+
+      localGrupos = {
+        ...localGrupos,
+        [targetGroup]: [...(localGrupos[targetGroup] || []), teamWithGroup]
+      };
+      setGrupos(localGrupos);
+      setDrawingTeam({ ...teamWithGroup, targetGroup });
+      setRevealedTeams(prev => [...prev, chosen.name]);
+
+      if (allAssigned.length + 1 === 16) {
+        const cal = generarCalendarioLiga(localGrupos);
+        setJornadas(cal);
+        saveLigaState(cal);
+        clearInterval(autoDrawTimerRef.current);
+        setIsAutoDrawing(false);
+      }
+
+      broadcastSorteoState(localGrupos, { ...teamWithGroup, targetGroup }, false);
+    }, 1100);
+  };
+
+  // Reiniciar Sorteo a 0
+  const reiniciarSorteo = () => {
+    if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
+    setIsAutoDrawing(false);
+    setIsSpinningBall(false);
+    setDrawingTeam(null);
+    const emptyGrupos = { A: [], B: [], C: [], D: [] };
+    setGrupos(emptyGrupos);
+    setRevealedTeams([]);
+    broadcastSorteoState(emptyGrupos, null, false, []);
+  };
+
+  // Sorteo instantáneo de todos los bombos
+  const ejecutarSorteoInstantaneo = () => {
+    playClickSound();
+    if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
+    setIsAutoDrawing(false);
+    setIsSpinningBall(false);
+
+    const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
+    const p1 = shuffle(BOMBOS_DATA[0].teams);
+    const p2 = shuffle(BOMBOS_DATA[1].teams);
+    const p3 = shuffle(BOMBOS_DATA[2].teams);
+    const p4 = shuffle(BOMBOS_DATA[3].teams);
+
+    const nuevosGrupos = {
+      A: [{ ...p1[0], grupo: 'A', id: 'A1' }, { ...p2[0], grupo: 'A', id: 'A2' }, { ...p3[0], grupo: 'A', id: 'A3' }, { ...p4[0], grupo: 'A', id: 'A4' }],
+      B: [{ ...p1[1], grupo: 'B', id: 'B1' }, { ...p2[1], grupo: 'B', id: 'B2' }, { ...p3[1], grupo: 'B', id: 'B3' }, { ...p4[1], grupo: 'B', id: 'B4' }],
+      C: [{ ...p1[2], grupo: 'C', id: 'C1' }, { ...p2[2], grupo: 'C', id: 'C2' }, { ...p3[2], grupo: 'C', id: 'C3' }, { ...p4[2], grupo: 'C', id: 'C4' }],
+      D: [{ ...p1[3], grupo: 'D', id: 'D1' }, { ...p2[3], grupo: 'D', id: 'D2' }, { ...p3[3], grupo: 'D', id: 'D3' }, { ...p4[3], grupo: 'D', id: 'D4' }],
+    };
+
+    const nuevoCalendario = generarCalendarioLiga(nuevosGrupos);
+    setGrupos(nuevosGrupos);
+    setJornadas(nuevoCalendario);
+    setDrawingTeam(null);
+    const allNames = Object.values(nuevosGrupos).flat().map(t => t.name);
+    setRevealedTeams(allNames);
+    saveLigaState(nuevoCalendario);
+    broadcastSorteoState(nuevosGrupos, null, false, allNames);
   };
 
   // Actualizar marcador de un partido en la fase de liga
@@ -521,9 +685,9 @@ export default function CopaGruposLiga() {
         </div>
         <h1 className="copa-title-main">COPA PRIMATE</h1>
         <div className="copa-vol-row">
-          <img src="/monito-der.png" className="copa-sticker-monkey" alt="Mono izq" onClick={playClickSound} />
-          <h2 className="copa-vol-text">VOL. III // FASE DE GRUPOS Y LIGA</h2>
-          <img src="/monito-izq.png" className="copa-sticker-monkey" alt="Mono der" onClick={playClickSound} />
+          <img src="/monito-izq.png" className="copa-sticker-monkey" alt="Mono izq" onClick={playClickSound} />
+          <h2 className="copa-vol-text">VOL. III</h2>
+          <img src="/monito-der.png" className="copa-sticker-monkey" alt="Mono der" onClick={playClickSound} />
         </div>
       </header>
 
@@ -649,101 +813,281 @@ export default function CopaGruposLiga() {
       )}
 
       {/* =========================================================
-          FASE 2: SORTEO DE LA FASE DE LIGA
+          FASE 2: SORTEO OFICIAL DE LA FASE DE LIGA (SISTEMA DE BOMBOS)
           ========================================================= */}
-      {activePhase === 'sorteo' && (
-        <div>
-          <div className="copa-sorteo-box">
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--omen-cyan)', letterSpacing: '2px', marginBottom: '8px' }}>
-              SORTEO OFICIAL DE LA FASE DE LIGA
-            </h3>
-            <p style={{ color: '#aaa', fontSize: '0.85rem', maxWidth: '600px', margin: '0 auto 20px' }}>
-              16 equipos distribuidos en 4 bombos/grupos. El sorteo genera 4 jornadas con 8 enfrentamientos cada una garantizando que todos jueguen 4 partidos.
-            </p>
+      {activePhase === 'sorteo' && (() => {
+        const allAssigned = Object.values(grupos).flat();
+        const totalCount = allAssigned.length;
+        const currentPotIdx = Math.min(3, Math.floor(totalCount / 4));
+        const nextGroup = totalCount < 16 ? ['A', 'B', 'C', 'D'][totalCount % 4] : 'COMPLETO';
 
-            <div
-              className={`sorteo-ball-interactive ${isSpinningBall ? 'spinning' : ''}`}
-              onClick={() => !isSpinningBall && requestEjecutarSorteo(true)}
-              title="Haz clic para sortear"
-            >
-              🐒
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className="btn-v-action"
-                disabled={isSpinningBall}
-                onClick={() => requestEjecutarSorteo(true)}
-              >
-                <Shuffle size={16} /> {isSpinningBall ? 'SORTEANDO PARTIDOS...' : 'SORTEO ALEATORIO ANIMADO'}
-              </button>
-
-              <button
-                type="button"
-                className="btn-v-secondary"
-                disabled={isSpinningBall}
-                onClick={() => requestEjecutarSorteo(false)}
-              >
-                <Sparkles size={16} /> REORDENAR CRUCES CLÁSICOS
-              </button>
-
-              <button
-                type="button"
-                className="btn-v-action"
-                style={{ background: 'linear-gradient(135deg, #1565c0, #0d47a1)', borderColor: '#29b6f6' }}
-                onClick={() => { playClickSound(); setActivePhase('liga'); }}
-              >
-                <Trophy size={16} /> VER CALENDARIO & RESULTADOS →
-              </button>
-            </div>
-          </div>
-
-          {/* Resumen de las 4 jornadas generadas */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-            {jornadas.map((jList, jIdx) => (
-              <div
-                key={jIdx}
-                style={{
-                  background: 'rgba(0,0,0,0.3)',
-                  border: '1px solid rgba(255,179,0,0.3)',
-                  borderRadius: '8px',
-                  padding: '12px'
-                }}
-              >
-                <div style={{ fontWeight: 900, color: '#ffb300', marginBottom: '8px', textAlign: 'center', fontSize: '0.9rem' }}>
-                  JORNADA {jIdx + 1} ({jList.length} PARTIDOS)
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* PANEL DE CONTROL SUPERIOR */}
+            <div className="copa-sorteo-box" style={{ padding: '24px 30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
+                <div>
+                  <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--omen-cyan)', letterSpacing: '2px', margin: 0 }}>
+                    SISTEMA DE SORTEO POR BOMBOS
+                  </h3>
+                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '4px' }}>
+                    16 equipos en 4 bombos asignados equitativamente a los Grupos A, B, C y D.
+                  </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  {jList.slice(0, 4).map((m, mIdx) => (
-                    <div
-                      key={mIdx}
-                      style={{
-                        fontSize: '0.72rem',
-                        background: 'rgba(255,255,255,0.03)',
-                        padding: '4px 6px',
-                        borderRadius: '4px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}
-                    >
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '42%' }}>{m.t1.name}</span>
-                      <span style={{ color: '#4caf50', fontWeight: 900 }}>VS</span>
-                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '42%', textAlign: 'right' }}>{m.t2.name}</span>
-                    </div>
-                  ))}
-                  {jList.length > 4 && (
-                    <div style={{ textAlign: 'center', fontSize: '0.7rem', color: '#888' }}>
-                      + {jList.length - 4} partidos más...
-                    </div>
-                  )}
+
+                {/* Badges de Estado */}
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0, 245, 212, 0.15)', border: '1px solid #00f5d4', padding: '6px 14px', borderRadius: '8px', color: '#00f5d4', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
+                    ASIGNADOS: {totalCount} / 16
+                  </div>
+                  <div style={{ background: 'rgba(192, 132, 252, 0.15)', border: '1px solid #c084fc', padding: '6px 14px', borderRadius: '8px', color: '#c084fc', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
+                    BOMBO ACTUAL: #{currentPotIdx + 1}
+                  </div>
+                  <div style={{ background: 'rgba(255, 70, 85, 0.15)', border: '1px solid #ff4655', padding: '6px 14px', borderRadius: '8px', color: '#ff4655', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
+                    DESTINO: GRUPO {nextGroup}
+                  </div>
                 </div>
               </div>
-            ))}
+
+              {/* BOLA INTERACTIVA / CAMARA DE EXTRACCIÓN */}
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '30px', margin: '20px 0', flexWrap: 'wrap' }}>
+                <div
+                  className={`sorteo-ball-interactive ${isSpinningBall ? 'spinning' : ''}`}
+                  onClick={() => !isSpinningBall && totalCount < 16 && extraerSiguienteBola()}
+                  title={totalCount < 16 ? "Haz clic para extraer bola" : "Sorteo completado"}
+                  style={{
+                    cursor: totalCount < 16 ? 'pointer' : 'default',
+                    opacity: totalCount >= 16 ? 0.7 : 1,
+                  }}
+                >
+                  {isSpinningBall ? '🎰' : '🐒'}
+                </div>
+
+                {/* Tarjeta de Equipo Extraído */}
+                {drawingTeam && (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(20, 26, 40, 0.95), rgba(10, 12, 20, 0.98))',
+                    border: '2px solid #00f5d4',
+                    borderRadius: '16px',
+                    padding: '16px 28px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '18px',
+                    boxShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 25px rgba(0, 245, 212, 0.35)',
+                    animation: 'scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  }}>
+                    <img
+                      src={drawingTeam.logo || '/logo1.png'}
+                      alt=""
+                      style={{ width: '64px', height: '64px', objectFit: 'contain' }}
+                      onError={(e) => { e.target.src = '/logo1.png'; }}
+                    />
+                    <div>
+                      <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 900, letterSpacing: '2px' }}>
+                        ¡BOLA EXTRAÍDA!
+                      </span>
+                      <h4 style={{ margin: '2px 0 6px', fontSize: '1.3rem', color: '#fff', fontWeight: 900 }}>
+                        {drawingTeam.name}
+                      </h4>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ background: '#00f5d4', color: '#08080b', fontSize: '11px', fontWeight: 900, padding: '2px 10px', borderRadius: '4px', letterSpacing: '1px' }}>
+                          ➔ ASIGNADO AL GRUPO {drawingTeam.targetGroup}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* BOTONERA DE ACCIÓN DEL SORTEO */}
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="btn-v-action"
+                  disabled={isSpinningBall || totalCount >= 16}
+                  onClick={extraerSiguienteBola}
+                  style={{
+                    background: 'linear-gradient(135deg, #00f5d4 0%, #0284c7 100%)',
+                    color: '#08080b',
+                    borderColor: '#00f5d4',
+                    fontWeight: 900,
+                    fontSize: '0.95rem',
+                    padding: '12px 24px',
+                  }}
+                >
+                  <Shuffle size={18} /> {isSpinningBall ? 'EXTRAYENDO...' : totalCount >= 16 ? 'SORTEO COMPLETO' : 'EXTRAER SIGUIENTE BOLA'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  disabled={isSpinningBall}
+                  onClick={toggleSorteoAutomatico}
+                  style={{ fontWeight: 800 }}
+                >
+                  <Play size={16} /> {isAutoDrawing ? 'DETENER AUTO-SORTEO' : 'SORTEO AUTOMÁTICO COMPLETO'}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  disabled={isSpinningBall || isAutoDrawing}
+                  onClick={ejecutarSorteoInstantaneo}
+                  style={{ fontWeight: 800 }}
+                >
+                  <Sparkles size={16} /> SORTEO INSTANTÁNEO
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  disabled={isSpinningBall || isAutoDrawing}
+                  onClick={reiniciarSorteo}
+                  style={{ borderColor: '#ff4655', color: '#ff4655', fontWeight: 800 }}
+                >
+                  <RotateCcw size={16} /> REINICIAR SORTEO
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-action"
+                  style={{ background: 'linear-gradient(135deg, #1565c0, #0d47a1)', borderColor: '#29b6f6' }}
+                  onClick={() => { playClickSound(); setActivePhase('liga'); }}
+                >
+                  <Trophy size={16} /> VER CALENDARIO & RESULTADOS →
+                </button>
+              </div>
+            </div>
+
+            {/* VISTA DE LOS 4 BOMBOS OFICIALES */}
+            <div>
+              <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Layers size={18} color="var(--omen-cyan)" /> BOMBOS DEL SORTEO OFICIAL (16 EQUIPOS)
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                {BOMBOS_DATA.map((b) => (
+                  <div
+                    key={b.bombo}
+                    style={{
+                      background: 'rgba(12, 16, 26, 0.7)',
+                      border: `1.5px solid ${b.color}55`,
+                      borderRadius: '12px',
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                      <span style={{ color: b.color, fontWeight: 900, fontSize: '0.85rem', letterSpacing: '1px' }}>
+                        {b.title}
+                      </span>
+                      <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 800 }}>
+                        {b.teams.filter(t => allAssigned.some(a => a.name === t.name)).length}/4
+                      </span>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {b.teams.map((t) => {
+                        const isDrawn = allAssigned.some((a) => a.name === t.name);
+                        const assignedTo = allAssigned.find((a) => a.name === t.name)?.grupo;
+                        return (
+                          <div
+                            key={t.name}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              background: isDrawn ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.04)',
+                              border: isDrawn ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '6px',
+                              padding: '6px 8px',
+                              opacity: isDrawn ? 0.45 : 1,
+                              transition: 'all 0.25s',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                              <img src={t.logo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
+                              <span style={{ fontSize: '12px', fontWeight: 800, color: isDrawn ? '#888' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {t.name}
+                              </span>
+                            </div>
+                            {isDrawn ? (
+                              <span style={{ fontSize: '10px', fontWeight: 900, color: '#00f5d4' }}>
+                                ✓ G-{assignedTo}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: '10px', color: '#ffb300', fontWeight: 900 }}>
+                                EN BOMBO
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* RESULTADO EN VIVO DE LOS 4 GRUPOS */}
+            <div>
+              <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Trophy size={18} color="#c084fc" /> ESTADO EN VIVO DE LOS GRUPOS (EMISIÓN OBS)
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+                {['A', 'B', 'C', 'D'].map((gKey) => {
+                  const tList = grupos[gKey] || [];
+                  return (
+                    <div
+                      key={gKey}
+                      className={`copa-group-col ${gKey}`}
+                      style={{ padding: '14px', borderRadius: '12px' }}
+                    >
+                      <div className="copa-group-header">
+                        <h4 className="copa-group-title" style={{ fontSize: '1.1rem' }}>GRUPO {gKey}</h4>
+                        <span style={{ fontSize: '11px', color: '#aaa', fontWeight: 800 }}>{tList.length}/4</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
+                        {[0, 1, 2, 3].map((slotIdx) => {
+                          const team = tList[slotIdx];
+                          return (
+                            <div
+                              key={slotIdx}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                background: team ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.02)',
+                                border: team ? '1px solid rgba(192, 132, 252, 0.3)' : '1px dashed rgba(255,255,255,0.1)',
+                                borderRadius: '6px',
+                                padding: '6px 10px',
+                                minHeight: '36px',
+                              }}
+                            >
+                              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 900 }}>#{slotIdx + 1}</span>
+                              {team ? (
+                                <>
+                                  <img src={team.logo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
+                                  <span style={{ fontSize: '12px', color: '#fff', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {team.name}
+                                  </span>
+                                </>
+                              ) : (
+                                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>Por sortear...</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* =========================================================
           FASE 3: LIGA SPLIT (TABLA DE CLASIFICACIÓN & JORNADAS)

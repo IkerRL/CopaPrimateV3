@@ -13,6 +13,7 @@ import OverlayMatchup from './pages/overlays/OverlayMatchup';
 import OverlayTicker from './pages/overlays/OverlayTicker';
 import OverlayRoulette from './pages/overlays/OverlayRoulette';
 import OverlayLive from './pages/overlays/OverlayLive';
+import OverlayGruposSorteo from './pages/overlays/OverlayGruposSorteo';
 
 const LINKS = [
   { to: '/', label: 'Inicio', icon: Home },
@@ -63,6 +64,7 @@ function App() {
     if (rawPath.includes('roulette')) return <OverlayRoulette />;
     if (rawPath.includes('matchup')) return <OverlayMatchup />;
     if (rawPath.includes('ticker')) return <OverlayTicker />;
+    if (rawPath.includes('sorteo') || rawPath.includes('grupos')) return <OverlayGruposSorteo />;
     return <OverlayLive />;
   }
 

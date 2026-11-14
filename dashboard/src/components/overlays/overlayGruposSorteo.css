@@ -1,0 +1,361 @@
+/* ==========================================================================
+   OVERLAY GRUPOS & SORTEO DE LIGA - VALORANT FUSIÓN
+   ========================================================================== */
+.overlay-sorteo-root {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    font-family: 'Outfit', 'Rajdhani', sans-serif;
+    user-select: none;
+    padding: 30px 40px;
+    box-sizing: border-box;
+    overflow: hidden;
+    position: relative;
+}
+
+.overlay-sorteo-container {
+    background: linear-gradient(135deg, rgba(16, 22, 36, 0.98) 0%, rgba(9, 10, 18, 0.99) 100%);
+    border: 1.5px solid rgba(192, 132, 252, 0.45);
+    border-radius: 24px;
+    padding: 32px 48px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(192, 132, 252, 0.22);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1380px;
+    height: 92vh;
+    max-height: 860px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
+    box-sizing: border-box;
+    animation: sorteoFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes sorteoFadeIn {
+    0% { opacity: 0; transform: scale(0.94) translateY(25px); filter: blur(8px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+}
+
+/* Encabezado */
+.sorteo-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 2;
+    margin-bottom: 20px;
+}
+
+.sorteo-monkey-img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.sorteo-monkey-left {
+    filter: drop-shadow(0 0 12px rgba(0, 245, 212, 0.6));
+    animation: monkeySwayLeft 3s ease-in-out infinite alternate;
+}
+
+.sorteo-monkey-right {
+    filter: drop-shadow(0 0 12px rgba(255, 70, 85, 0.6));
+    animation: monkeySwayRight 3s ease-in-out infinite alternate;
+}
+
+@keyframes monkeySwayLeft {
+    0% { transform: rotate(-4deg) scale(1); }
+    100% { transform: rotate(4deg) scale(1.08); }
+}
+
+@keyframes monkeySwayRight {
+    0% { transform: rotate(4deg) scale(1); }
+    100% { transform: rotate(-4deg) scale(1.08); }
+}
+
+.sorteo-header-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.sorteo-title-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #c084fc;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.sorteo-title-main {
+    margin: 0;
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(180deg, #ffffff 0%, #e9d5ff 60%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+    text-shadow: 0 0 25px rgba(192, 132, 252, 0.45);
+}
+
+.sorteo-phase-pill {
+    margin-top: 4px;
+    background: linear-gradient(90deg, rgba(0, 245, 212, 0.15) 0%, rgba(192, 132, 252, 0.2) 50%, rgba(255, 70, 85, 0.15) 100%);
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    border-radius: 20px;
+    padding: 3px 18px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffffff;
+    box-shadow: 0 0 15px rgba(192, 132, 252, 0.3);
+}
+
+/* Grid de Grupos (4 Columnas) */
+.grupos-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    width: 100%;
+    flex: 1;
+    z-index: 2;
+    overflow: hidden;
+}
+
+.grupo-col {
+    background: rgba(12, 16, 26, 0.7);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grupo-col.col-A {
+    border-color: rgba(0, 245, 212, 0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(0, 245, 212, 0.08);
+}
+.grupo-col.col-B {
+    border-color: rgba(192, 132, 252, 0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(192, 132, 252, 0.08);
+}
+.grupo-col.col-C {
+    border-color: rgba(255, 70, 85, 0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(255, 70, 85, 0.08);
+}
+.grupo-col.col-D {
+    border-color: rgba(251, 191, 36, 0.45);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 25px rgba(251, 191, 36, 0.08);
+}
+
+.grupo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.grupo-title {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.col-A .grupo-title { color: #00f5d4; text-shadow: 0 0 12px rgba(0, 245, 212, 0.5); }
+.col-B .grupo-title { color: #c084fc; text-shadow: 0 0 12px rgba(192, 132, 252, 0.5); }
+.col-C .grupo-title { color: #ff4655; text-shadow: 0 0 12px rgba(255, 70, 85, 0.5); }
+.col-D .grupo-title { color: #fbbf24; text-shadow: 0 0 12px rgba(251, 191, 36, 0.5); }
+
+.grupo-tag {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Lista de equipos dentro del grupo */
+.grupo-teams-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.team-slot-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.team-slot-card.revealed {
+    border-color: rgba(192, 132, 252, 0.35);
+    animation: teamCardFlip 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes teamCardFlip {
+    0% { transform: scale(0.92) translateY(8px); opacity: 0; }
+    100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.team-slot-card.hidden-slot {
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    opacity: 0.6;
+}
+
+.team-rank-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.4);
+    min-width: 16px;
+}
+
+.team-slot-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 3px;
+    object-fit: contain;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.team-slot-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+}
+
+.team-slot-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1px;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.team-slot-players {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+}
+
+.mystery-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.mystery-icon {
+    font-size: 18px;
+    animation: mysteryPulse 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes mysteryPulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    100% { transform: scale(1.2); opacity: 1; filter: drop-shadow(0 0 8px #c084fc); }
+}
+
+.mystery-text {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+/* SECCIÓN CENTRAL DE SORTEO (SI ESTÁ EN MODO SORTEO EN VIVO) */
+.sorteo-live-chamber {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: radial-gradient(circle, rgba(192, 132, 252, 0.15) 0%, transparent 70%);
+    border: 1px solid rgba(192, 132, 252, 0.4);
+    border-radius: 18px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 600px;
+}
+
+.sorteo-orb-spinning {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c084fc 0%, #00f5d4 100%);
+    box-shadow: 0 0 35px rgba(192, 132, 252, 0.8), inset 0 0 15px #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: orbSpin 2s infinite linear;
+}
+
+@keyframes orbSpin {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+.sorteo-destination-badge {
+    background: #00f5d4;
+    color: #08080b;
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 2px;
+    padding: 4px 16px;
+    border-radius: 20px;
+    box-shadow: 0 0 15px rgba(0, 245, 212, 0.6);
+}
+
+/* Barra inferior */
+.sorteo-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #00f5d4, #c084fc, #ff4655, #fbbf24);
+    box-shadow: 0 0 15px rgba(192, 132, 252, 0.8);
+}

@@ -226,30 +226,51 @@ export default function MapRoulette() {
     setIsMuted((prev) => !prev);
   };
 
-  // Controles de selección de mapas (idénticos a script.js)
+  // Sincronizar cambios de selección en tiempo real con el overlay
+  const broadcastPoolChange = (updatedPool) => {
+    const activeNames = updatedPool.filter((m) => m.active).map((m) => m.name);
+    apiFetch('/overlay-state', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: 'roulette',
+        roulette: {
+          state: 'lobby',
+          activeMaps: activeNames,
+          spinId: 0,
+        },
+      }),
+    }).catch(() => {});
+  };
+
+  // Controles de selección de mapas
   const selectAll = () => {
     if (isSpinningRef.current) return;
-    setMapPool((prev) => prev.map((m) => ({ ...m, active: true })));
+    const next = mapPool.map((m) => ({ ...m, active: true }));
+    setMapPool(next);
+    broadcastPoolChange(next);
   };
 
   const deselectAll = () => {
     if (isSpinningRef.current) return;
-    setMapPool((prev) => prev.map((m) => ({ ...m, active: false })));
+    const next = mapPool.map((m) => ({ ...m, active: false }));
+    setMapPool(next);
+    broadcastPoolChange(next);
   };
 
   const selectRotation = () => {
     if (isSpinningRef.current) return;
     const rotacionActual = ['Ascent', 'Breeze', 'Haven', 'Lotus', 'Summit', 'Sunset', 'Split'];
-    setMapPool((prev) =>
-      prev.map((m) => ({ ...m, active: rotacionActual.includes(m.name) }))
-    );
+    const next = mapPool.map((m) => ({ ...m, active: rotacionActual.includes(m.name) }));
+    setMapPool(next);
+    broadcastPoolChange(next);
   };
 
   const toggleMap = (name) => {
     if (isSpinningRef.current) return;
-    setMapPool((prev) =>
-      prev.map((m) => (m.name === name ? { ...m, active: !m.active } : m))
-    );
+    const next = mapPool.map((m) => (m.name === name ? { ...m, active: !m.active } : m));
+    setMapPool(next);
+    broadcastPoolChange(next);
   };
 
   // Tick checker con requestAnimationFrame (idéntico a script.js)

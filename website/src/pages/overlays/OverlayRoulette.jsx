@@ -86,7 +86,7 @@ const INITIAL_MAP_POOL = [
 const ITEM_WIDTH = 180;
 
 export default function OverlayRoulette() {
-  const [mapPool] = useState(INITIAL_MAP_POOL);
+  const [mapPool, setMapPool] = useState(INITIAL_MAP_POOL);
   const [viewState, setViewState] = useState('lobby'); // 'lobby' | 'roulette' | 'reward'
   const [winnerMap, setWinnerMap] = useState(null);
   const [rouletteItems, setRouletteItems] = useState([]);
@@ -341,6 +341,16 @@ export default function OverlayRoulette() {
           const rData = data?.roulette || {};
           const spinId = Number(rData.spinId) || 0;
 
+          // Sincronizar selección de mapas en el lobby
+          if (Array.isArray(rData.activeMaps)) {
+            setMapPool((prev) =>
+              prev.map((m) => ({
+                ...m,
+                active: rData.activeMaps.includes(m.name),
+              }))
+            );
+          }
+
           if (lastSpinId.current === 0) {
             lastSpinId.current = spinId;
             if (spinId > 0 && Date.now() - spinId < 9000 && !isSpinningRef.current) {
@@ -415,7 +425,7 @@ export default function OverlayRoulette() {
         </button>
       )}
 
-      {/* 1. LOBBY (Siempre en DOM para preservar medidas) */}
+      {/* 1. LOBBY (Solo muestra los mapas seleccionados en moderación) */}
       <div
         id="lobby"
         style={{
@@ -425,16 +435,23 @@ export default function OverlayRoulette() {
       >
         <div className="lobby-content" style={{ marginTop: '30px' }}>
           <div className="map-pool-section">
-            <h3 className="section-title">POOL DE MAPAS</h3>
+            <h3 className="section-title">POOL DE MAPAS OFICIAL</h3>
             <div id="map-pool" className="map-pool-grid">
-              {mapPool.map((map) => (
+              {mapPool.filter((m) => m.active).map((map, idx) => (
                 <div
                   key={map.name}
-                  className={`map-card ${map.active ? 'active' : ''}`}
+                  className="map-card active"
+                  style={{
+                    animation: 'mapCardEntrance 0.45s cubic-bezier(0.16, 1, 0.3, 1) both',
+                    animationDelay: `${idx * 0.05}s`,
+                  }}
                 >
                   <img className="map-card-img" src={map.url} alt={map.name} />
                   <div className="map-card-overlay">
                     <span className="map-card-name">{map.name}</span>
+                    <span style={{ fontSize: '10px', color: '#00f5d4', display: 'block', marginTop: '2px' }}>
+                      {map.location}
+                    </span>
                   </div>
                   <div className="map-card-checkbox" />
                 </div>

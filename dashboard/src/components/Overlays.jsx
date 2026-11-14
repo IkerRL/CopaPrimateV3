@@ -203,6 +203,7 @@ export default function Overlays() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
           {[
             { id: 'scoreboard', label: 'Marcador HUD', icon: '💎', desc: 'Puntuación y radianita' },
+            { id: 'sorteo', label: 'Grupos & Sorteo', icon: '🏆', desc: 'Overlay dedicado de grupos y liga' },
             { id: 'roulette', label: 'Ruleta de Mapas', icon: '🎰', desc: 'Sorteo animado en vivo' },
             { id: 'matchup', label: 'Pantalla Versus', icon: '⚔️', desc: 'Previa de los dos equipos' },
             { id: 'ticker', label: 'Ticker Inferior', icon: '📰', desc: 'Cinta inferior de noticias' },
@@ -456,8 +457,8 @@ export default function Overlays() {
 
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                 <span style={{ fontSize: '38px', fontWeight: 900, color: '#c084fc', fontFamily: "'Bebas Neue', sans-serif" }}>VS</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.5)', padding: '2px 10px', borderRadius: '6px' }}>
-                  {currentMatch.format || 'BO3'} · FASE DE LIGA
+                <span style={{ fontSize: '11px', color: '#00f5d4', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(0, 245, 212, 0.4)', padding: '3px 12px', borderRadius: '12px', fontWeight: 900, letterSpacing: '1px' }}>
+                  FASE DE GRUPOS
                 </span>
               </div>
 
@@ -518,10 +519,17 @@ export default function Overlays() {
           },
           {
             id: 'obs-vs',
-            title: 'Pantalla Versus (Cruce de Partida)',
-            desc: 'Pantalla de presentación de los dos equipos con logos y formato para las pausas y previa del encuentro.',
+            title: 'Pantalla Versus (Previa del Partido)',
+            desc: 'Presentación oficial de los dos equipos con logos, lados tácticos y fase del torneo para las previas.',
             res: '1920 x 1080 px',
             url: '/overlay/matchup',
+          },
+          {
+            id: 'obs-sorteo',
+            title: 'Sorteo & Grupos de Liga',
+            desc: 'Overlay dedicado para la emisión del sorteo de liga, bombos, presentación de los 4 grupos y seguimiento de las jornadas.',
+            res: '1920 x 1080 px',
+            url: '/overlay/sorteo',
           },
           {
             id: 'obs-ticker',

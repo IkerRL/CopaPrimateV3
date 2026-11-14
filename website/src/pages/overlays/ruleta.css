@@ -673,6 +673,19 @@
     50% { opacity: 1; }
 }
 
+@keyframes mapCardEntrance {
+    0% {
+        opacity: 0;
+        transform: translateY(22px) scale(0.92);
+        filter: blur(4px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px);
+    }
+}
+
 @media (max-width: 768px) {
     .val-roulette-root .main-title { font-size: 38px; }
     .val-roulette-root .subtitle { letter-spacing: 4px; }

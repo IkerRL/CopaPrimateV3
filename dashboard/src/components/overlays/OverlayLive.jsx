@@ -4,6 +4,7 @@ import OverlayScoreboard from './OverlayScoreboard';
 import OverlayRoulette from './OverlayRoulette';
 import OverlayMatchup from './OverlayMatchup';
 import OverlayTicker from './OverlayTicker';
+import OverlayGruposSorteo from './OverlayGruposSorteo';
 
 export default function OverlayLive() {
   const [serverMode, setServerMode] = useState('scoreboard');
@@ -90,6 +91,9 @@ export default function OverlayLive() {
         return <OverlayMatchup />;
       case 'ticker':
         return <OverlayTicker />;
+      case 'sorteo':
+      case 'grupos':
+        return <OverlayGruposSorteo />;
       case 'scoreboard':
       default:
         return <OverlayScoreboard />;

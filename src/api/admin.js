@@ -378,6 +378,7 @@ router.post('/overlay-state', (req, res) => {
             winnerMap: body.roulette?.winnerMap || prev.roulette?.winnerMap || null,
             activeMaps: Array.isArray(body.roulette?.activeMaps) ? body.roulette.activeMaps : (prev.roulette?.activeMaps || null),
         },
+        sorteo: body.sorteo !== undefined ? body.sorteo : (prev.sorteo || null),
         updatedAt: new Date().toISOString(),
     };
     saveOverlayState(updated);
