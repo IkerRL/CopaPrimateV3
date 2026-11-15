@@ -59,6 +59,7 @@ const STATUSES = [
 
 const OVERLAY_SCENES = [
   { id: 'scoreboard', label: 'Marcador HUD' },
+  { id: 'sorteo', label: '🏆 Grupos & Sorteo' },
   { id: 'matchup', label: '⚔️ Previa Versus' },
   { id: 'roulette', label: '🎰 Ruleta Mapas' },
   { id: 'ticker', label: '📰 Ticker Noticias' },
@@ -84,6 +85,8 @@ export default function Scoreboard() {
   const firstRender = useRef(true);
 
   const [showMatchupConfigModal, setShowMatchupConfigModal] = useState(false);
+  const [showSorteoPhaseModal, setShowSorteoPhaseModal] = useState(false);
+  const [selectedSorteoPhase, setSelectedSorteoPhase] = useState('presentacion');
   const [matchupModalConfig, setMatchupModalConfig] = useState({
     map: '',
     moment: 'previa',
@@ -212,6 +215,11 @@ export default function Scoreboard() {
       return;
     }
 
+    if (mode === 'sorteo') {
+      setShowSorteoPhaseModal(true);
+      return;
+    }
+
     setActiveOverlayMode(mode);
     try {
       await apiFetch(`/overlay-state`, {
@@ -222,6 +230,31 @@ export default function Scoreboard() {
       setFeedback({ type: 'success', text: `🎬 Escena activa en OBS cambiada a: ${mode.toUpperCase()}` });
     } catch {
       setFeedback({ type: 'error', text: 'Error al cambiar la escena en OBS' });
+    }
+  };
+
+  const handleConfirmSorteoPhase = async (phase) => {
+    const chosenPhase = phase || selectedSorteoPhase;
+    setSelectedSorteoPhase(chosenPhase);
+    setActiveOverlayMode('sorteo');
+    try {
+      const prevRes = await apiFetch('/overlay-state');
+      const prevData = prevRes.ok ? await prevRes.json() : {};
+      await apiFetch('/overlay-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'sorteo',
+          sorteo: {
+            ...(prevData.sorteo || {}),
+            activePhase: chosenPhase,
+          }
+        })
+      });
+      setFeedback({ type: 'success', text: `🎬 Escena OBS: GRUPOS & SORTEO (${chosenPhase.toUpperCase()})` });
+      setShowSorteoPhaseModal(false);
+    } catch {
+      setFeedback({ type: 'error', text: 'Error al cambiar la fase de sorteo en OBS' });
     }
   };
 
@@ -706,6 +739,125 @@ export default function Scoreboard() {
                 }}
               >
                 🚀 Transmitir a OBS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Selección de Fase para Grupos & Sorteo */}
+      {showSorteoPhaseModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(8, 8, 11, 0.88)',
+            backdropFilter: 'blur(10px)',
+            padding: '20px',
+            animation: 'modalBackdropFade 0.2s ease-out'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowSorteoPhaseModal(false);
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '560px',
+              backgroundColor: '#0c101a',
+              borderRadius: '16px',
+              border: '1.5px solid #00f5d4',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 245, 212, 0.25)',
+              padding: '28px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+              color: '#fff',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#00f5d4', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                🏆 ACTIVAR ESCENA: GRUPOS & SORTEO
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSorteoPhaseModal(false)}
+                style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '18px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+              Selecciona qué fase del módulo deseas mostrar en directo en la emisión de OBS:
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {[
+                { id: 'presentacion', label: '1. Presentación', desc: 'Cuatro grupos fijos A, B, C, D (Tiers)', icon: '🐒' },
+                { id: 'sorteo', label: '2. Sorteo en Vivo', desc: 'Animación de bombos y cruces', icon: '🎲' },
+                { id: 'clasificacion', label: '3. Clasificación', desc: 'Tabla general de posiciones (Top 1-16)', icon: '🏆' },
+                { id: 'jornadas', label: '4. Jornadas', desc: 'Calendario de 4 jornadas (32 partidos)', icon: '📅' },
+              ].map((p) => {
+                const isSelected = selectedSorteoPhase === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedSorteoPhase(p.id)}
+                    style={{
+                      padding: '14px',
+                      borderRadius: '10px',
+                      border: isSelected ? '2px solid #00f5d4' : '1px solid rgba(255,255,255,0.15)',
+                      background: isSelected ? 'rgba(0, 245, 212, 0.15)' : 'rgba(0,0,0,0.4)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      boxShadow: isSelected ? '0 0 16px rgba(0, 245, 212, 0.25)' : 'none',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <span style={{ fontSize: '20px' }}>{p.icon}</span>
+                    <strong style={{ color: isSelected ? '#00f5d4' : '#fff', fontSize: '13px' }}>{p.label}</strong>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>{p.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setShowSorteoPhaseModal(false)}
+                className="btn-v-secondary"
+                style={{ padding: '9px 16px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleConfirmSorteoPhase(selectedSorteoPhase)}
+                className="btn-v-action"
+                style={{
+                  background: 'linear-gradient(135deg, #00f5d4 0%, #00bbf9 100%)',
+                  borderColor: '#00f5d4',
+                  color: '#08080b',
+                  fontWeight: 900,
+                  padding: '9px 20px',
+                  cursor: 'pointer',
+                }}
+              >
+                🚀 Confirmar y Activar en Stream
               </button>
             </div>
           </div>

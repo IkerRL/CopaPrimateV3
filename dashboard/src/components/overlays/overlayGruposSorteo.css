@@ -96,6 +96,13 @@
     text-transform: uppercase;
 }
 
+.sorteo-copa-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.7));
+}
+
 .sorteo-title-main {
     margin: 0;
     font-family: 'Oswald', 'Rajdhani', sans-serif;
@@ -273,11 +280,25 @@
 
 .team-slot-players {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.65);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
     letter-spacing: 0.5px;
+}
+
+.team-slot-player-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.team-slot-player-rank-icon {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
 }
 
 .mystery-box {
@@ -641,6 +662,14 @@
     font-size: 14px;
 }
 
+.spotlight-player-rank-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    filter: drop-shadow(0 0 6px rgba(0, 245, 212, 0.4));
+    flex-shrink: 0;
+}
+
 .spotlight-player-name {
     font-size: 13px;
     font-weight: 800;
@@ -662,7 +691,7 @@
 }
 
 /* ==========================================================================
-   CHAMPIONS LEAGUE SORTEO HUD MODAL & MATRIX SCANNER (MILESTONE 3 / R2)
+   COPA PRIMATE SORTEO HUD MODAL & MATRIX SCANNER (MILESTONE 3 / R2)
    ========================================================================== */
 
 .champions-draw-modal {

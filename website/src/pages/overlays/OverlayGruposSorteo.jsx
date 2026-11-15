@@ -1,6 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { API_BASE } from '../../api';
 import './overlayGruposSorteo.css';
+import { getPlayerRank, getRankIconUrl, parseValorantTier, RANK_ICONS, PLAYER_RANKS } from '../../utils/valorantRanks';
+
+export { getPlayerRank, getRankIconUrl, parseValorantTier, RANK_ICONS, PLAYER_RANKS };
 
 export function getTeamTag(name) {
   if (!name) return 'TBD';
@@ -40,73 +43,6 @@ export function getTeamTag(name) {
 
   const alphanum = raw.replace(/[^a-zA-Z0-9]/g, '');
   return alphanum.slice(0, 3).toUpperCase() || 'TBD';
-}
-
-const PLAYER_RANKS = {
-  // Los Monos
-  "TenZ#NA1": "Diamante 2",
-  "Kyedae#0001": "Oro 3",
-  "ScreaM#1 tap": "Plata 3",
-  "TenZ": "Diamante 2",
-  "Kyedae": "Oro 3",
-  "ScreaM": "Plata 3",
-  // Gorilas
-  "Mixwell#G2": "Platino 2",
-  "Keloqz#FR": "Oro 3",
-  "Avova#123": "Plata 3",
-  "Mixwell": "Platino 2",
-  "Keloqz": "Oro 3",
-  "Avova": "Plata 3",
-  // Primates FC
-  "Knekro#123": "Oro 2",
-  "IlloJuan#Malaga": "Plata 2",
-  "Knekro": "Oro 2",
-  "IlloJuan": "Plata 2",
-  // Chimp Squad
-  "Boaster#FNC": "Plata 1",
-  "Derke#FNC": "Bronce 3",
-  "Boaster": "Plata 1",
-  "Derke": "Bronce 3",
-  // Roster extendido
-  "Maka": "Ascendente 2",
-  "Black": "Diamante 1",
-  "Saadhak": "Inmortal 3",
-  "Less": "Inmortal 2",
-  "Chronicle": "Inmortal 1",
-  "Leo": "Inmortal 1",
-  "aspas": "Radiante",
-  "cauanzin": "Inmortal 2",
-  "Satha": "Platino 3",
-  "Makflat": "Oro 3",
-  "Alezita": "Platino 1",
-  "Sarix": "Oro 2",
-  "Acid": "Plata 3",
-  "Bru": "Oro 1",
-  "Gustavo": "Diamante 3",
-  "Carlos": "Platino 2",
-  "KrypT": "Diamante 1",
-  "Charly": "Platino 3",
-  "TheDori": "Platino 2",
-  "Sotomi": "Oro 3",
-};
-
-function getPlayerRank(player, teamGroup) {
-  if (typeof player === 'object' && player) {
-    if (player.currentRank) return player.currentRank;
-    if (player.rank) return player.rank;
-    if (player.name && PLAYER_RANKS[player.name]) return PLAYER_RANKS[player.name];
-  }
-  const nameStr = typeof player === 'string' ? player : (player?.name || '');
-  if (PLAYER_RANKS[nameStr]) return PLAYER_RANKS[nameStr];
-  for (const [k, v] of Object.entries(PLAYER_RANKS)) {
-    if (nameStr.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(nameStr.toLowerCase())) {
-      return v;
-    }
-  }
-  if (teamGroup === 'A') return 'Inmortal 1';
-  if (teamGroup === 'B') return 'Ascendente 2';
-  if (teamGroup === 'C') return 'Diamante 2';
-  return 'Platino 2';
 }
 
 const DEFAULT_GRUPOS = {
@@ -269,7 +205,7 @@ export default function OverlayGruposSorteo() {
     };
   }, []);
 
-  // Local animation clock loop during Champions League animation
+  // Local animation clock loop during Copa Primate draw animation
   useEffect(() => {
     if (!championsAnimation) return;
     const timer = setInterval(() => {
@@ -287,10 +223,91 @@ export default function OverlayGruposSorteo() {
     ? serverStandings
     : computeStandings(grupos, jornadas);
 
+  const renderGruposGrid = () => (
+    <div className="grupos-grid">
+      {groupKeys.map((gKey) => {
+        const teamList = grupos[gKey] || [];
+        const tierName = gKey === 'A' ? 'TIER 1' : gKey === 'B' ? 'TIER 2' : gKey === 'C' ? 'TIER 3' : 'TIER 4';
+
+        return (
+          <div key={gKey} className={`grupo-col col-${gKey}`}>
+            <div className="grupo-header">
+              <span className="grupo-title">GRUPO {gKey}</span>
+              <span className="grupo-tag">{tierName} · 4 ESCUADRAS</span>
+            </div>
+
+            <div className="grupo-teams-list">
+              {teamList.map((t, idx) => {
+                const revealed = isTeamRevealed(t.name);
+                const tTag = getTeamTag(t.name);
+
+                return (
+                  <div
+                    key={t.id || idx}
+                    className={`team-slot-card ${revealed ? 'revealed' : 'hidden-slot'}`}
+                  >
+                    <span className="team-rank-num">#{idx + 1}</span>
+
+                    {revealed ? (
+                      <>
+                        <img
+                          src={t.logo || '/logo1.png'}
+                          className="team-slot-logo"
+                          alt={t.name}
+                          onError={(e) => { e.target.src = '/logo1.png'; }}
+                        />
+                        <div className="team-slot-info">
+                          <span className="team-slot-tag" title={t.name}>
+                            {tTag} · {t.name}
+                          </span>
+                          {Array.isArray(t.jugadores) && t.jugadores.length > 0 && (
+                            <div className="team-slot-players">
+                              {t.jugadores.map((j, jIdx) => {
+                                const pName = typeof j === 'string' ? j : (j?.name || `J${jIdx + 1}`);
+                                const pRank = getPlayerRank(j, gKey);
+                                const iconUrl = getRankIconUrl(pRank, gKey);
+                                return (
+                                  <span key={jIdx} className="team-slot-player-item" title={`${pName} (${pRank})`}>
+                                    <img
+                                      src={iconUrl}
+                                      alt={pRank}
+                                      className="team-slot-player-rank-icon"
+                                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                    />
+                                    <span className="team-slot-player-name">{pName}</span>
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="mystery-card-back mystery-box">
+                        <div className="mystery-card-back-inner">
+                          <span style={{ fontSize: '20px' }}>🐒</span>
+                          <div className="mystery-card-back-text-col">
+                            <span className="mystery-card-back-label">BOMBO {idx + 1}</span>
+                            <span className="mystery-card-back-status">OCULTO</span>
+                          </div>
+                        </div>
+                        <div className="mystery-shimmer" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+
   return (
     <div className="overlay-sorteo-root">
       <div className="overlay-sorteo-container">
-        {/* ENCABEZADO OFICIAL (SIN LOGO DE LA COPA AL LADO DEL TÍTULO) */}
+        {/* ENCABEZADO OFICIAL CON LOGO DE COPA PRIMATE */}
         <div className="sorteo-header">
           <img
             src="/monito-izq.png"
@@ -300,6 +317,12 @@ export default function OverlayGruposSorteo() {
 
           <div className="sorteo-header-center">
             <div className="sorteo-title-top">
+              <img
+                src="/copa-logo.png"
+                className="sorteo-copa-logo"
+                alt="Copa Primate"
+                onError={(e) => { e.currentTarget.src = '/logo1.png'; }}
+              />
               <span>COPA PRIMATE // VOL. III</span>
             </div>
             <h1 className="sorteo-title-main">
@@ -313,7 +336,7 @@ export default function OverlayGruposSorteo() {
             </h1>
             <div className="sorteo-phase-pill">
               {activePhase === 'sorteo'
-                ? 'BOMBOS & ASIGNACIÓN EN DIRECTO · FORMATO CHAMPIONS'
+                ? 'BOMBOS & ASIGNACIÓN EN DIRECTO · SORTEO DE LIGA'
                 : activePhase === 'clasificacion'
                 ? 'FASE DE LIGA REGULAR · TOP 8 CLASIFICA A PLAYOFFS'
                 : activePhase === 'jornadas' || activePhase === 'liga'
@@ -329,37 +352,49 @@ export default function OverlayGruposSorteo() {
           />
         </div>
 
-        {/* CÁMARA DE SORTEO EN VIVO (CUANDO ESTÁ EN SORTEO O GIRANDO) */}
-        {(activePhase === 'sorteo' && (isSpinning || drawingTeam)) && (
-          <div className="sorteo-live-chamber">
-            <div className="sorteo-orb-spinning">
-              {drawingTeam ? '🐒' : '🎰'}
-            </div>
-            {drawingTeam ? (
-              <div style={{ textAlign: 'center' }}>
-                <span style={{ fontSize: '12px', color: '#c084fc', letterSpacing: '2px', fontWeight: 900 }}>
-                  EQUIPO SELECCIONADO:
-                </span>
-                <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '1px' }}>
-                  {drawingTeam.name}
-                </div>
-                {drawingTeam.targetGroup && (
-                  <div className="sorteo-destination-badge" style={{ marginTop: '6px' }}>
-                    GRUPO {drawingTeam.targetGroup}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div style={{ fontSize: '13px', color: '#00f5d4', fontWeight: 900, letterSpacing: '2px' }}>
-                {isSpinning ? 'BUSCANDO RIVALES EN EL QUANTUM ENGINE...' : 'ESPERANDO SELECCIÓN DE EQUIPO...'}
-              </div>
-            )}
+        {/* FASE 1: PRESENTACIÓN DE GRUPOS */}
+        {activePhase === 'presentacion' && (
+          <div key={activePhase} className="phase-content-wrapper">
+            {renderGruposGrid()}
           </div>
         )}
 
-        {/* FASE: CLASIFICACIÓN GENERAL (TABLA 1-16 STREAM) */}
+        {/* FASE 2: CÁMARA Y GRUPOS DEL SORTEO EN VIVO */}
+        {activePhase === 'sorteo' && (
+          <div key={activePhase} className="phase-content-wrapper">
+            {(isSpinning || drawingTeam) && (
+              <div className="sorteo-live-chamber">
+                <div className="sorteo-orb-spinning">
+                  {drawingTeam ? '🐒' : '🎰'}
+                </div>
+                {drawingTeam ? (
+                  <div style={{ textAlign: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#c084fc', letterSpacing: '2px', fontWeight: 900 }}>
+                      EQUIPO SELECCIONADO:
+                    </span>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '1px' }}>
+                      {drawingTeam.name}
+                    </div>
+                    {drawingTeam.targetGroup && (
+                      <div className="sorteo-destination-badge" style={{ marginTop: '6px' }}>
+                        GRUPO {drawingTeam.targetGroup}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '13px', color: '#00f5d4', fontWeight: 900, letterSpacing: '2px' }}>
+                    {isSpinning ? 'BUSCANDO RIVALES EN EL QUANTUM ENGINE...' : 'ESPERANDO SELECCIÓN DE EQUIPO...'}
+                  </div>
+                )}
+              </div>
+            )}
+            {renderGruposGrid()}
+          </div>
+        )}
+
+        {/* FASE 3: CLASIFICACIÓN GENERAL (TABLA 1-16 STREAM) */}
         {activePhase === 'clasificacion' && (
-          <div className="phase-content-wrapper">
+          <div key={activePhase} className="phase-content-wrapper">
             <div className="sorteo-standings-container">
               <div className="sorteo-standings-header-row">
                 <div className="sorteo-standings-title">
@@ -440,9 +475,9 @@ export default function OverlayGruposSorteo() {
           </div>
         )}
 
-        {/* FASE: JORNADAS / CALENDARIO (4 COLUMNAS DE PARTIDOS) */}
+        {/* FASE 4: JORNADAS / CALENDARIO (4 COLUMNAS DE PARTIDOS) */}
         {(activePhase === 'jornadas' || (activePhase === 'liga' && jornadas && jornadas.length > 0)) && (
-          <div className="phase-content-wrapper" style={{
+          <div key={activePhase} className="phase-content-wrapper" style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '16px',
@@ -523,73 +558,10 @@ export default function OverlayGruposSorteo() {
           </div>
         )}
 
-        {/* FASE: PRESENTACIÓN DE GRUPOS (A, B, C, D) O MODO DEFAULT */}
-        {(activePhase === 'presentacion' || (activePhase !== 'clasificacion' && activePhase !== 'jornadas' && activePhase !== 'liga')) && (
-          <div className="grupos-grid">
-            {groupKeys.map((gKey) => {
-              const teamList = grupos[gKey] || [];
-              const tierName = gKey === 'A' ? 'TIER 1' : gKey === 'B' ? 'TIER 2' : gKey === 'C' ? 'TIER 3' : 'TIER 4';
-
-              return (
-                <div key={gKey} className={`grupo-col col-${gKey}`}>
-                  <div className="grupo-header">
-                    <span className="grupo-title">GRUPO {gKey}</span>
-                    <span className="grupo-tag">{tierName} · 4 ESCUADRAS</span>
-                  </div>
-
-                  <div className="grupo-teams-list">
-                    {teamList.map((t, idx) => {
-                      const revealed = isTeamRevealed(t.name);
-                      const tTag = getTeamTag(t.name);
-                      const playersStr = Array.isArray(t.jugadores)
-                        ? t.jugadores.map(j => typeof j === 'string' ? j : j?.name).join(' · ')
-                        : '';
-
-                      return (
-                        <div
-                          key={t.id || idx}
-                          className={`team-slot-card ${revealed ? 'revealed' : 'hidden-slot'}`}
-                        >
-                          <span className="team-rank-num">#{idx + 1}</span>
-
-                          {revealed ? (
-                            <>
-                              <img
-                                src={t.logo || '/logo1.png'}
-                                className="team-slot-logo"
-                                alt={t.name}
-                                onError={(e) => { e.target.src = '/logo1.png'; }}
-                              />
-                              <div className="team-slot-info">
-                                <span className="team-slot-tag" title={t.name}>
-                                  {tTag} · {t.name}
-                                </span>
-                                {playersStr && (
-                                  <span className="team-slot-players" title={playersStr}>
-                                    {playersStr}
-                                  </span>
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <div className="mystery-card-back mystery-box">
-                              <div className="mystery-card-back-inner">
-                                <span style={{ fontSize: '20px' }}>🐒</span>
-                                <div className="mystery-card-back-text-col">
-                                  <span className="mystery-card-back-label">BOMBO {idx + 1}</span>
-                                  <span className="mystery-card-back-status">OCULTO</span>
-                                </div>
-                              </div>
-                              <div className="mystery-shimmer" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
+        {/* MODO DEFAULT (FALLBACK) */}
+        {activePhase !== 'presentacion' && activePhase !== 'sorteo' && activePhase !== 'clasificacion' && activePhase !== 'jornadas' && activePhase !== 'liga' && (
+          <div key="default" className="phase-content-wrapper">
+            {renderGruposGrid()}
           </div>
         )}
 
@@ -633,10 +605,16 @@ export default function OverlayGruposSorteo() {
                   ).map((jug, jIdx) => {
                     const pName = typeof jug === 'string' ? jug : (jug?.name || `Jugador ${jIdx + 1}`);
                     const pRank = getPlayerRank(jug, spotlightTeam.grupo || 'A');
+                    const pRankIcon = getRankIconUrl(pRank, spotlightTeam.grupo || 'A');
 
                     return (
                       <div key={jIdx} className="spotlight-player-card">
-                        <span className="spotlight-player-icon">🎮</span>
+                        <img
+                          src={pRankIcon}
+                          alt={pRank}
+                          className="spotlight-player-rank-icon"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
                         <span className="spotlight-player-name">{pName}</span>
                         <span className="spotlight-player-rank">{pRank}</span>
                       </div>
@@ -648,7 +626,7 @@ export default function OverlayGruposSorteo() {
           </div>
         )}
 
-        {/* CHAMPIONS LEAGUE DRAW HUD OVERLAY (SORTEO DE RIVALES EN VIVO) */}
+        {/* COPA PRIMATE DRAW HUD OVERLAY (SORTEO DE RIVALES EN VIVO) */}
         {championsAnimation && (
           <div className="champions-draw-modal">
             {(() => {
@@ -679,7 +657,7 @@ export default function OverlayGruposSorteo() {
                     <div className="champions-hud-title-wrap">
                       <span className="champions-stars-icon">⭐</span>
                       <div>
-                        <div className="champions-hud-subtitle">CHAMPIONS LEAGUE // SORTEO DE ENFRENTAMIENTOS</div>
+                        <div className="champions-hud-subtitle">COPA PRIMATE // SORTEO DE LIGA</div>
                         <h2 className="champions-hud-title">COPA PRIMATE DRAW SYSTEM</h2>
                       </div>
                     </div>

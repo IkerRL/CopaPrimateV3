@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { 
   Trophy, Shuffle, Eye, EyeOff, Radio, Save, Play, 
-  RotateCcw, Sparkles, User, Award, CheckCircle2, ChevronDown, ChevronRight, Edit3, Crosshair, X, Layers
+  RotateCcw, Sparkles, Award, CheckCircle2, ChevronDown, ChevronRight, Edit3, Crosshair, X, Layers
 } from 'lucide-react';
 import { apiFetch } from '../api';
 import ConfirmModal from './ConfirmModal';
 import './copaGrupos.css';
 import './overlays/overlayGruposSorteo.css';
 import { getTeamTag } from './overlays/OverlayGruposSorteo';
+import { getPlayerRank, getRankIconUrl } from '../utils/valorantRanks';
 
 const MAPS = ['Ascent', 'Bind', 'Haven', 'Split', 'Sunset', 'Lotus', 'Abyss', 'Icebox', 'Breeze', 'Fracture', 'Pearl'];
 
@@ -204,7 +205,7 @@ export default function CopaGruposLiga() {
   const [isAutoDrawing, setIsAutoDrawing] = useState(false);
   const autoDrawTimerRef = useRef(null);
 
-  // Milestone 3: Sorteo Champions League State
+  // Milestone 3: Sorteo Copa Primate State
   const [selectedTeamForDraw, setSelectedTeamForDraw] = useState(null);
   const [drawnTeamNames, setDrawnTeamNames] = useState([]);
   const [championsModalState, setChampionsModalState] = useState(null);
@@ -411,7 +412,7 @@ export default function CopaGruposLiga() {
     return matchups;
   };
 
-  // Disparador del Sorteo Champions League interactivo y sincronizado
+  // Disparador del Sorteo Copa Primate interactivo y sincronizado
   const triggerChampionsSorteo = (team) => {
     if (!team) return;
     playClickSound();
@@ -670,98 +671,6 @@ export default function CopaGruposLiga() {
     playClickSound();
     setRevealedTeams([]);
     broadcastSorteoState(grupos, drawingTeam, isSpinningBall, [], activePhase, spotlightTeam);
-  };
-
-  // Extraer una bola de forma individual
-  const extraerSiguienteBola = () => {
-    if (isSpinningBall) return;
-    const currentTeams = Object.values(grupos).flat();
-    const count = currentTeams.length;
-    if (count >= 16) {
-      alert('¡El sorteo ya está completo con los 16 equipos asignados!');
-      return;
-    }
-
-    playClickSound();
-    setIsSpinningBall(true);
-    broadcastSorteoState(grupos, null, true);
-
-    const potIdx = Math.floor(count / 4);
-    const targetGroup = ['A', 'B', 'C', 'D'][count % 4];
-    const potTeams = BOMBOS_DATA[potIdx].teams;
-    const available = potTeams.filter(t => !currentTeams.some(c => c.name === t.name));
-    const chosen = available[Math.floor(Math.random() * available.length)];
-    const teamWithGroup = { ...chosen, grupo: targetGroup, id: `${targetGroup}${potIdx + 1}` };
-
-    setTimeout(() => {
-      setIsSpinningBall(false);
-      setDrawingTeam({ ...teamWithGroup, targetGroup });
-      const nextGrupos = {
-        ...grupos,
-        [targetGroup]: [...(grupos[targetGroup] || []), teamWithGroup]
-      };
-      setGrupos(nextGrupos);
-      const nextRevealed = [...revealedTeams, chosen.name];
-      setRevealedTeams(nextRevealed);
-
-      if (count + 1 === 16) {
-        const cal = generarCalendarioLiga(nextGrupos);
-        setJornadas(cal);
-        saveLigaState(cal);
-      }
-
-      broadcastSorteoState(nextGrupos, { ...teamWithGroup, targetGroup }, false, nextRevealed);
-    }, 900);
-  };
-
-  // Sorteo Automático Paso a Paso
-  const toggleSorteoAutomatico = () => {
-    if (isAutoDrawing) {
-      if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
-      setIsAutoDrawing(false);
-      return;
-    }
-
-    const currentTeams = Object.values(grupos).flat();
-    let localGrupos = currentTeams.length >= 16 ? { A: [], B: [], C: [], D: [] } : { ...grupos };
-    if (currentTeams.length >= 16) {
-      setGrupos(localGrupos);
-      setRevealedTeams([]);
-    }
-
-    setIsAutoDrawing(true);
-    autoDrawTimerRef.current = setInterval(() => {
-      const allAssigned = Object.values(localGrupos).flat();
-      if (allAssigned.length >= 16) {
-        clearInterval(autoDrawTimerRef.current);
-        setIsAutoDrawing(false);
-        return;
-      }
-
-      const potIdx = Math.floor(allAssigned.length / 4);
-      const targetGroup = ['A', 'B', 'C', 'D'][allAssigned.length % 4];
-      const available = BOMBOS_DATA[potIdx].teams.filter(t => !allAssigned.some(c => c.name === t.name));
-      const chosen = available[Math.floor(Math.random() * available.length)];
-      const teamWithGroup = { ...chosen, grupo: targetGroup, id: `${targetGroup}${potIdx + 1}` };
-
-      localGrupos = {
-        ...localGrupos,
-        [targetGroup]: [...(localGrupos[targetGroup] || []), teamWithGroup]
-      };
-      setGrupos(localGrupos);
-      setDrawingTeam({ ...teamWithGroup, targetGroup });
-      setRevealedTeams(prev => [...prev, chosen.name]);
-
-      if (allAssigned.length + 1 === 16) {
-        const cal = generarCalendarioLiga(localGrupos);
-        setJornadas(cal);
-        saveLigaState(cal);
-        clearInterval(autoDrawTimerRef.current);
-        setIsAutoDrawing(false);
-      }
-
-      broadcastSorteoState(localGrupos, { ...teamWithGroup, targetGroup }, false);
-    }, 1100);
   };
 
   // Reiniciar Sorteo a 0
@@ -1068,7 +977,7 @@ export default function CopaGruposLiga() {
           className={`copa-phase-btn ${activePhase === 'sorteo' ? 'active' : ''}`}
           onClick={() => handleSwitchPhase('sorteo')}
         >
-          <Shuffle size={16} /> 2. SORTEO (CHAMPIONS)
+          <Shuffle size={16} /> 2. SORTEO (LIGA)
         </button>
 
         <button
@@ -1214,9 +1123,23 @@ export default function CopaGruposLiga() {
                         <div className="copa-team-info">
                           <div className="copa-team-name">{team.name}</div>
                           <div className="copa-players-row">
-                            {team.jugadores?.map((j, i) => (
-                              <span key={i}>👤 {j}</span>
-                            ))}
+                            {team.jugadores?.map((j, i) => {
+                              const pName = typeof j === 'string' ? j : (j?.name || `J${i + 1}`);
+                              const pRank = getPlayerRank(j, gKey);
+                              const iconUrl = getRankIconUrl(pRank, gKey);
+                              return (
+                                <span key={i} className="copa-player-line" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                  <img
+                                    src={iconUrl}
+                                    alt={pRank}
+                                    title={`${pName} · ${pRank}`}
+                                    style={{ width: '16px', height: '16px', objectFit: 'contain', flexShrink: 0 }}
+                                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                  />
+                                  <span>{pName}</span>
+                                </span>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>
@@ -1230,14 +1153,9 @@ export default function CopaGruposLiga() {
       )}
 
       {/* =========================================================
-          FASE 2: SORTEO OFICIAL DE LA FASE DE LIGA (SISTEMA DE BOMBOS)
+          FASE 2: SORTEO OFICIAL DE LA FASE DE LIGA (COPA PRIMATE)
           ========================================================= */}
       {activePhase === 'sorteo' && (() => {
-        const allAssigned = Object.values(grupos).flat();
-        const totalCount = allAssigned.length;
-        const currentPotIdx = Math.min(3, Math.floor(totalCount / 4));
-        const nextGroup = totalCount < 16 ? ['A', 'B', 'C', 'D'][totalCount % 4] : 'COMPLETO';
-
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* PANEL DE CONTROL UNIFICADO DEL SORTEO DE ENFRENTAMIENTOS */}
@@ -1254,10 +1172,10 @@ export default function CopaGruposLiga() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
                   <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--omen-cyan)', letterSpacing: '2px', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <Shuffle size={22} color="var(--omen-cyan)" /> SORTEO DE ENFRENTAMIENTOS DE LIGA (FORMATO CHAMPIONS)
+                    <Shuffle size={22} color="var(--omen-cyan)" /> SORTEO DE ENFRENTAMIENTOS DE LIGA (COPA PRIMATE)
                   </h3>
                   <div style={{ fontSize: '0.85rem', color: '#ccc', marginTop: '4px' }}>
-                    Los 16 equipos están organizados por nivel (Grupos A, B, C, D). Sortea en directo los 4 rivales que enfrentará cada equipo.
+                    Los 16 equipos están organizados por niveles fijos de habilidad (Grupos A, B, C, D). Sortea en directo los 4 rivales que enfrentará cada equipo.
                   </div>
                 </div>
 
@@ -1348,142 +1266,131 @@ export default function CopaGruposLiga() {
               </div>
             </div>
 
-            {/* VISTA DE LOS 4 BOMBOS OFICIALES */}
+            {/* =========================================================
+                SECCIÓN A: GRUPOS FIJOS POR NIVEL DE HABILIDAD (TIERS 1 A 4)
+                ========================================================= */}
             <div>
-              <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Layers size={18} color="var(--omen-cyan)" /> BOMBOS DEL SORTEO OFICIAL (16 EQUIPOS)
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                {BOMBOS_DATA.map((b) => (
-                  <div
-                    key={b.bombo}
-                    style={{
-                      background: 'rgba(12, 16, 26, 0.7)',
-                      border: `1.5px solid ${b.color}55`,
-                      borderRadius: '12px',
-                      padding: '12px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '8px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
-                      <span style={{ color: b.color, fontWeight: 900, fontSize: '0.85rem', letterSpacing: '1px' }}>
-                        {b.title}
-                      </span>
-                      <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 800 }}>
-                        {b.teams.filter(t => drawnTeamNames.includes(t.name) || allAssigned.some(a => a.name === t.name)).length}/4
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      {b.teams.map((t) => {
-                        const isDrawn = drawnTeamNames.includes(t.name) || allAssigned.some((a) => a.name === t.name);
-                        const assignedTo = t.grupo || getTeamGroup(t.name, grupos) || allAssigned.find((a) => a.name === t.name)?.grupo;
-                        return (
-                          <div
-                            key={t.name}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'space-between',
-                              background: isDrawn ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.04)',
-                              border: isDrawn ? '1px solid rgba(0,245,212,0.3)' : '1px solid rgba(255,255,255,0.1)',
-                              borderRadius: '6px',
-                              padding: '6px 8px',
-                              opacity: isDrawn ? 0.75 : 1,
-                              transition: 'all 0.25s',
-                            }}
-                          >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                              <img src={t.logo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: isDrawn ? '#00f5d4' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                {t.name}
-                              </span>
-                            </div>
-                            {isDrawn ? (
-                              <span style={{ fontSize: '10px', fontWeight: 900, color: '#00f5d4' }}>
-                                ✓ G-{assignedTo}
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                className="btn-v-secondary"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedTeamForDraw(t);
-                                  triggerChampionsSorteo(t);
-                                }}
-                                style={{
-                                  fontSize: '10px',
-                                  padding: '2px 8px',
-                                  background: 'rgba(0, 245, 212, 0.15)',
-                                  borderColor: '#00f5d4',
-                                  color: '#00f5d4',
-                                  fontWeight: 900,
-                                  borderRadius: '4px',
-                                  cursor: 'pointer',
-                                }}
-                                title={`Sortear rivales de ${t.name}`}
-                              >
-                                SORTEAR
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Layers size={18} color="var(--omen-cyan)" /> GRUPOS FIJOS POR NIVEL DE HABILIDAD (TIERS 1 A 4)
+                </h4>
+                <span style={{ fontSize: '0.8rem', color: '#00f5d4', fontWeight: 700 }}>
+                  🔒 Membresía fija e inmutable · 4 equipos por nivel
+                </span>
               </div>
-            </div>
-
-            {/* RESULTADO EN VIVO DE LOS 4 GRUPOS */}
-            <div>
-              <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Trophy size={18} color="#c084fc" /> ESTADO EN VIVO DE LOS GRUPOS (EMISIÓN OBS)
-              </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                {['A', 'B', 'C', 'D'].map((gKey) => {
-                  const tList = grupos[gKey] || [];
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                {[
+                  { key: 'A', name: 'GRUPO A · TIER 1', sub: 'Cabezas de Serie', color: '#00f5d4' },
+                  { key: 'B', name: 'GRUPO B · TIER 2', sub: 'Aspirantes Pro', color: '#c084fc' },
+                  { key: 'C', name: 'GRUPO C · TIER 3', sub: 'Intermedio Alto', color: '#ff4655' },
+                  { key: 'D', name: 'GRUPO D · TIER 4', sub: 'Challengers', color: '#fbbf24' },
+                ].map((tier) => {
+                  const tList = grupos[tier.key] || [];
                   return (
                     <div
-                      key={gKey}
-                      className={`copa-group-col ${gKey}`}
-                      style={{ padding: '14px', borderRadius: '12px' }}
+                      key={tier.key}
+                      style={{
+                        background: 'rgba(12, 16, 26, 0.75)',
+                        border: `1.5px solid ${tier.color}66`,
+                        borderRadius: '12px',
+                        padding: '14px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px',
+                      }}
                     >
-                      <div className="copa-group-header">
-                        <h4 className="copa-group-title" style={{ fontSize: '1.1rem' }}>GRUPO {gKey}</h4>
-                        <span style={{ fontSize: '11px', color: '#aaa', fontWeight: 800 }}>{tList.length}/4</span>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '8px' }}>
+                        <div>
+                          <div style={{ color: tier.color, fontWeight: 900, fontSize: '0.88rem', letterSpacing: '1px' }}>
+                            {tier.name}
+                          </div>
+                          <div style={{ fontSize: '10px', color: '#888', fontWeight: 600 }}>
+                            {tier.sub}
+                          </div>
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#aaa', fontWeight: 800 }}>
+                          {tList.filter(t => drawnTeamNames.includes(t.name)).length}/4
+                        </span>
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '10px' }}>
-                        {[0, 1, 2, 3].map((slotIdx) => {
-                          const team = tList[slotIdx];
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {tList.map((t) => {
+                          const isDrawn = drawnTeamNames.includes(t.name);
                           return (
                             <div
-                              key={slotIdx}
+                              key={t.name}
                               style={{
                                 display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                background: team ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.02)',
-                                border: team ? '1px solid rgba(192, 132, 252, 0.3)' : '1px dashed rgba(255,255,255,0.1)',
-                                borderRadius: '6px',
-                                padding: '6px 10px',
-                                minHeight: '36px',
+                                flexDirection: 'column',
+                                gap: '6px',
+                                background: isDrawn ? 'rgba(0, 245, 212, 0.05)' : 'rgba(255,255,255,0.03)',
+                                border: isDrawn ? '1px solid rgba(0,245,212,0.35)' : '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: '8px',
+                                padding: '8px 10px',
+                                transition: 'all 0.2s ease',
                               }}
                             >
-                              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 900 }}>#{slotIdx + 1}</span>
-                              {team ? (
-                                <>
-                                  <img src={team.logo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
-                                  <span style={{ fontSize: '12px', color: '#fff', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                    {team.name}
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                                  <img
+                                    src={t.logo}
+                                    alt=""
+                                    style={{ width: '22px', height: '22px', objectFit: 'contain' }}
+                                    onError={(e) => { e.target.src = '/logo1.png'; }}
+                                  />
+                                  <span style={{ fontSize: '12px', fontWeight: 800, color: isDrawn ? '#00f5d4' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {t.name}
                                   </span>
-                                </>
-                              ) : (
-                                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>Por sortear...</span>
-                              )}
+                                </div>
+                                {isDrawn ? (
+                                  <span style={{ fontSize: '10px', fontWeight: 900, color: '#00f5d4', background: 'rgba(0,245,212,0.15)', padding: '2px 6px', borderRadius: '4px' }}>
+                                    ✓ SORTEADO
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="btn-v-secondary"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedTeamForDraw(t);
+                                      triggerChampionsSorteo(t);
+                                    }}
+                                    style={{
+                                      fontSize: '10px',
+                                      padding: '2px 8px',
+                                      background: 'rgba(0, 245, 212, 0.15)',
+                                      borderColor: '#00f5d4',
+                                      color: '#00f5d4',
+                                      fontWeight: 900,
+                                      borderRadius: '4px',
+                                      cursor: 'pointer',
+                                    }}
+                                    title={`Sortear los 4 rivales de ${t.name}`}
+                                  >
+                                    SORTEAR
+                                  </button>
+                                )}
+                              </div>
+                              {/* Roster de jugadores con iconos de rango oficiales de Valorant */}
+                              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '4px' }}>
+                                {t.jugadores?.map((j, jIdx) => {
+                                  const pName = typeof j === 'string' ? j : (j?.name || `J${jIdx + 1}`);
+                                  const pRank = getPlayerRank(j, tier.key);
+                                  const iconUrl = getRankIconUrl(pRank, tier.key);
+                                  return (
+                                    <div key={jIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '10px', color: '#ccc' }}>
+                                      <img
+                                        src={iconUrl}
+                                        alt={pRank}
+                                        title={`${pName} (${pRank})`}
+                                        style={{ width: '13px', height: '13px', objectFit: 'contain' }}
+                                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                      />
+                                      <span>{pName}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
                             </div>
                           );
                         })}
@@ -1492,6 +1399,93 @@ export default function CopaGruposLiga() {
                   );
                 })}
               </div>
+            </div>
+
+            {/* =========================================================
+                SECCIÓN B: CALENDARIO DE ENFRENTAMIENTOS DE LIGA (32 PARTIDOS / 4 JORNADAS)
+                ========================================================= */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Trophy size={18} color="#c084fc" /> CALENDARIO DE ENFRENTAMIENTOS DE LIGA (32 PARTIDOS EN 4 JORNADAS)
+                </h4>
+                <div style={{ display: 'flex', gap: '8px', fontSize: '11px', color: '#aaa', fontWeight: 700 }}>
+                  <span>J1: A vs B, C vs D</span> · <span>J2: A vs C, B vs D</span> · <span>J3: A vs D, B vs C</span> · <span>J4: Intra-grupo</span>
+                </div>
+              </div>
+
+              {(() => {
+                const schedule = (jornadas && jornadas.length === 4 && jornadas[0]?.length === 8)
+                  ? jornadas
+                  : generarCalendarioLiga(grupos);
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
+                    {schedule.map((jList, jIdx) => (
+                      <div
+                        key={jIdx}
+                        style={{
+                          background: 'rgba(12, 16, 26, 0.75)',
+                          border: '1.5px solid rgba(192, 132, 252, 0.35)',
+                          borderRadius: '12px',
+                          padding: '12px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '6px' }}>
+                          <span style={{ color: '#c084fc', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '1px' }}>
+                            JORNADA {jIdx + 1}
+                          </span>
+                          <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 800 }}>
+                            {jList.length} Partidos
+                          </span>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '420px', overflowY: 'auto' }}>
+                          {jList.map((m, mIdx) => {
+                            const isDrawn1 = drawnTeamNames.includes(m.t1?.name);
+                            const isDrawn2 = drawnTeamNames.includes(m.t2?.name);
+                            const bothDrawn = isDrawn1 && isDrawn2;
+                            return (
+                              <div
+                                key={m.id || mIdx}
+                                style={{
+                                  background: bothDrawn ? 'rgba(0, 245, 212, 0.08)' : 'rgba(255,255,255,0.03)',
+                                  border: bothDrawn ? '1px solid rgba(0, 245, 212, 0.4)' : '1px solid rgba(255,255,255,0.08)',
+                                  borderRadius: '6px',
+                                  padding: '6px 8px',
+                                  fontSize: '11px',
+                                }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px', fontSize: '9px', color: '#888', fontWeight: 800 }}>
+                                  <span>M{mIdx + 1} · {m.format || 'BO1'}</span>
+                                  {bothDrawn && <span style={{ color: '#00f5d4' }}>✓ CONFIRMADO</span>}
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0 }}>
+                                    <img src={m.t1?.logo} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
+                                    <span style={{ color: '#fff', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {m.t1?.name}
+                                    </span>
+                                  </div>
+                                  <span style={{ fontSize: '10px', fontWeight: 900, color: '#ff4655', padding: '0 4px' }}>VS</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, minWidth: 0, justifyContent: 'flex-end' }}>
+                                    <span style={{ color: '#fff', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                      {m.t2?.name}
+                                    </span>
+                                    <img src={m.t2?.logo} alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         );
@@ -1714,7 +1708,7 @@ export default function CopaGruposLiga() {
       )}
 
       {/* =========================================================
-          MODAL CHAMPIONS LEAGUE SORTEO HUD (MILESTONE 3 / R2)
+          MODAL COPA PRIMATE SORTEO HUD (MILESTONE 3 / R2)
           ========================================================= */}
       {championsModalState && (
         <div className="champions-draw-modal" style={{ zIndex: 1100 }} onClick={dismissChampionsModal}>
@@ -1723,7 +1717,7 @@ export default function CopaGruposLiga() {
               <div className="champions-hud-title-wrap">
                 <span className="champions-stars-icon">⭐</span>
                 <div>
-                  <div className="champions-hud-subtitle">CHAMPIONS LEAGUE // PANEL DE SORTEO EN VIVO</div>
+                  <div className="champions-hud-subtitle">COPA PRIMATE // PANEL DE SORTEO EN VIVO</div>
                   <h2 className="champions-hud-title">COPA PRIMATE DRAW SYSTEM</h2>
                 </div>
               </div>
@@ -1884,11 +1878,26 @@ export default function CopaGruposLiga() {
               <div style={{ fontSize: '0.75rem', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 ROSTER OFICIAL
               </div>
-              {zoomedTeam.jugadores?.map((j, i) => (
-                <div key={i} className="copa-zoom-player-item">
-                  <User size={16} /> {j}
-                </div>
-              ))}
+              {zoomedTeam.jugadores?.map((j, i) => {
+                const pName = typeof j === 'string' ? j : (j?.name || `J${i + 1}`);
+                const pRank = getPlayerRank(j, zoomedTeam.grupo || 'A');
+                const iconUrl = getRankIconUrl(pRank, zoomedTeam.grupo || 'A');
+                return (
+                  <div key={i} className="copa-zoom-player-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <img
+                      src={iconUrl}
+                      alt={pRank}
+                      title={`${pName} (${pRank})`}
+                      style={{ width: '18px', height: '18px', objectFit: 'contain', filter: 'drop-shadow(0 0 4px rgba(0, 245, 212, 0.4))' }}
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                    <span style={{ flex: 1 }}>{pName}</span>
+                    <span style={{ fontSize: '10px', color: '#00f5d4', fontWeight: 800, textTransform: 'uppercase' }}>
+                      {pRank}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', width: '100%' }}>

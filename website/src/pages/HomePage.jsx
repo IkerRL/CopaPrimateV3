@@ -19,7 +19,7 @@ const FEATURES = [
   {
     icon: Trophy,
     color: 'var(--feat-1)',
-    title: 'Formato Champions',
+    title: 'Formato de Liga',
     text: 'Liga única con bombos por Elo, repechaje y fase final directa. Solo los mejores sobrevivirán a la jungla.',
   },
   {

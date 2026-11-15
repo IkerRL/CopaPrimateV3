@@ -154,6 +154,7 @@ export default function OverlayRoulette() {
   };
 
   const playTickSound = () => {
+    if (!audioUnlocked) return;
     try {
       const ctx = getAudioContext();
       // NO encolar osciladores si el contexto está suspendido (evita explosión de sonido bugeado)
@@ -193,6 +194,7 @@ export default function OverlayRoulette() {
   };
 
   const playWinSound = () => {
+    if (!audioUnlocked) return;
     let played = false;
     try {
       const ctx = getAudioContext();
@@ -249,8 +251,6 @@ export default function OverlayRoulette() {
   };
 
   const ejecutarSpin = (chosenIdx, reps, winnerObj, activeList) => {
-    unlockAudio();
-
     const currentPool = (activeList && activeList.length > 0)
       ? INITIAL_MAP_POOL.filter(m => activeList.includes(m.name))
       : INITIAL_MAP_POOL;
@@ -325,9 +325,6 @@ export default function OverlayRoulette() {
       unlockAudio();
     };
 
-    // Intentar inicialización inmediata (en OBS CEF suele correr directamente)
-    unlockAudio();
-
     window.addEventListener('click', handleInteraction);
     window.addEventListener('pointerdown', handleInteraction);
     window.addEventListener('keydown', handleInteraction);
@@ -395,7 +392,7 @@ export default function OverlayRoulette() {
 
   return (
     <div className="val-roulette-root overlay-mode" onClick={unlockAudio}>
-      <audio ref={winSoundRef} src="/partida.mp3" preload="auto" />
+      <audio ref={winSoundRef} src="/partida.mp3" preload="none" muted />
 
       {/* Indicador sutil si el navegador bloqueó el audio */}
       {!audioUnlocked && (

@@ -32,6 +32,8 @@ export default function Overlays() {
   const [activeOverlayMode, setActiveOverlayMode] = useState('scoreboard');
   const [isSpinningLive, setIsSpinningLive] = useState(false);
   const [showMatchupConfigModal, setShowMatchupConfigModal] = useState(false);
+  const [showSorteoPhaseModal, setShowSorteoPhaseModal] = useState(false);
+  const [selectedSorteoPhase, setSelectedSorteoPhase] = useState('presentacion');
   const [matchupModalConfig, setMatchupModalConfig] = useState({
     map: '',
     moment: 'previa',
@@ -69,6 +71,10 @@ export default function Overlays() {
       setShowMatchupConfigModal(true);
       return;
     }
+    if (mode === 'sorteo') {
+      setShowSorteoPhaseModal(true);
+      return;
+    }
     setActiveOverlayMode(mode);
     try {
       await apiFetch('/overlay-state', {
@@ -78,6 +84,30 @@ export default function Overlays() {
       });
     } catch (e) {
       console.error(e);
+    }
+  };
+
+  const handleConfirmSorteoPhase = async (phase) => {
+    const chosenPhase = phase || selectedSorteoPhase;
+    setSelectedSorteoPhase(chosenPhase);
+    setActiveOverlayMode('sorteo');
+    try {
+      const prevRes = await apiFetch('/overlay-state');
+      const prevData = prevRes.ok ? await prevRes.json() : {};
+      await apiFetch('/overlay-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'sorteo',
+          sorteo: {
+            ...(prevData.sorteo || {}),
+            activePhase: chosenPhase,
+          }
+        })
+      });
+      setShowSorteoPhaseModal(false);
+    } catch (e) {
+      console.error('Error al actualizar fase de sorteo:', e);
     }
   };
 
@@ -399,6 +429,89 @@ export default function Overlays() {
           </div>
         </div>
       )}
+      {/* MODAL DE SELECCIÓN DE FASE: GRUPOS & SORTEO */}
+      {showSorteoPhaseModal && (
+        <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setShowSorteoPhaseModal(false); }}>
+          <div className="glass-modal" style={{ maxWidth: '560px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <h3 style={{ margin: 0, color: '#00f5d4', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px' }}>
+                🏆 ACTIVAR ESCENA: GRUPOS & SORTEO
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowSorteoPhaseModal(false)}
+                style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '18px' }}
+              >
+                ✕
+              </button>
+            </div>
+            <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', margin: '0 0 16px' }}>
+              Selecciona qué fase del módulo deseas mostrar en directo en la emisión de OBS:
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              {[
+                { id: 'presentacion', label: '1. Presentación', desc: 'Cuatro grupos fijos A, B, C, D (Tiers)', icon: '🐒' },
+                { id: 'sorteo', label: '2. Sorteo en Vivo', desc: 'Animación de bombos y cruces', icon: '🎲' },
+                { id: 'clasificacion', label: '3. Clasificación', desc: 'Tabla general de posiciones (Top 1-16)', icon: '🏆' },
+                { id: 'jornadas', label: '4. Jornadas', desc: 'Calendario de 4 jornadas (32 partidos)', icon: '📅' },
+              ].map((p) => {
+                const isSelected = selectedSorteoPhase === p.id;
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setSelectedSorteoPhase(p.id)}
+                    style={{
+                      padding: '14px',
+                      borderRadius: '10px',
+                      border: isSelected ? '2px solid #00f5d4' : '1px solid rgba(255,255,255,0.15)',
+                      background: isSelected ? 'rgba(0, 245, 212, 0.15)' : 'rgba(0,0,0,0.4)',
+                      color: '#fff',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px',
+                      boxShadow: isSelected ? '0 0 16px rgba(0, 245, 212, 0.25)' : 'none',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <span style={{ fontSize: '20px' }}>{p.icon}</span>
+                    <strong style={{ color: isSelected ? '#00f5d4' : '#fff', fontSize: '13px' }}>{p.label}</strong>
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>{p.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '18px' }}>
+              <button
+                type="button"
+                onClick={() => setShowSorteoPhaseModal(false)}
+                className="btn-secondary"
+                style={{ padding: '9px 16px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => handleConfirmSorteoPhase(selectedSorteoPhase)}
+                className="btn-primary"
+                style={{
+                  background: 'linear-gradient(135deg, #00f5d4 0%, #00bbf9 100%)',
+                  borderColor: '#00f5d4',
+                  color: '#08080b',
+                  fontWeight: 900,
+                  padding: '9px 20px',
+                  cursor: 'pointer',
+                }}
+              >
+                🚀 Confirmar y Activar en Stream
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
