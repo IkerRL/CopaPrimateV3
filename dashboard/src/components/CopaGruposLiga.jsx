@@ -613,6 +613,12 @@ export default function CopaGruposLiga() {
           if (Array.isArray(oData.sorteo.revealedTeams)) {
             setRevealedTeams(oData.sorteo.revealedTeams);
           }
+          if (Array.isArray(oData.sorteo.drawnTeamNames)) {
+            setDrawnTeamNames(oData.sorteo.drawnTeamNames);
+          }
+          if (oData.sorteo.activePhase) {
+            setActivePhase(oData.sorteo.activePhase);
+          }
           const activeSpot = oData.sorteo.spotlightTeam !== undefined
             ? oData.sorteo.spotlightTeam
             : (oData.sorteo.zoomedTeam !== undefined ? oData.sorteo.zoomedTeam : null);

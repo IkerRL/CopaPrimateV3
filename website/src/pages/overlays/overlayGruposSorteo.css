@@ -1209,18 +1209,541 @@
     }
 }
 
+/* ==========================================================================
+   FASE 2: HERO LIVE DRAW STAGE & BOMBOS OVERLAY
+   ========================================================================== */
+
+.sorteo-phase-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    flex: 1;
+}
+
+.sorteo-stage-card {
+    background: linear-gradient(135deg, rgba(14, 20, 36, 0.95) 0%, rgba(8, 12, 22, 0.98) 100%);
+    border: 1.5px solid rgba(0, 245, 212, 0.45);
+    border-radius: 18px;
+    padding: 14px 22px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 245, 212, 0.15);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+    animation: phaseFadeIn 0.3s ease-out;
+}
+
+.sorteo-stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+}
+
+.sorteo-stage-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sorteo-live-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #00f5d4;
+    box-shadow: 0 0 10px #00f5d4;
+    animation: livePulse 1.4s infinite ease-in-out;
+}
+
+.sorteo-live-indicator.pulse-fast {
+    background: #c084fc;
+    box-shadow: 0 0 12px #c084fc;
+    animation: livePulse 0.7s infinite ease-in-out;
+}
+
+.sorteo-stage-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.sorteo-stage-header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sorteo-progress-pill {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    display: flex;
+    gap: 6px;
+    color: #c084fc;
+}
+
+.sorteo-progress-count {
+    color: #00f5d4;
+}
+
+.sorteo-progress-bar-wrap {
+    width: 140px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.sorteo-progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f5d4, #c084fc);
+    box-shadow: 0 0 10px #00f5d4;
+    transition: width 0.4s ease;
+}
+
+/* Hero Showcase */
+.sorteo-hero-showcase {
+    display: grid;
+    grid-template-columns: 290px 1fr;
+    gap: 18px;
+    align-items: center;
+}
+
+.sorteo-hero-team-box {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1.5px solid rgba(0, 245, 212, 0.4);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: inset 0 0 20px rgba(0, 245, 212, 0.08);
+}
+
+.sorteo-hero-team-box.grupo-A { border-color: rgba(255, 70, 85, 0.6); }
+.sorteo-hero-team-box.grupo-B { border-color: rgba(0, 245, 212, 0.6); }
+.sorteo-hero-team-box.grupo-C { border-color: rgba(192, 132, 252, 0.6); }
+.sorteo-hero-team-box.grupo-D { border-color: rgba(56, 189, 248, 0.6); }
+
+.sorteo-hero-logo-wrap {
+    position: relative;
+    width: 66px;
+    height: 66px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sorteo-hero-halo {
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 245, 212, 0.45) 0%, transparent 70%);
+    animation: haloBreath 2.5s infinite alternate ease-in-out;
+}
+
+.sorteo-hero-logo {
+    width: 62px;
+    height: 62px;
+    object-fit: contain;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.5);
+    padding: 4px;
+    z-index: 2;
+}
+
+.sorteo-hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow: hidden;
+}
+
+.sorteo-hero-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: #00f5d4;
+    letter-spacing: 2px;
+}
+
+.sorteo-hero-name {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 19px;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 0 15px rgba(0, 245, 212, 0.4);
+}
+
+.sorteo-hero-badges {
+    display: flex;
+    gap: 6px;
+}
+
+.sorteo-hero-bombo-badge, .sorteo-hero-group-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.sorteo-hero-bombo-badge {
+    background: rgba(192, 132, 252, 0.2);
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    color: #c084fc;
+}
+
+.sorteo-hero-group-badge {
+    background: rgba(0, 245, 212, 0.2);
+    border: 1px solid rgba(0, 245, 212, 0.5);
+    color: #00f5d4;
+}
+
+/* Matchup Slots */
+.sorteo-hero-matchups-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.sorteo-matchup-slot {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 96px;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.sorteo-matchup-slot.revealed {
+    border-color: #00f5d4;
+    background: rgba(0, 245, 212, 0.08);
+    box-shadow: 0 0 20px rgba(0, 245, 212, 0.25);
+}
+
+.sorteo-matchup-slot.scanning {
+    border-color: #c084fc;
+    background: rgba(192, 132, 252, 0.12);
+    box-shadow: 0 0 25px rgba(192, 132, 252, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.sorteo-matchup-slot.pending {
+    border-style: dashed;
+    opacity: 0.5;
+}
+
+.sorteo-slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 3px;
+}
+
+.sorteo-slot-jornada {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: #ffb300;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.sorteo-slot-icon {
+    font-size: 11px;
+}
+
+.sorteo-slot-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.sorteo-slot-opp-logo {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+
+.sorteo-slot-opp-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    color: #00f5d4;
+    letter-spacing: 1.2px;
+}
+
+.sorteo-slot-opp-name {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.sorteo-slot-opp-badges {
+    display: flex;
+    gap: 4px;
+    margin-top: 1px;
+}
+
+.sorteo-slot-mini-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 9px;
+    font-weight: 900;
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid rgba(0, 245, 212, 0.4);
+    color: #00f5d4;
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.sorteo-slot-scanner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 100%;
+    position: relative;
+}
+
+.sorteo-laser-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00f5d4, #fff, #00f5d4, transparent);
+    box-shadow: 0 0 10px #00f5d4;
+    animation: scanLaserSweep 1s infinite ease-in-out;
+}
+
+.sorteo-scanner-spin {
+    font-size: 22px;
+    animation: scannerOrbSpin 1s infinite linear;
+}
+
+.sorteo-scanner-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    color: #c084fc;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.sorteo-slot-pending {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.sorteo-pending-lock {
+    font-size: 18px;
+}
+
+.sorteo-pending-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+/* Sala de espera / Hub de Bombos */
+.sorteo-hub-waiting {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: center;
+}
+
+.sorteo-hub-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.sorteo-hub-orb-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #c084fc 0%, #00f5d4 100%);
+    box-shadow: 0 0 25px rgba(0, 245, 212, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    animation: orbSpin 3s infinite linear;
+    flex-shrink: 0;
+}
+
+.sorteo-hub-text-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.sorteo-hub-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: #00f5d4;
+    letter-spacing: 2px;
+}
+
+.sorteo-hub-title {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 2px 0 3px 0;
+    letter-spacing: 1px;
+}
+
+.sorteo-hub-desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.sorteo-hub-pots-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.sorteo-pot-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sorteo-pot-card.pot-A { border-color: rgba(0, 245, 212, 0.4); }
+.sorteo-pot-card.pot-B { border-color: rgba(192, 132, 252, 0.4); }
+.sorteo-pot-card.pot-C { border-color: rgba(255, 70, 85, 0.4); }
+.sorteo-pot-card.pot-D { border-color: rgba(251, 191, 36, 0.4); }
+
+.sorteo-pot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sorteo-pot-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 900;
+    color: #fff;
+}
+
+.sorteo-pot-drawn {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    color: #00f5d4;
+}
+
+.sorteo-pot-label {
+    font-size: 9px;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 700;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badges de estado en el grid de sorteo */
+.draw-status-pill {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.8px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.draw-status-pill.drawn {
+    background: rgba(0, 245, 212, 0.18);
+    border: 1px solid rgba(0, 245, 212, 0.5);
+    color: #00f5d4;
+    box-shadow: 0 0 8px rgba(0, 245, 212, 0.3);
+}
+
+.draw-status-pill.drawing {
+    background: rgba(251, 191, 36, 0.25);
+    border: 1px solid #fbbf24;
+    color: #fbbf24;
+    animation: livePulse 1s infinite;
+}
+
+.draw-status-pill.pending {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.team-slot-card.currently-drawing {
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 25px rgba(251, 191, 36, 0.45) !important;
+}
+
+.team-slot-card.team-drawn-card {
+    border-color: rgba(0, 245, 212, 0.35);
+}
+
+/* ==========================================================================
+   FASE 3: CLASIFICACIÓN GENERAL EN 2 COLUMNAS SIDE-BY-SIDE SIN SCROLL
+   ========================================================================== */
+
 .sorteo-standings-container {
     width: 100%;
-    background: rgba(12, 16, 26, 0.85);
+    background: rgba(12, 16, 26, 0.9);
     border: 1.5px solid rgba(0, 245, 212, 0.35);
     border-radius: 16px;
-    padding: 16px 20px;
+    padding: 14px 20px;
     box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 30px rgba(0, 245, 212, 0.15);
     display: flex;
     flex-direction: column;
     gap: 12px;
     flex: 1;
-    overflow-y: auto;
     box-sizing: border-box;
 }
 
@@ -1229,18 +1752,32 @@
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 10px;
+    padding-bottom: 8px;
 }
 
 .sorteo-standings-title {
     font-family: 'Rajdhani', sans-serif;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 900;
     letter-spacing: 2px;
     color: #ffffff;
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.standings-trophy-icon {
+    font-size: 18px;
+}
+
+.standings-count-badge {
+    background: rgba(192, 132, 252, 0.2);
+    border: 1px solid rgba(192, 132, 252, 0.4);
+    color: #c084fc;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 800;
 }
 
 .sorteo-standings-legend {
@@ -1256,21 +1793,135 @@
     color: #00f5d4;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
+.legend-regular {
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-dot-cyan {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00f5d4;
+    box-shadow: 0 0 6px #00f5d4;
+}
+
+.legend-dot-gray {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+}
+
+/* Split Grid */
+.sorteo-standings-split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    width: 100%;
+    flex: 1;
+    align-items: start;
+}
+
+.sorteo-standings-half-col {
+    background: rgba(10, 14, 24, 0.75);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+.sorteo-standings-half-col.zone-playoff {
+    border-color: rgba(0, 245, 212, 0.45);
+    box-shadow: 0 0 25px rgba(0, 245, 212, 0.12);
+}
+
+.sorteo-standings-half-col.zone-regular {
+    border-color: rgba(192, 132, 252, 0.35);
+    box-shadow: 0 0 20px rgba(192, 132, 252, 0.08);
+}
+
+.sorteo-standings-col-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 6px;
+}
+
+.col-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.col-indicator-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.col-indicator-dot.dot-playoff {
+    background: #00f5d4;
+    box-shadow: 0 0 8px #00f5d4;
+}
+
+.col-indicator-dot.dot-regular {
+    background: #c084fc;
+    box-shadow: 0 0 8px #c084fc;
+}
+
+.col-header-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    text-transform: uppercase;
+}
+
+.col-header-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    padding: 2px 7px;
+    border-radius: 10px;
+}
+
+.col-header-tag.tag-playoff {
+    background: rgba(0, 245, 212, 0.15);
+    color: #00f5d4;
+    border: 1px solid rgba(0, 245, 212, 0.5);
+}
+
+.col-header-tag.tag-regular {
+    background: rgba(192, 132, 252, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(192, 132, 252, 0.4);
+}
+
+/* Tabla de clasificación estilizada */
 .sorteo-standings-table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 0 6px;
+    border-spacing: 0 3px;
     font-family: 'Rajdhani', sans-serif;
 }
 
 .sorteo-standings-table th {
-    padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
+    padding: 4px 6px;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.2px;
     color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
     text-align: center;
@@ -1281,49 +1932,60 @@
 }
 
 .sorteo-standings-table td {
-    padding: 7px 12px;
-    font-size: 13px;
+    padding: 5px 8px;
+    font-size: 12px;
     font-weight: 800;
     text-align: center;
-    background: rgba(0, 0, 0, 0.45);
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .sorteo-standings-table tr td:first-child {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
     border-left: 2px solid transparent;
 }
 
 .sorteo-standings-table tr td:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
 }
 
-.sorteo-standings-table tr.top-qualifier td {
-    background: rgba(0, 245, 212, 0.06);
+.sorteo-standings-table tr.row-playoff td {
+    background: rgba(0, 245, 212, 0.05);
 }
 
-.sorteo-standings-table tr.top-qualifier td:first-child {
-    border-left: 3px solid #00f5d4;
+.sorteo-standings-table tr.row-playoff td:first-child {
+    border-left: 2.5px solid #00f5d4;
+}
+
+.sorteo-standings-table tr.row-regular td:first-child {
+    border-left: 2.5px solid rgba(192, 132, 252, 0.4);
 }
 
 .standings-pos-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
-    font-size: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    font-size: 11px;
     font-weight: 900;
 }
 
 .standings-pos-badge.gold {
-    background: rgba(250, 204, 21, 0.2);
+    background: rgba(250, 204, 21, 0.25);
     color: #facc15;
     border: 1px solid #facc15;
+    box-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+}
+
+.standings-pos-badge.podium {
+    background: rgba(226, 232, 240, 0.2);
+    color: #e2e8f0;
+    border: 1px solid #e2e8f0;
 }
 
 .standings-pos-badge.top8 {
@@ -1341,45 +2003,92 @@
 .standings-team-cell {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     text-align: left;
 }
 
 .standings-team-logo {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     object-fit: contain;
+    border-radius: 4px;
 }
 
 .standings-team-tag {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 900;
-    color: #ffffff;
-    letter-spacing: 1px;
+    color: #00f5d4;
+    letter-spacing: 0.8px;
 }
 
 .standings-team-name {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.standings-group-pill {
+    font-size: 10px;
+    font-weight: 900;
+    padding: 2px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.standings-group-pill.group-pill-A {
+    background: rgba(255, 70, 85, 0.15);
+    color: #ff4655;
+    border: 1px solid rgba(255, 70, 85, 0.4);
+}
+
+.standings-group-pill.group-pill-B {
+    background: rgba(0, 245, 212, 0.15);
+    color: #00f5d4;
+    border: 1px solid rgba(0, 245, 212, 0.4);
+}
+
+.standings-group-pill.group-pill-C {
+    background: rgba(192, 132, 252, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(192, 132, 252, 0.4);
+}
+
+.standings-group-pill.group-pill-D {
+    background: rgba(251, 191, 36, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.4);
+}
+
+.stat-win {
+    color: #00f5d4;
+    font-weight: 900;
+}
+
+.stat-loss {
+    color: #ff4655;
+    font-weight: 900;
+}
+
+.stat-diff-pos {
+    color: #00f5d4;
+}
+
+.stat-diff-neg {
+    color: #ff4655;
+}
+
+.stat-diff-zero {
+    color: #888;
 }
 
 .standings-pts-cell {
-    font-size: 15px !important;
+    font-size: 14px !important;
     font-weight: 900 !important;
     color: #00f5d4 !important;
-}
-
-.standings-cutline-row td {
-    background: none !important;
-    padding: 2px 0 !important;
-    border: none !important;
-}
-
-.standings-cutline-bar {
-    height: 2px;
-    background: linear-gradient(90deg, rgba(0, 245, 212, 0.8) 0%, rgba(192, 132, 252, 0.8) 100%);
-    box-shadow: 0 0 10px #00f5d4;
-    border-radius: 2px;
+    text-shadow: 0 0 6px rgba(0, 245, 212, 0.4);
 }
 
 

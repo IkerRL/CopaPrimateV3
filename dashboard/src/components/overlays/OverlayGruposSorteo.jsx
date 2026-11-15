@@ -47,15 +47,15 @@ export function getTeamTag(name) {
 
 const DEFAULT_GRUPOS = {
   A: [
-    { id: 'A1', name: "Los Monos", jugadores: ["TenZ#NA1", "Kyedae#0001", "ScreaM#1 tap"], logo: "/logo1.png", grupo: 'A' },
-    { id: 'A2', name: "LOUD GG", jugadores: ["aspas", "Less", "cauanzin"], logo: "/logo2.png", grupo: 'A' },
-    { id: 'A3', name: "Sentinels", jugadores: ["TenZ", "Zellsis", "johnqt"], logo: "/logo3.png", grupo: 'A' },
+    { id: 'A1', name: "Thunder Buddies", jugadores: ["Brrokeen", "Pipe"], logo: "/logo3.png", grupo: 'A' },
+    { id: 'A2', name: "Los Akrtona2", jugadores: ["Kira", "Serax"], logo: "/logo2.png", grupo: 'A' },
+    { id: 'A3', name: "Chuu-Chuu 100% MAX", jugadores: ["MakaQuillo", "Max"], logo: "/logo8.png", grupo: 'A' },
     { id: 'A4', name: "REHENKARMACIÓN", jugadores: ["Satha", "Makflat"], logo: "/logo1.png", grupo: 'A' }
   ],
   B: [
-    { id: 'B1', name: "Gorilas", jugadores: ["Mixwell#G2", "Keloqz#FR", "Avova#123"], logo: "/gorilas.jpg", grupo: 'B' },
-    { id: 'B2', name: "Fnatic Monkeys", jugadores: ["Boaster", "Derke", "Chronicle"], logo: "/logo6.png", grupo: 'B' },
-    { id: 'B3', name: "Paper Rex", jugadores: ["f0rsakeN", "Jinggg", "mindfreak"], logo: "/logo7.png", grupo: 'B' },
+    { id: 'B1', name: "Entry Baiters", jugadores: ["レックウザ", "Militantedelsoe"], logo: "/logo5.png", grupo: 'B' },
+    { id: 'B2', name: "Dream Team", jugadores: ["JoKker", "Pepardo"], logo: "/logo7.png", grupo: 'B' },
+    { id: 'B3', name: "Makaco Ninja-Pelocho", jugadores: ["MakacoNinja", "Iker 😎"], logo: "/logo6.png", grupo: 'B' },
     { id: 'B4', name: "Kizuna", jugadores: ["Alezita", "Sarix"], logo: "/logo4.png", grupo: 'B' }
   ],
   C: [
@@ -65,8 +65,8 @@ const DEFAULT_GRUPOS = {
     { id: 'C4', name: "MARIIKS", jugadores: ["Acid", "Bru"], logo: "/logo10.png", grupo: 'C' }
   ],
   D: [
-    { id: 'D1', name: "Primates FC", jugadores: ["Knekro#123", "IlloJuan#Malaga"], logo: "/logo12.png", grupo: 'D' },
-    { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster#FNC", "Derke#FNC"], logo: "/logo13.png", grupo: 'D' },
+    { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png", grupo: 'D' },
+    { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png", grupo: 'D' },
     { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png", grupo: 'D' },
     { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png", grupo: 'D' }
   ]
@@ -129,15 +129,57 @@ function computeStandings(gruposData, jornadasData) {
   });
 }
 
+function getTeamMatchupsFromJornadas(teamName, jornadasData, gruposData) {
+  if (!teamName || !Array.isArray(jornadasData)) return [];
+  const norm = String(teamName).toLowerCase().trim();
+  const res = [];
+  for (let jIdx = 0; jIdx < 4; jIdx++) {
+    const jNum = jIdx + 1;
+    const jList = jornadasData[jIdx] || [];
+    const match = jList.find(m => {
+      const n1 = String(m?.t1?.name || '').toLowerCase().trim();
+      const n2 = String(m?.t2?.name || '').toLowerCase().trim();
+      return n1 === norm || n2 === norm;
+    });
+    if (match) {
+      const isT1 = String(match?.t1?.name || '').toLowerCase().trim() === norm;
+      const opp = isT1 ? match.t2 : match.t1;
+      const oppName = opp?.name || `Rival J${jNum}`;
+      const oppLogo = opp?.logo || '/logo1.png';
+      let oppGrupo = opp?.grupo;
+      if (!oppGrupo && gruposData) {
+        for (const [gKey, list] of Object.entries(gruposData)) {
+          if (Array.isArray(list) && list.some(t => t.name === oppName)) {
+            oppGrupo = gKey;
+            break;
+          }
+        }
+      }
+      res.push({
+        jornada: jNum,
+        opponent: {
+          name: oppName,
+          logo: oppLogo,
+          grupo: oppGrupo || 'A',
+          bombo: opp?.bombo || (oppGrupo === 'A' ? 1 : oppGrupo === 'B' ? 2 : oppGrupo === 'C' ? 3 : 4),
+        }
+      });
+    }
+  }
+  return res;
+}
+
 export default function OverlayGruposSorteo() {
   const [grupos, setGrupos] = useState(DEFAULT_GRUPOS);
   const [revealedTeams, setRevealedTeams] = useState([]);
   const [activePhase, setActivePhase] = useState('presentacion'); // 'presentacion' | 'sorteo' | 'clasificacion' | 'jornadas' | 'liga'
   const [drawingTeam, setDrawingTeam] = useState(null);
+  const [drawnTeamNames, setDrawnTeamNames] = useState([]);
   const [isSpinning, setIsSpinning] = useState(false);
   const [jornadas, setJornadas] = useState([]);
   const [spotlightTeam, setSpotlightTeam] = useState(null);
   const [championsAnimation, setChampionsAnimation] = useState(null);
+  const [lastDrawnHero, setLastDrawnHero] = useState(null);
   const [animClock, setAnimClock] = useState(Date.now());
   const [serverStandings, setServerStandings] = useState([]);
 
@@ -175,7 +217,13 @@ export default function OverlayGruposSorteo() {
             if (s.activePhase) setActivePhase(s.activePhase);
             if (Array.isArray(s.revealedTeams)) setRevealedTeams(s.revealedTeams);
             if (s.grupos) setGrupos(s.grupos);
-            if (s.drawingTeam !== undefined) setDrawingTeam(s.drawingTeam);
+            if (s.drawingTeam !== undefined) {
+              setDrawingTeam(s.drawingTeam);
+              if (s.drawingTeam) setLastDrawnHero(s.drawingTeam);
+            }
+            if (Array.isArray(s.drawnTeamNames)) {
+              setDrawnTeamNames(s.drawnTeamNames);
+            }
             if (s.isSpinning !== undefined) setIsSpinning(s.isSpinning);
             if (s.spotlightTeam !== undefined || s.zoomedTeam !== undefined) {
               const active = s.spotlightTeam ?? s.zoomedTeam ?? null;
@@ -183,6 +231,9 @@ export default function OverlayGruposSorteo() {
             }
             if (s.championsAnimation !== undefined) {
               setChampionsAnimation(s.championsAnimation);
+              if (s.championsAnimation && s.championsAnimation.team) {
+                setLastDrawnHero(s.championsAnimation.team);
+              }
             }
             if (Array.isArray(s.standings)) {
               setServerStandings(s.standings);
@@ -205,7 +256,7 @@ export default function OverlayGruposSorteo() {
     };
   }, []);
 
-  // Local animation clock loop during Copa Primate draw animation
+  // Local animation clock loop during draw animation
   useEffect(() => {
     if (!championsAnimation) return;
     const timer = setInterval(() => {
@@ -223,28 +274,40 @@ export default function OverlayGruposSorteo() {
     ? serverStandings
     : computeStandings(grupos, jornadas);
 
-  const renderGruposGrid = () => (
-    <div className="grupos-grid">
+  // Determinar qué equipo y cruces mostrar en el Hero Draw Stage
+  const activeDrawHero = championsAnimation?.team || drawingTeam || lastDrawnHero || null;
+  const heroMatchups = (Array.isArray(championsAnimation?.matchups) && championsAnimation.matchups.length > 0)
+    ? championsAnimation.matchups
+    : (activeDrawHero ? getTeamMatchupsFromJornadas(activeDrawHero.name, jornadas, grupos) : []);
+
+  const isAnimRunning = championsAnimation?.status === 'running';
+  const currentAnimStep = championsAnimation?.revealedCount || (isAnimRunning ? Math.min(4, Math.max(1, Math.floor((Date.now() - (championsAnimation?.startedAt || Date.now())) / (championsAnimation?.stepDuration || 1600)) + 1)) : 4);
+
+  const renderGruposGrid = (isSorteoMode = false) => (
+    <div className={`grupos-grid ${isSorteoMode ? 'sorteo-mode-grid' : ''}`}>
       {groupKeys.map((gKey) => {
         const teamList = grupos[gKey] || [];
-        const tierName = gKey === 'A' ? 'TIER 1' : gKey === 'B' ? 'TIER 2' : gKey === 'C' ? 'TIER 3' : 'TIER 4';
+        const tierName = gKey === 'A' ? 'TIER 1 · CABEZAS' : gKey === 'B' ? 'TIER 2 · ASPIRANTES' : gKey === 'C' ? 'TIER 3 · INTERMEDIO' : 'TIER 4 · CHALLENGERS';
+        const potNum = gKey === 'A' ? 1 : gKey === 'B' ? 2 : gKey === 'C' ? 3 : 4;
 
         return (
           <div key={gKey} className={`grupo-col col-${gKey}`}>
             <div className="grupo-header">
-              <span className="grupo-title">GRUPO {gKey}</span>
+              <span className="grupo-title">{isSorteoMode ? `BOMBO ${potNum} · GRUPO ${gKey}` : `GRUPO ${gKey}`}</span>
               <span className="grupo-tag">{tierName} · 4 ESCUADRAS</span>
             </div>
 
             <div className="grupo-teams-list">
               {teamList.map((t, idx) => {
-                const revealed = isTeamRevealed(t.name);
+                const revealed = isSorteoMode || isTeamRevealed(t.name);
                 const tTag = getTeamTag(t.name);
+                const isDrawn = drawnTeamNames.includes(t.name);
+                const isCurrentlyDrawing = (drawingTeam?.name === t.name) || (championsAnimation?.team?.name === t.name);
 
                 return (
                   <div
                     key={t.id || idx}
-                    className={`team-slot-card ${revealed ? 'revealed' : 'hidden-slot'}`}
+                    className={`team-slot-card ${revealed ? 'revealed' : 'hidden-slot'} ${isCurrentlyDrawing ? 'currently-drawing' : ''} ${isDrawn ? 'team-drawn-card' : ''}`}
                   >
                     <span className="team-rank-num">#{idx + 1}</span>
 
@@ -257,9 +320,16 @@ export default function OverlayGruposSorteo() {
                           onError={(e) => { e.target.src = '/logo1.png'; }}
                         />
                         <div className="team-slot-info">
-                          <span className="team-slot-tag" title={t.name}>
-                            {tTag} · {t.name}
-                          </span>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px' }}>
+                            <span className="team-slot-tag" title={t.name}>
+                              {tTag} · {t.name}
+                            </span>
+                            {isSorteoMode && (
+                              <span className={`draw-status-pill ${isCurrentlyDrawing ? 'drawing' : isDrawn ? 'drawn' : 'pending'}`}>
+                                {isCurrentlyDrawing ? '⚡ EN SORTEO' : isDrawn ? '✓ LISTO' : '⏳ EN BOMBO'}
+                              </span>
+                            )}
+                          </div>
                           {Array.isArray(t.jugadores) && t.jugadores.length > 0 && (
                             <div className="team-slot-players">
                               {t.jugadores.map((j, jIdx) => {
@@ -307,7 +377,7 @@ export default function OverlayGruposSorteo() {
   return (
     <div className="overlay-sorteo-root">
       <div className="overlay-sorteo-container">
-        {/* ENCABEZADO OFICIAL CON LOGO DE COPA PRIMATE */}
+        {/* ENCABEZADO OFICIAL CON LOGO DE COPA PRIMATE Y MONITOS ANIMADOS */}
         <div className="sorteo-header">
           <img
             src="/monito-izq.png"
@@ -355,82 +425,214 @@ export default function OverlayGruposSorteo() {
         {/* FASE 1: PRESENTACIÓN DE GRUPOS */}
         {activePhase === 'presentacion' && (
           <div key={activePhase} className="phase-content-wrapper">
-            {renderGruposGrid()}
+            {renderGruposGrid(false)}
           </div>
         )}
 
-        {/* FASE 2: CÁMARA Y GRUPOS DEL SORTEO EN VIVO */}
+        {/* FASE 2: ESCENARIO DE SORTEO OFICIAL EN DIRECTO (BOMBOS & CRUCES) */}
         {activePhase === 'sorteo' && (
-          <div key={activePhase} className="phase-content-wrapper">
-            {(isSpinning || drawingTeam) && (
-              <div className="sorteo-live-chamber">
-                <div className="sorteo-orb-spinning">
-                  {drawingTeam ? '🐒' : '🎰'}
-                </div>
-                {drawingTeam ? (
-                  <div style={{ textAlign: 'center' }}>
-                    <span style={{ fontSize: '12px', color: '#c084fc', letterSpacing: '2px', fontWeight: 900 }}>
-                      EQUIPO SELECCIONADO:
-                    </span>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff', letterSpacing: '1px' }}>
-                      {drawingTeam.name}
-                    </div>
-                    {drawingTeam.targetGroup && (
-                      <div className="sorteo-destination-badge" style={{ marginTop: '6px' }}>
-                        GRUPO {drawingTeam.targetGroup}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ fontSize: '13px', color: '#00f5d4', fontWeight: 900, letterSpacing: '2px' }}>
-                    {isSpinning ? 'BUSCANDO RIVALES EN EL QUANTUM ENGINE...' : 'ESPERANDO SELECCIÓN DE EQUIPO...'}
-                  </div>
-                )}
-              </div>
-            )}
-            {renderGruposGrid()}
-          </div>
-        )}
-
-        {/* FASE 3: CLASIFICACIÓN GENERAL (TABLA 1-16 STREAM) */}
-        {activePhase === 'clasificacion' && (
-          <div key={activePhase} className="phase-content-wrapper">
-            <div className="sorteo-standings-container">
-              <div className="sorteo-standings-header-row">
-                <div className="sorteo-standings-title">
-                  <span>🏆 TABLA GENERAL DE POSICIONES</span>
-                </div>
-                <div className="sorteo-standings-legend">
-                  <span className="legend-playoff">
-                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00f5d4', display: 'inline-block' }} />
-                    TOP 1-8 CLASIFICAN A PLAYOFFS
+          <div key={activePhase} className="phase-content-wrapper sorteo-phase-wrapper">
+            {/* HERO STAGE CENTRAL DE SORTEO */}
+            <div className="sorteo-stage-card">
+              {/* Barra de progreso y estado del sorteo */}
+              <div className="sorteo-stage-header">
+                <div className="sorteo-stage-header-left">
+                  <span className={`sorteo-live-indicator ${isAnimRunning ? 'pulse-fast' : ''}`} />
+                  <span className="sorteo-stage-title">
+                    {isAnimRunning
+                      ? `EXTRACCIÓN EN DIRECTO · ${activeDrawHero?.name || 'EQUIPO'}`
+                      : drawnTeamNames.length === 16
+                      ? 'SORTEO DE LIGA FINALIZADO (16/16 EQUIPOS)'
+                      : 'SALA OFICIAL DE SORTEO Y EMPAREJAMIENTOS'}
                   </span>
                 </div>
+                <div className="sorteo-stage-header-right">
+                  <div className="sorteo-progress-pill">
+                    <span className="sorteo-progress-label">EMPAREJADOS:</span>
+                    <span className="sorteo-progress-count">{drawnTeamNames.length} / 16</span>
+                  </div>
+                  <div className="sorteo-progress-bar-wrap">
+                    <div
+                      className="sorteo-progress-bar-fill"
+                      style={{ width: `${Math.min(100, (drawnTeamNames.length / 16) * 100)}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Contenido dinámico del escenario */}
+              {activeDrawHero ? (
+                <div className="sorteo-hero-showcase">
+                  {/* Tarjeta del Equipo que se sortea */}
+                  <div className={`sorteo-hero-team-box grupo-${activeDrawHero.grupo || 'A'}`}>
+                    <div className="sorteo-hero-logo-wrap">
+                      <div className="sorteo-hero-halo" />
+                      <img
+                        src={activeDrawHero.logo || '/logo1.png'}
+                        alt={activeDrawHero.name}
+                        className="sorteo-hero-logo"
+                        onError={(e) => { e.target.src = '/logo1.png'; }}
+                      />
+                    </div>
+                    <div className="sorteo-hero-info">
+                      <span className="sorteo-hero-tag">{getTeamTag(activeDrawHero.name)}</span>
+                      <h2 className="sorteo-hero-name">{activeDrawHero.name}</h2>
+                      <div className="sorteo-hero-badges">
+                        <span className={`sorteo-hero-bombo-badge bombo-${activeDrawHero.bombo || 1}`}>
+                          BOMBO {activeDrawHero.bombo || 1}
+                        </span>
+                        <span className={`sorteo-hero-group-badge grupo-${activeDrawHero.grupo || 'A'}`}>
+                          GRUPO {activeDrawHero.grupo || 'A'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 4 Casillas de Jornadas (Rival 1, Rival 2, Rival 3, Rival 4) */}
+                  <div className="sorteo-hero-matchups-row">
+                    {[1, 2, 3, 4].map((jNum) => {
+                      const mItem = heroMatchups.find(m => Number(m.jornada) === jNum) || heroMatchups[jNum - 1];
+                      const opp = mItem?.opponent || (mItem?.rival ? {
+                        name: mItem.rival,
+                        logo: mItem.logo || '/logo1.png',
+                        grupo: mItem.grupo || 'A',
+                        bombo: mItem.bombo || jNum,
+                      } : null);
+
+                      const isRevealed = Boolean(opp && (isAnimRunning ? jNum <= currentAnimStep : true));
+                      const isScanning = Boolean(isAnimRunning && jNum === currentAnimStep + 1);
+
+                      return (
+                        <div
+                          key={jNum}
+                          className={`sorteo-matchup-slot ${isRevealed ? 'revealed' : isScanning ? 'scanning' : 'pending'}`}
+                        >
+                          <div className="sorteo-slot-header">
+                            <span className="sorteo-slot-jornada">JORNADA {jNum}</span>
+                            <span className="sorteo-slot-icon">
+                              {isRevealed ? '✅' : isScanning ? '⚡' : '🔒'}
+                            </span>
+                          </div>
+
+                          {isRevealed && opp ? (
+                            <div className="sorteo-slot-body">
+                              <img
+                                src={opp.logo || '/logo1.png'}
+                                alt={opp.name}
+                                className="sorteo-slot-opp-logo"
+                                onError={(e) => { e.target.src = '/logo1.png'; }}
+                              />
+                              <span className="sorteo-slot-opp-tag">{getTeamTag(opp.name)}</span>
+                              <span className="sorteo-slot-opp-name" title={opp.name}>{opp.name}</span>
+                              <div className="sorteo-slot-opp-badges">
+                                <span className="sorteo-slot-mini-badge">B{opp.bombo || jNum}</span>
+                                <span className="sorteo-slot-mini-badge">G-{opp.grupo || 'A'}</span>
+                              </div>
+                            </div>
+                          ) : isScanning ? (
+                            <div className="sorteo-slot-scanner">
+                              <div className="sorteo-laser-line" />
+                              <span className="sorteo-scanner-spin">🎰</span>
+                              <span className="sorteo-scanner-text">EXTRAYENDO BOMBO {jNum}...</span>
+                            </div>
+                          ) : (
+                            <div className="sorteo-slot-pending">
+                              <span className="sorteo-pending-lock">🔒</span>
+                              <span className="sorteo-pending-text">BOMBO {jNum} EN ESPERA</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* SALA DE ESPERA / HUB DE BOMBOS */
+                <div className="sorteo-hub-waiting">
+                  <div className="sorteo-hub-left">
+                    <div className="sorteo-hub-orb-wrap">
+                      <div className="sorteo-hub-orb">🎰</div>
+                    </div>
+                    <div className="sorteo-hub-text-col">
+                      <div className="sorteo-hub-badge">SALA OFICIAL DE SORTEO</div>
+                      <h3 className="sorteo-hub-title">EXTRACCIÓN DE CRUCES DE LIGA</h3>
+                      <p className="sorteo-hub-desc">
+                        16 equipos distribuidos en 4 niveles de habilidad. Cada equipo disputa 4 partidos frente a rivales de distinto nivel.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="sorteo-hub-pots-summary">
+                    {groupKeys.map(gKey => {
+                      const potNum = gKey === 'A' ? 1 : gKey === 'B' ? 2 : gKey === 'C' ? 3 : 4;
+                      const gTeams = grupos[gKey] || [];
+                      const drawnCount = gTeams.filter(t => drawnTeamNames.includes(t.name)).length;
+                      return (
+                        <div key={gKey} className={`sorteo-pot-card pot-${gKey}`}>
+                          <div className="sorteo-pot-header">
+                            <span className="sorteo-pot-num">BOMBO {potNum}</span>
+                            <span className="sorteo-pot-drawn">{drawnCount}/4</span>
+                          </div>
+                          <div className="sorteo-pot-label">
+                            {gKey === 'A' ? 'TIER 1 · CABEZAS' : gKey === 'B' ? 'TIER 2 · ASPIRANTES' : gKey === 'C' ? 'TIER 3 · INTERMEDIO' : 'TIER 4 · CHALLENGERS'}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* CUADRÍCULA DE LOS 4 GRUPOS / BOMBOS CON ESTADOS EN VIVO */}
+            {renderGruposGrid(true)}
+          </div>
+        )}
+
+        {/* FASE 3: CLASIFICACIÓN GENERAL (TABLA 1-16 EN 2 COLUMNAS SIDE-BY-SIDE SIN SCROLL) */}
+        {activePhase === 'clasificacion' && (() => {
+          const top8 = standingsData.slice(0, 8);
+          const bottom8 = standingsData.slice(8, 16);
+
+          const renderStandingsSubTable = (teamsList, startPos, isPlayoffZone) => (
+            <div className={`sorteo-standings-half-col ${isPlayoffZone ? 'zone-playoff' : 'zone-regular'}`}>
+              <div className="sorteo-standings-col-header">
+                <div className="col-header-left">
+                  <span className={`col-indicator-dot ${isPlayoffZone ? 'dot-playoff' : 'dot-regular'}`} />
+                  <span className="col-header-title">
+                    {isPlayoffZone ? 'TOP 1 - 8 · CLASIFICADOS A PLAYOFFS' : 'PUESTOS 9 - 16 · FASE REGULAR'}
+                  </span>
+                </div>
+                <span className={`col-header-tag ${isPlayoffZone ? 'tag-playoff' : 'tag-regular'}`}>
+                  {isPlayoffZone ? 'ZONA PLAYOFFS 🏆' : 'FASE REGULAR'}
+                </span>
               </div>
 
               <table className="sorteo-standings-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '45px' }}>POS</th>
+                    <th style={{ width: '38px' }}>POS</th>
                     <th className="th-team">EQUIPO</th>
-                    <th style={{ width: '50px' }}>GRUPO</th>
-                    <th style={{ width: '45px' }}>PJ</th>
-                    <th style={{ width: '45px' }}>V</th>
-                    <th style={{ width: '45px' }}>D</th>
-                    <th style={{ width: '55px' }}>DIF</th>
-                    <th style={{ width: '55px' }}>PTS</th>
+                    <th style={{ width: '46px' }}>GRUPO</th>
+                    <th style={{ width: '36px' }}>PJ</th>
+                    <th style={{ width: '36px' }}>V</th>
+                    <th style={{ width: '36px' }}>D</th>
+                    <th style={{ width: '46px' }}>DIF</th>
+                    <th style={{ width: '46px' }}>PTS</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {standingsData.map((team, idx) => {
-                    const pos = idx + 1;
+                  {teamsList.map((team, idx) => {
+                    const pos = startPos + idx;
+                    const isTop1 = pos === 1;
+                    const isTop3 = pos <= 3;
                     const isTop8 = pos <= 8;
                     const teamTag = getTeamTag(team.name);
 
                     return (
-                      <tr key={team.name || idx} className={isTop8 ? 'top-qualifier' : ''}>
+                      <tr key={team.name || idx} className={`standings-row ${isTop8 ? 'row-playoff' : 'row-regular'}`}>
                         <td>
-                          <span className={`standings-pos-badge ${pos === 1 ? 'gold' : isTop8 ? 'top8' : 'normal'}`}>
+                          <span className={`standings-pos-badge ${isTop1 ? 'gold' : isTop3 ? 'podium' : isTop8 ? 'top8' : 'normal'}`}>
                             {pos}
                           </span>
                         </td>
@@ -447,21 +649,14 @@ export default function OverlayGruposSorteo() {
                           </div>
                         </td>
                         <td>
-                          <span style={{
-                            fontSize: '11px',
-                            fontWeight: 900,
-                            color: team.grupo === 'A' ? '#ff4655' : team.grupo === 'B' ? '#00f5d4' : team.grupo === 'C' ? '#c084fc' : '#38bdf8',
-                            background: 'rgba(255,255,255,0.05)',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                          }}>
+                          <span className={`standings-group-pill group-pill-${team.grupo || 'A'}`}>
                             G-{team.grupo || 'A'}
                           </span>
                         </td>
                         <td>{team.pj || 0}</td>
-                        <td style={{ color: '#00f5d4' }}>{team.wins || 0}</td>
-                        <td style={{ color: '#ff4655' }}>{team.losses || 0}</td>
-                        <td style={{ color: team.diff > 0 ? '#00f5d4' : team.diff < 0 ? '#ff4655' : '#aaa' }}>
+                        <td className="stat-win">{team.wins || 0}</td>
+                        <td className="stat-loss">{team.losses || 0}</td>
+                        <td className={team.diff > 0 ? 'stat-diff-pos' : team.diff < 0 ? 'stat-diff-neg' : 'stat-diff-zero'}>
                           {team.diff > 0 ? `+${team.diff}` : team.diff || 0}
                         </td>
                         <td className="standings-pts-cell">{team.pts || 0}</td>
@@ -471,8 +666,37 @@ export default function OverlayGruposSorteo() {
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
+          );
+
+          return (
+            <div key={activePhase} className="phase-content-wrapper">
+              <div className="sorteo-standings-container">
+                <div className="sorteo-standings-header-row">
+                  <div className="sorteo-standings-title">
+                    <span className="standings-trophy-icon">🏆</span>
+                    <span>TABLA GENERAL DE CLASIFICACIÓN // FASE DE LIGA</span>
+                    <span className="standings-count-badge">16 EQUIPOS</span>
+                  </div>
+                  <div className="sorteo-standings-legend">
+                    <span className="legend-playoff">
+                      <span className="legend-dot-cyan" />
+                      TOP 1-8: CUARTOS DE FINAL (PLAYOFFS)
+                    </span>
+                    <span className="legend-regular">
+                      <span className="legend-dot-gray" />
+                      PUESTOS 9-16: ZONA ELIMINADA
+                    </span>
+                  </div>
+                </div>
+
+                <div className="sorteo-standings-split-grid">
+                  {renderStandingsSubTable(top8, 1, true)}
+                  {renderStandingsSubTable(bottom8, 9, false)}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* FASE 4: JORNADAS / CALENDARIO (4 COLUMNAS DE PARTIDOS) */}
         {(activePhase === 'jornadas' || (activePhase === 'liga' && jornadas && jornadas.length > 0)) && (
@@ -560,7 +784,7 @@ export default function OverlayGruposSorteo() {
         {/* MODO DEFAULT (FALLBACK) */}
         {activePhase !== 'presentacion' && activePhase !== 'sorteo' && activePhase !== 'clasificacion' && activePhase !== 'jornadas' && activePhase !== 'liga' && (
           <div key="default" className="phase-content-wrapper">
-            {renderGruposGrid()}
+            {renderGruposGrid(false)}
           </div>
         )}
 
@@ -622,156 +846,6 @@ export default function OverlayGruposSorteo() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* COPA PRIMATE DRAW HUD OVERLAY (SORTEO DE RIVALES EN VIVO) */}
-        {championsAnimation && (
-          <div className="champions-draw-modal">
-            {(() => {
-              const startedAt = championsAnimation.startedAt || Date.now();
-              const stepDuration = championsAnimation.stepDuration || 1600;
-              const elapsed = Date.now() - startedAt;
-              const autoStep = Math.min(4, Math.max(1, Math.floor(elapsed / stepDuration) + 1));
-              const currentStep = championsAnimation.revealedCount || championsAnimation.step || (championsAnimation.status === 'completed' ? 4 : autoStep);
-              const isCompleted = championsAnimation.status === 'completed' || (elapsed >= stepDuration * 4 && !championsAnimation.revealedCount);
-
-              const teamObj = typeof championsAnimation.team === 'string'
-                ? { name: championsAnimation.team, logo: '/logo1.png', grupo: 'A', bombo: 1 }
-                : (championsAnimation.team || drawingTeam || { name: 'Equipo', logo: '/logo1.png', grupo: 'A', bombo: 1 });
-
-              const teamName = teamObj.name || 'Equipo';
-              const teamLogo = teamObj.logo || '/logo1.png';
-              const teamGroup = teamObj.grupo || 'A';
-              const teamBombo = teamObj.bombo || 1;
-
-              const matchupsList = Array.isArray(championsAnimation.matchups)
-                ? championsAnimation.matchups
-                : (Array.isArray(championsAnimation.revealedMatchups) ? championsAnimation.revealedMatchups : []);
-
-              return (
-                <div className="champions-hud-container">
-                  {/* HUD Header */}
-                  <div className="champions-hud-header">
-                    <div className="champions-hud-title-wrap">
-                      <span className="champions-stars-icon">⭐</span>
-                      <div>
-                        <div className="champions-hud-subtitle">COPA PRIMATE // SORTEO DE LIGA</div>
-                        <h2 className="champions-hud-title">COPA PRIMATE DRAW SYSTEM</h2>
-                      </div>
-                    </div>
-                    <div className={`champions-status-badge ${isCompleted ? 'completed' : 'running'}`}>
-                      <span className="spotlight-live-dot" />
-                      {isCompleted ? 'SORTEO FINALIZADO' : 'ESCANEANDO RIVALES EN DIRECTO'}
-                    </div>
-                  </div>
-
-                  {/* Selected Team Showcase */}
-                  <div className="champions-selected-team-banner">
-                    <div className="shield-halo" />
-                    <div className="champions-team-main-col">
-                      <div className="champions-team-logo-wrap">
-                        <img
-                          src={teamLogo}
-                          alt={teamName}
-                          className="champions-team-logo"
-                          onError={(e) => { e.target.src = '/logo1.png'; }}
-                        />
-                      </div>
-                      <div className="champions-team-info-col">
-                        <span className="champions-team-tag">{getTeamTag(teamName)}</span>
-                        <h3 className="champions-team-name">{teamName}</h3>
-                      </div>
-                    </div>
-                    <div className="champions-team-badges-col">
-                      <span className="champions-pot-pill">BOMBO {teamBombo}</span>
-                      <span className="champions-group-pill">GRUPO {teamGroup}</span>
-                    </div>
-                  </div>
-
-                  {/* 4 Matchups Grid */}
-                  <div className="champions-matchups-grid">
-                    {[1, 2, 3, 4].map((jNum) => {
-                      const matchItem = matchupsList.find(m => Number(m.jornada) === jNum) || matchupsList[jNum - 1];
-                      const opp = matchItem?.opponent || (matchItem?.rival ? {
-                        name: matchItem.rival,
-                        logo: matchItem.logo || '/logo1.png',
-                        grupo: matchItem.grupo || 'A',
-                        bombo: matchItem.bombo || 1,
-                      } : null);
-
-                      const isRevealed = jNum <= currentStep && opp;
-                      const isScanning = jNum === currentStep + 1 && !isCompleted;
-                      const isPending = !isRevealed && !isScanning;
-
-                      return (
-                        <div
-                          key={jNum}
-                          className={`matchup-card-slot ${isRevealed ? 'revealed' : ''} ${isScanning ? 'scanning' : ''} ${isPending ? 'pending' : ''}`}
-                        >
-                          <div className="matchup-jornada-header">
-                            <span className="matchup-jornada-title">JORNADA {jNum}</span>
-                            <span className="matchup-status-icon">
-                              {isRevealed ? '✅' : isScanning ? '⚡' : '🔒'}
-                            </span>
-                          </div>
-
-                          {isRevealed ? (
-                            <div className="matchup-revealed-body">
-                              {jNum === currentStep && <div className="lock-flash" />}
-                              <img
-                                src={opp.logo || '/logo1.png'}
-                                alt={opp.name}
-                                className="matchup-opponent-logo"
-                                onError={(e) => { e.target.src = '/logo1.png'; }}
-                              />
-                              <span className="matchup-opponent-tag">{getTeamTag(opp.name)}</span>
-                              <div className="matchup-opponent-name" title={opp.name}>
-                                {opp.name}
-                              </div>
-                              <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
-                                <span className="lock-pill locked">BOMBO {opp.bombo || 1}</span>
-                                {opp.grupo && <span className="lock-pill locked">G-{opp.grupo}</span>}
-                              </div>
-                            </div>
-                          ) : isScanning ? (
-                            <div className="matrix-scanner">
-                              <div className="scan-laser" />
-                              <div className="matrix-scanner-orb">🎰</div>
-                              <span className="matrix-glitch-text">BUSCANDO RIVAL...</span>
-                              <span style={{ fontSize: '10px', color: '#00f5d4', fontWeight: 800, letterSpacing: '1px' }}>
-                                B{jNum} MATRIX LOCK
-                              </span>
-                            </div>
-                          ) : (
-                            <div className="matchup-pending-body">
-                              <span className="matchup-pending-icon">🔒</span>
-                              <span className="matchup-pending-label">PENDIENTE</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* HUD Footer */}
-                  <div className="champions-hud-footer">
-                    <span className="champions-hud-engine-note">
-                      QUANTUM DRAW ENGINE // 100% COLLISION FREE · 32 PARTIDOS
-                    </span>
-                    <div className="champions-hud-progress-wrap">
-                      <div className="champions-hud-progress-bar">
-                        <div
-                          className="champions-hud-progress-fill"
-                          style={{ width: `${Math.min(100, (currentStep / 4) * 100)}%` }}
-                        />
-                      </div>
-                      <span className="champions-hud-progress-text">{currentStep} / 4 RIVALES</span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })()}
           </div>
         )}
 
