@@ -6,6 +6,8 @@ import {
 import { apiFetch } from '../api';
 import ConfirmModal from './ConfirmModal';
 import './copaGrupos.css';
+import './overlays/overlayGruposSorteo.css';
+import { getTeamTag } from './overlays/OverlayGruposSorteo';
 
 const MAPS = ['Ascent', 'Bind', 'Haven', 'Split', 'Sunset', 'Lotus', 'Abyss', 'Icebox', 'Breeze', 'Fracture', 'Pearl'];
 
@@ -89,6 +91,21 @@ const BOMBOS_DATA = [
   }
 ];
 
+// Utilidades de resolución de bombos y grupos
+function getTeamPot(teamName) {
+  for (const b of BOMBOS_DATA) {
+    if (b.teams.some(t => t.name === teamName)) return b.bombo;
+  }
+  return 1;
+}
+
+function getTeamGroup(teamName, currentGrupos) {
+  for (const [gKey, list] of Object.entries(currentGrupos || {})) {
+    if (Array.isArray(list) && list.some(t => t.name === teamName)) return gKey;
+  }
+  return 'A';
+}
+
 // Generador de cruces de fase de liga balanceados
 function generarCalendarioLiga(gruposData) {
   const allTeams = Object.values(gruposData).flat();
@@ -148,8 +165,9 @@ function generarCalendarioLiga(gruposData) {
     partidos.map((p, idx) => ({
       id: `j${jNum}-m${idx + 1}`,
       jornada: jNum,
-      t1: { name: p.t1.name, logo: p.t1.logo, grupo: p.t1.grupo },
-      t2: { name: p.t2.name, logo: p.t2.logo, grupo: p.t2.grupo },
+      round: `J${jNum}`,
+      t1: { name: p.t1.name, logo: p.t1.logo, grupo: p.t1.grupo, bombo: p.t1.bombo || getTeamPot(p.t1.name) },
+      t2: { name: p.t2.name, logo: p.t2.logo, grupo: p.t2.grupo, bombo: p.t2.bombo || getTeamPot(p.t2.name) },
       score1: '',
       score2: '',
       status: 'Programado',
@@ -165,6 +183,7 @@ export default function CopaGruposLiga() {
   const [grupos, setGrupos] = useState(DEFAULT_GRUPOS);
   const [revealedTeams, setRevealedTeams] = useState([]);
   const [zoomedTeam, setZoomedTeam] = useState(null);
+  const [spotlightTeam, setSpotlightTeam] = useState(null);
   const [jornadas, setJornadas] = useState([]);
   const [isSpinningBall, setIsSpinningBall] = useState(false);
   const [activeAccordion, setActiveAccordion] = useState(0);
@@ -185,7 +204,24 @@ export default function CopaGruposLiga() {
   const [isAutoDrawing, setIsAutoDrawing] = useState(false);
   const autoDrawTimerRef = useRef(null);
 
-  const broadcastSorteoState = (customGrupos = grupos, customDrawing = drawingTeam, spinning = isSpinningBall, customRevealed = revealedTeams, phase = activePhase) => {
+  // Milestone 3: Sorteo Champions League State
+  const [selectedTeamForDraw, setSelectedTeamForDraw] = useState(null);
+  const [drawnTeamNames, setDrawnTeamNames] = useState([]);
+  const [championsModalState, setChampionsModalState] = useState(null);
+  const championsAnimIntervalRef = useRef(null);
+  const championsAudioRef = useRef(null);
+  const championsLastStepRef = useRef(0);
+
+  const broadcastSorteoState = (
+    customGrupos = grupos,
+    customDrawing = drawingTeam,
+    spinning = isSpinningBall,
+    customRevealed = revealedTeams,
+    phase = activePhase,
+    customSpotlight = spotlightTeam,
+    customChampionsAnim = championsModalState,
+    customDrawnNames = drawnTeamNames
+  ) => {
     apiFetch('/overlay-state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -197,16 +233,321 @@ export default function CopaGruposLiga() {
           revealedTeams: customRevealed,
           drawingTeam: customDrawing,
           isSpinning: spinning,
+          spotlightTeam: customSpotlight,
+          zoomedTeam: customSpotlight,
+          championsAnimation: customChampionsAnim !== undefined ? customChampionsAnim : null,
+          drawnTeamNames: customDrawnNames,
         }
       })
     }).catch(() => {});
   };
 
+  const toggleSpotlightStream = (team) => {
+    playClickSound();
+    if (spotlightTeam?.name === team?.name) {
+      setSpotlightTeam(null);
+      broadcastSorteoState(grupos, drawingTeam, isSpinningBall, revealedTeams, activePhase, null);
+    } else if (team) {
+      const gKey = team.grupo || Object.keys(grupos).find(k => (grupos[k] || []).some(t => t.name === team.name)) || 'A';
+      const potIdx = team.bombo || BOMBOS_DATA.find(b => b.teams.some(t => t.name === team.name))?.bombo || ((grupos[gKey] || []).findIndex(t => t.name === team.name) + 1) || 1;
+      const target = {
+        ...team,
+        grupo: gKey,
+        bombo: potIdx,
+      };
+      setSpotlightTeam(target);
+      broadcastSorteoState(grupos, drawingTeam, isSpinningBall, revealedTeams, activePhase, target);
+    }
+  };
+
+  const closeSpotlightStream = () => {
+    playClickSound();
+    setSpotlightTeam(null);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, revealedTeams, activePhase, null);
+  };
+
   const audioCtxRef = useRef(null);
+
+  const playScannerSweepSound = () => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx && ctx.state === 'running') {
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(700, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.18);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.19);
+      }
+    } catch {}
+  };
+
+  const playLockInChimeSound = (stepIndex) => {
+    try {
+      if (!audioCtxRef.current) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtxRef.current = new AudioCtx();
+      }
+      const ctx = audioCtxRef.current;
+      if (ctx && ctx.state === 'running') {
+        const freqs = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        const baseFreq = freqs[Math.min(freqs.length - 1, Math.max(0, (stepIndex || 1) - 1))] || 523.25;
+        const now = ctx.currentTime;
+
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(baseFreq, now);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.66);
+
+        const subOsc = ctx.createOscillator();
+        const subGain = ctx.createGain();
+        subOsc.type = 'sine';
+        subOsc.frequency.setValueAtTime(140, now);
+        subOsc.frequency.exponentialRampToValueAtTime(45, now + 0.3);
+        subGain.gain.setValueAtTime(0.2, now);
+        subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        subOsc.connect(subGain);
+        subGain.connect(ctx.destination);
+        subOsc.start(now);
+        subOsc.stop(now + 0.31);
+      }
+    } catch {}
+  };
+
+  const playChampionsAnthem = () => {
+    try {
+      if (!championsAudioRef.current) {
+        championsAudioRef.current = new Audio('/champions.mp3');
+      }
+      championsAudioRef.current.currentTime = 0;
+      championsAudioRef.current.volume = 0.55;
+      championsAudioRef.current.play().catch(() => {});
+    } catch {}
+  };
+
+  const stopChampionsAnthem = () => {
+    try {
+      if (championsAudioRef.current) {
+        championsAudioRef.current.pause();
+        championsAudioRef.current.currentTime = 0;
+      }
+    } catch {}
+  };
+
+  // Helper para resolver los 4 enfrentamientos deterministas de un equipo
+  const resolveTeamMatchups = (targetTeam, currentGrupos = grupos, currentJornadas = jornadas) => {
+    let activeJornadas = currentJornadas;
+    if (!activeJornadas || activeJornadas.length !== 4 || !activeJornadas[0] || activeJornadas[0].length !== 8) {
+      activeJornadas = generarCalendarioLiga(currentGrupos);
+    }
+
+    const tNameNorm = String(targetTeam?.name || '').toLowerCase().trim();
+    const matchups = [];
+
+    for (let jIdx = 0; jIdx < 4; jIdx++) {
+      const jNum = jIdx + 1;
+      const jMatches = activeJornadas[jIdx] || [];
+      const match = jMatches.find(m => {
+        const n1 = String(m?.t1?.name || '').toLowerCase().trim();
+        const n2 = String(m?.t2?.name || '').toLowerCase().trim();
+        return n1 === tNameNorm || n2 === tNameNorm;
+      });
+
+      if (match) {
+        const isT1 = String(match?.t1?.name || '').toLowerCase().trim() === tNameNorm;
+        const oppRaw = isT1 ? match.t2 : match.t1;
+        const oppName = oppRaw?.name || `Rival J${jNum}`;
+        const oppLogo = oppRaw?.logo || '/copa-logo.png';
+        const oppGrupo = oppRaw?.grupo || getTeamGroup(oppName, currentGrupos);
+        const oppBombo = oppRaw?.bombo || getTeamPot(oppName);
+
+        matchups.push({
+          jornada: jNum,
+          opponent: {
+            name: oppName,
+            logo: oppLogo,
+            grupo: oppGrupo,
+            bombo: oppBombo,
+          },
+          rival: oppName,
+          logo: oppLogo,
+          grupo: oppGrupo,
+          bombo: oppBombo,
+        });
+      } else {
+        matchups.push({
+          jornada: jNum,
+          opponent: {
+            name: `Rival J${jNum}`,
+            logo: '/copa-logo.png',
+            grupo: 'A',
+            bombo: jNum,
+          },
+          rival: `Rival J${jNum}`,
+          logo: '/copa-logo.png',
+          grupo: 'A',
+          bombo: jNum,
+        });
+      }
+    }
+
+    return matchups;
+  };
+
+  // Disparador del Sorteo Champions League interactivo y sincronizado
+  const triggerChampionsSorteo = (team) => {
+    if (!team) return;
+    playClickSound();
+
+    if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
+      audioCtxRef.current.resume().catch(() => {});
+    }
+
+    let activeJornadas = jornadas;
+    if (!activeJornadas || activeJornadas.length !== 4 || !activeJornadas[0] || activeJornadas[0].length !== 8) {
+      activeJornadas = generarCalendarioLiga(grupos);
+      setJornadas(activeJornadas);
+      saveLigaState(activeJornadas);
+    }
+
+    const tGrupo = team.grupo || getTeamGroup(team.name, grupos);
+    const tBombo = team.bombo || getTeamPot(team.name);
+    const teamFull = { ...team, grupo: tGrupo, bombo: tBombo };
+
+    const matchups = resolveTeamMatchups(teamFull, grupos, activeJornadas);
+
+    const animId = Date.now();
+    const startedAt = Date.now();
+    const stepDuration = 1600;
+
+    const initialAnim = {
+      animId,
+      status: 'running',
+      active: true,
+      team: {
+        name: teamFull.name,
+        logo: teamFull.logo || '/copa-logo.png',
+        grupo: tGrupo,
+        bombo: tBombo,
+      },
+      matchups,
+      revealedMatchups: [matchups[0]],
+      revealedCount: 1,
+      step: 1,
+      startedAt,
+      stepDuration,
+    };
+
+    setChampionsModalState(initialAnim);
+    setDrawingTeam(teamFull);
+    championsLastStepRef.current = 1;
+    playLockInChimeSound(1);
+
+    const nextDrawn = drawnTeamNames.includes(team.name) ? drawnTeamNames : [...drawnTeamNames, team.name];
+    setDrawnTeamNames(nextDrawn);
+
+    const nextRevealed = Array.from(new Set([...revealedTeams, team.name, matchups[0].opponent.name]));
+    setRevealedTeams(nextRevealed);
+
+    broadcastSorteoState(grupos, teamFull, false, nextRevealed, activePhase, spotlightTeam, initialAnim, nextDrawn);
+
+    if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
+
+    championsAnimIntervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      const currentStep = Math.min(4, Math.max(1, Math.floor(elapsed / stepDuration) + 1));
+      const isComplete = elapsed >= stepDuration * 4;
+
+      if (currentStep > championsLastStepRef.current) {
+        championsLastStepRef.current = currentStep;
+        playLockInChimeSound(currentStep);
+
+        const currentOppNames = matchups.slice(0, currentStep).map(m => m.opponent.name);
+        const updatedRevealed = Array.from(new Set([...revealedTeams, team.name, ...currentOppNames]));
+        setRevealedTeams(updatedRevealed);
+
+        const updatedAnim = {
+          ...initialAnim,
+          status: isComplete ? 'completed' : 'running',
+          revealedCount: currentStep,
+          step: currentStep,
+          revealedMatchups: matchups.slice(0, currentStep),
+        };
+
+        setChampionsModalState(updatedAnim);
+        broadcastSorteoState(grupos, teamFull, false, updatedRevealed, activePhase, spotlightTeam, updatedAnim, nextDrawn);
+      }
+
+      if (isComplete) {
+        clearInterval(championsAnimIntervalRef.current);
+        championsAnimIntervalRef.current = null;
+        playChampionsAnthem();
+
+        const allOppNames = matchups.map(m => m.opponent.name);
+        const finalRevealed = Array.from(new Set([...revealedTeams, team.name, ...allOppNames]));
+        setRevealedTeams(finalRevealed);
+
+        const completedAnim = {
+          ...initialAnim,
+          status: 'completed',
+          active: false,
+          revealedCount: 4,
+          step: 4,
+          revealedMatchups: matchups,
+        };
+
+        setChampionsModalState(completedAnim);
+        broadcastSorteoState(grupos, teamFull, false, finalRevealed, activePhase, spotlightTeam, completedAnim, nextDrawn);
+      }
+    }, 100);
+  };
+
+  const dismissChampionsModal = () => {
+    playClickSound();
+    stopChampionsAnthem();
+    if (championsAnimIntervalRef.current) {
+      clearInterval(championsAnimIntervalRef.current);
+      championsAnimIntervalRef.current = null;
+    }
+    setChampionsModalState(null);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, revealedTeams, activePhase, spotlightTeam, null, drawnTeamNames);
+  };
 
   // Cargar estado inicial desde servidor o inicializar
   useEffect(() => {
     fetchLigaState();
+  }, []);
+
+  // Cleanup de intervalos y audio en desmontaje
+  useEffect(() => {
+    return () => {
+      if (championsAnimIntervalRef.current) {
+        clearInterval(championsAnimIntervalRef.current);
+        championsAnimIntervalRef.current = null;
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
+      if (championsAudioRef.current) {
+        championsAudioRef.current.pause();
+      }
+    };
   }, []);
 
   const playClickSound = () => {
@@ -235,9 +576,13 @@ export default function CopaGruposLiga() {
 
   const fetchLigaState = async () => {
     try {
-      const res = await apiFetch('/matches');
-      if (res.ok) {
-        const data = await res.json();
+      const [resMatches, resOverlay] = await Promise.all([
+        apiFetch('/matches').catch(() => null),
+        apiFetch('/overlay-state').catch(() => null),
+      ]);
+
+      if (resMatches && resMatches.ok) {
+        const data = await resMatches.json();
         if (data && data.groups && Object.keys(data.groups).length === 4) {
           // Reconstruir grupos con jugadores
           const gA = data.groups.A || DEFAULT_GRUPOS.A;
@@ -262,6 +607,21 @@ export default function CopaGruposLiga() {
           }
         } else {
           setJornadas(generarCalendarioLiga(DEFAULT_GRUPOS));
+        }
+      }
+
+      if (resOverlay && resOverlay.ok) {
+        const oData = await resOverlay.json();
+        if (oData && oData.sorteo) {
+          if (Array.isArray(oData.sorteo.revealedTeams)) {
+            setRevealedTeams(oData.sorteo.revealedTeams);
+          }
+          const activeSpot = oData.sorteo.spotlightTeam !== undefined
+            ? oData.sorteo.spotlightTeam
+            : (oData.sorteo.zoomedTeam !== undefined ? oData.sorteo.zoomedTeam : null);
+          if (activeSpot) {
+            setSpotlightTeam(activeSpot);
+          }
         }
       }
     } catch (e) {
@@ -298,7 +658,7 @@ export default function CopaGruposLiga() {
     playClickSound();
     setRevealedTeams(prev => {
       const updated = prev.includes(teamName) ? prev.filter(t => t !== teamName) : [...prev, teamName];
-      broadcastSorteoState(grupos, drawingTeam, isSpinningBall, updated);
+      broadcastSorteoState(grupos, drawingTeam, isSpinningBall, updated, activePhase, spotlightTeam);
       return updated;
     });
   };
@@ -307,13 +667,13 @@ export default function CopaGruposLiga() {
     playClickSound();
     const allNames = Object.values(grupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
-    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, allNames);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, allNames, activePhase, spotlightTeam);
   };
 
   const hideAll = () => {
     playClickSound();
     setRevealedTeams([]);
-    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, []);
+    broadcastSorteoState(grupos, drawingTeam, isSpinningBall, [], activePhase, spotlightTeam);
   };
 
   // Extraer una bola de forma individual
@@ -411,19 +771,26 @@ export default function CopaGruposLiga() {
   // Reiniciar Sorteo a 0
   const reiniciarSorteo = () => {
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
+    if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
+    stopChampionsAnthem();
     setIsAutoDrawing(false);
     setIsSpinningBall(false);
     setDrawingTeam(null);
+    setChampionsModalState(null);
+    setSelectedTeamForDraw(null);
+    setDrawnTeamNames([]);
     const emptyGrupos = { A: [], B: [], C: [], D: [] };
     setGrupos(emptyGrupos);
     setRevealedTeams([]);
-    broadcastSorteoState(emptyGrupos, null, false, []);
+    broadcastSorteoState(emptyGrupos, null, false, [], activePhase, null, null, []);
   };
 
   // Sorteo instantáneo de todos los bombos
   const ejecutarSorteoInstantaneo = () => {
     playClickSound();
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
+    if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
+    stopChampionsAnthem();
     setIsAutoDrawing(false);
     setIsSpinningBall(false);
 
@@ -444,10 +811,12 @@ export default function CopaGruposLiga() {
     setGrupos(nuevosGrupos);
     setJornadas(nuevoCalendario);
     setDrawingTeam(null);
+    setChampionsModalState(null);
     const allNames = Object.values(nuevosGrupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
+    setDrawnTeamNames(allNames);
     saveLigaState(nuevoCalendario);
-    broadcastSorteoState(nuevosGrupos, null, false, allNames);
+    broadcastSorteoState(nuevosGrupos, null, false, allNames, activePhase, null, null, allNames);
   };
 
   // Actualizar marcador de un partido en la fase de liga
@@ -718,6 +1087,27 @@ export default function CopaGruposLiga() {
         </button>
       </nav>
 
+      {/* BANNER DE ZOOM STREAM OBS ACTIVO */}
+      {spotlightTeam && (
+        <div className="copa-spotlight-active-banner">
+          <div className="copa-spotlight-banner-left">
+            <span className="copa-spotlight-pulse-dot" />
+            <span className="copa-spotlight-banner-title">
+              🔴 ZOOM STREAM ACTIVO: <strong className="copa-spotlight-banner-team">{spotlightTeam.name}</strong>
+              {spotlightTeam.grupo ? ` (GRUPO ${spotlightTeam.grupo})` : ''}
+              {spotlightTeam.bombo ? ` · BOMBO ${spotlightTeam.bombo}` : ''}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="copa-btn-close-spotlight"
+            onClick={closeSpotlightStream}
+          >
+            <X size={15} /> CERRAR ZOOM STREAM
+          </button>
+        </div>
+      )}
+
       {/* BARRA DE MENSAJES DE GUARDADO */}
       {saveStatus && (
         <div style={{
@@ -774,16 +1164,42 @@ export default function CopaGruposLiga() {
 
                 {grupos[gKey]?.map(team => {
                   const isRevealed = revealedTeams.includes(team.name);
+                  const isSpotlight = spotlightTeam?.name === team.name;
                   return (
                     <div
                       key={team.id || team.name}
-                      className={`copa-team-card ${isRevealed ? 'revealed' : ''}`}
+                      className={`copa-team-card ${isRevealed ? 'revealed' : ''} ${isSpotlight ? 'spotlight-active' : ''}`}
                       onClick={() => toggleReveal(team.name)}
                       onDoubleClick={(e) => {
                         e.stopPropagation();
                         setZoomedTeam(team);
                       }}
                     >
+                      <div className="copa-card-actions">
+                        <button
+                          type="button"
+                          className={`copa-card-btn copa-card-btn-reveal ${isRevealed ? 'active' : ''}`}
+                          title={isRevealed ? "Ocultar en stream (Eye)" : "Revelar en stream (Eye)"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleReveal(team.name);
+                          }}
+                        >
+                          {isRevealed ? <EyeOff size={14} /> : <Eye size={14} />}
+                        </button>
+                        <button
+                          type="button"
+                          className={`copa-card-btn copa-card-btn-zoom ${isSpotlight ? 'active' : ''}`}
+                          title={isSpotlight ? "Quitar Zoom Stream" : "Zoom Stream OBS"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSpotlightStream(team);
+                          }}
+                        >
+                          <Sparkles size={14} />
+                        </button>
+                      </div>
+
                       <div className="copa-smoke-cover" />
                       <div className={`copa-group-badge ${gKey}`}>GRUPO {gKey}</div>
                       
@@ -959,6 +1375,81 @@ export default function CopaGruposLiga() {
               </div>
             </div>
 
+            {/* SELECTOR LIBRE DE EQUIPO PARA SORTEO CHAMPIONS LEAGUE (R2) */}
+            <div className="copa-sorteo-box" style={{
+              background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.95), rgba(10, 14, 24, 0.98))',
+              border: '1.5px solid #00f5d4',
+              borderRadius: '16px',
+              padding: '20px 24px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '14px',
+              boxShadow: '0 8px 30px rgba(0, 245, 212, 0.15)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#00f5d4', fontWeight: 900, letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Sparkles size={18} color="#00f5d4" /> SORTEO CHAMPIONS LEAGUE · ORDEN LIBRE
+                  </h4>
+                  <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '3px' }}>
+                    Selecciona cualquier equipo de los 4 bombos para sortear secuencialmente sus 4 rivales de liga en tiempo real.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <span style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 800 }}>
+                    SORTEADOS: {drawnTeamNames.length} / 16 EQUIPOS
+                  </span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                <select
+                  value={selectedTeamForDraw?.name || ''}
+                  onChange={(e) => {
+                    const found = BOMBOS_DATA.flatMap(b => b.teams.map(t => ({ ...t, bombo: b.bombo, grupo: getTeamGroup(t.name, grupos) }))).find(t => t.name === e.target.value);
+                    if (found) setSelectedTeamForDraw(found);
+                  }}
+                  style={{
+                    flex: '1 1 280px',
+                    background: 'rgba(0, 0, 0, 0.6)',
+                    color: '#fff',
+                    border: '1.5px solid rgba(0, 245, 212, 0.4)',
+                    borderRadius: '8px',
+                    padding: '10px 14px',
+                    fontSize: '0.92rem',
+                    fontWeight: 800,
+                  }}
+                >
+                  <option value="">-- Elige un equipo para sortear rivales (16 disponibles) --</option>
+                  {BOMBOS_DATA.flatMap(b => b.teams.map(t => ({ ...t, bombo: b.bombo, grupo: getTeamGroup(t.name, grupos) }))).map(t => {
+                    const isDrawn = drawnTeamNames.includes(t.name);
+                    return (
+                      <option key={t.name} value={t.name}>
+                        {isDrawn ? '✓ ' : '○ '} [Bombo {t.bombo} · Grupo {t.grupo}] {t.name}
+                      </option>
+                    );
+                  })}
+                </select>
+
+                <button
+                  type="button"
+                  className="btn-v-action"
+                  disabled={!selectedTeamForDraw}
+                  onClick={() => selectedTeamForDraw && triggerChampionsSorteo(selectedTeamForDraw)}
+                  style={{
+                    background: 'linear-gradient(135deg, #00f5d4 0%, #0284c7 100%)',
+                    color: '#08080b',
+                    borderColor: '#00f5d4',
+                    fontWeight: 900,
+                    padding: '11px 22px',
+                    fontSize: '0.92rem',
+                  }}
+                >
+                  <Sparkles size={16} /> SORTEAR RIVALES {selectedTeamForDraw ? `(${selectedTeamForDraw.name})` : ''}
+                </button>
+              </div>
+            </div>
+
             {/* VISTA DE LOS 4 BOMBOS OFICIALES */}
             <div>
               <h4 style={{ fontSize: '1rem', color: '#fff', fontWeight: 900, letterSpacing: '1.5px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -983,14 +1474,14 @@ export default function CopaGruposLiga() {
                         {b.title}
                       </span>
                       <span style={{ fontSize: '10px', color: '#aaa', fontWeight: 800 }}>
-                        {b.teams.filter(t => allAssigned.some(a => a.name === t.name)).length}/4
+                        {b.teams.filter(t => drawnTeamNames.includes(t.name) || allAssigned.some(a => a.name === t.name)).length}/4
                       </span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {b.teams.map((t) => {
-                        const isDrawn = allAssigned.some((a) => a.name === t.name);
-                        const assignedTo = allAssigned.find((a) => a.name === t.name)?.grupo;
+                        const isDrawn = drawnTeamNames.includes(t.name) || allAssigned.some((a) => a.name === t.name);
+                        const assignedTo = t.grupo || getTeamGroup(t.name, grupos) || allAssigned.find((a) => a.name === t.name)?.grupo;
                         return (
                           <div
                             key={t.name}
@@ -999,16 +1490,16 @@ export default function CopaGruposLiga() {
                               alignItems: 'center',
                               justifyContent: 'space-between',
                               background: isDrawn ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.04)',
-                              border: isDrawn ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(255,255,255,0.1)',
+                              border: isDrawn ? '1px solid rgba(0,245,212,0.3)' : '1px solid rgba(255,255,255,0.1)',
                               borderRadius: '6px',
                               padding: '6px 8px',
-                              opacity: isDrawn ? 0.45 : 1,
+                              opacity: isDrawn ? 0.75 : 1,
                               transition: 'all 0.25s',
                             }}
                           >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
                               <img src={t.logo} alt="" style={{ width: '22px', height: '22px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
-                              <span style={{ fontSize: '12px', fontWeight: 800, color: isDrawn ? '#888' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 800, color: isDrawn ? '#00f5d4' : '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                 {t.name}
                               </span>
                             </div>
@@ -1017,9 +1508,28 @@ export default function CopaGruposLiga() {
                                 ✓ G-{assignedTo}
                               </span>
                             ) : (
-                              <span style={{ fontSize: '10px', color: '#ffb300', fontWeight: 900 }}>
-                                EN BOMBO
-                              </span>
+                              <button
+                                type="button"
+                                className="btn-v-secondary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedTeamForDraw(t);
+                                  triggerChampionsSorteo(t);
+                                }}
+                                style={{
+                                  fontSize: '10px',
+                                  padding: '2px 8px',
+                                  background: 'rgba(0, 245, 212, 0.15)',
+                                  borderColor: '#00f5d4',
+                                  color: '#00f5d4',
+                                  fontWeight: 900,
+                                  borderRadius: '4px',
+                                  cursor: 'pointer',
+                                }}
+                                title={`Sortear rivales de ${t.name}`}
+                              >
+                                SORTEAR
+                              </button>
                             )}
                           </div>
                         );
@@ -1289,6 +1799,156 @@ export default function CopaGruposLiga() {
       )}
 
       {/* =========================================================
+          MODAL CHAMPIONS LEAGUE SORTEO HUD (MILESTONE 3 / R2)
+          ========================================================= */}
+      {championsModalState && (
+        <div className="champions-draw-modal" style={{ zIndex: 1100 }} onClick={dismissChampionsModal}>
+          <div className="champions-hud-container" onClick={(e) => e.stopPropagation()}>
+            <div className="champions-hud-header">
+              <div className="champions-hud-title-wrap">
+                <span className="champions-stars-icon">⭐</span>
+                <div>
+                  <div className="champions-hud-subtitle">CHAMPIONS LEAGUE // PANEL DE SORTEO EN VIVO</div>
+                  <h2 className="champions-hud-title">COPA PRIMATE DRAW SYSTEM</h2>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <div className={`champions-status-badge ${championsModalState.status === 'completed' ? 'completed' : 'running'}`}>
+                  <span className="spotlight-live-dot" />
+                  {championsModalState.status === 'completed' ? 'SORTEO FINALIZADO' : 'ESCANEANDO RIVALES...'}
+                </div>
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  onClick={dismissChampionsModal}
+                  style={{
+                    background: 'rgba(255, 70, 85, 0.2)',
+                    borderColor: '#ff4655',
+                    color: '#fff',
+                    fontWeight: 900,
+                    padding: '6px 14px',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  <X size={16} /> CERRAR
+                </button>
+              </div>
+            </div>
+
+            {/* Banner del equipo seleccionado */}
+            <div className="champions-selected-team-banner">
+              <div className="shield-halo" />
+              <div className="champions-team-main-col">
+                <div className="champions-team-logo-wrap">
+                  <img
+                    src={championsModalState.team?.logo || '/copa-logo.png'}
+                    alt={championsModalState.team?.name}
+                    className="champions-team-logo"
+                    onError={(e) => { e.target.src = '/copa-logo.png'; }}
+                  />
+                </div>
+                <div className="champions-team-info-col">
+                  <span className="champions-team-tag">{getTeamTag(championsModalState.team?.name)}</span>
+                  <h3 className="champions-team-name">{championsModalState.team?.name}</h3>
+                </div>
+              </div>
+              <div className="champions-team-badges-col">
+                <span className="champions-pot-pill">BOMBO {championsModalState.team?.bombo || 1}</span>
+                <span className="champions-group-pill">GRUPO {championsModalState.team?.grupo || 'A'}</span>
+              </div>
+            </div>
+
+            {/* 4 Matchups Grid */}
+            <div className="champions-matchups-grid">
+              {[1, 2, 3, 4].map((jNum) => {
+                const currentStep = championsModalState.revealedCount || championsModalState.step || (championsModalState.status === 'completed' ? 4 : 1);
+                const isComplete = championsModalState.status === 'completed';
+                const matchItem = championsModalState.matchups?.find(m => Number(m.jornada) === jNum) || championsModalState.matchups?.[jNum - 1];
+                const opp = matchItem?.opponent;
+                const isRevealed = jNum <= currentStep && opp;
+                const isScanning = jNum === currentStep + 1 && !isComplete;
+                const isPending = !isRevealed && !isScanning;
+
+                return (
+                  <div
+                    key={jNum}
+                    className={`matchup-card-slot ${isRevealed ? 'revealed' : ''} ${isScanning ? 'scanning' : ''} ${isPending ? 'pending' : ''}`}
+                  >
+                    <div className="matchup-jornada-header">
+                      <span className="matchup-jornada-title">JORNADA {jNum}</span>
+                      <span className="matchup-status-icon">
+                        {isRevealed ? '✅' : isScanning ? '⚡' : '🔒'}
+                      </span>
+                    </div>
+
+                    {isRevealed ? (
+                      <div className="matchup-revealed-body">
+                        {jNum === currentStep && <div className="lock-flash" />}
+                        <img
+                          src={opp.logo || '/copa-logo.png'}
+                          alt={opp.name}
+                          className="matchup-opponent-logo"
+                          onError={(e) => { e.target.src = '/copa-logo.png'; }}
+                        />
+                        <span className="matchup-opponent-tag">{getTeamTag(opp.name)}</span>
+                        <div className="matchup-opponent-name" title={opp.name}>
+                          {opp.name}
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                          <span className="lock-pill locked">BOMBO {opp.bombo || 1}</span>
+                          {opp.grupo && <span className="lock-pill locked">G-{opp.grupo}</span>}
+                        </div>
+                      </div>
+                    ) : isScanning ? (
+                      <div className="matrix-scanner">
+                        <div className="scan-laser" />
+                        <div className="matrix-scanner-orb">🎰</div>
+                        <span className="matrix-glitch-text">BUSCANDO RIVAL...</span>
+                        <span style={{ fontSize: '10px', color: '#00f5d4', fontWeight: 800, letterSpacing: '1px' }}>
+                          B{jNum} MATRIX LOCK
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="matchup-pending-body">
+                        <span className="matchup-pending-icon">🔒</span>
+                        <span className="matchup-pending-label">PENDIENTE</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer */}
+            <div className="champions-hud-footer">
+              <span className="champions-hud-engine-note">
+                SORTEO DETERMINISTA SIN COLISIONES · 32 PARTIDOS EN CALENDARIO
+              </span>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
+                <span className="champions-hud-progress-text">
+                  {(championsModalState.revealedCount || championsModalState.step || (championsModalState.status === 'completed' ? 4 : 1))} / 4 RIVALES REVELADOS
+                </span>
+                <button
+                  type="button"
+                  className="btn-v-action"
+                  onClick={dismissChampionsModal}
+                  style={{
+                    background: 'linear-gradient(135deg, #00f5d4 0%, #0284c7 100%)',
+                    color: '#08080b',
+                    fontWeight: 900,
+                    padding: '8px 18px',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  CONTINUAR SORTEO →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================
           MODAL SPOTLIGHT ZOOM
           ========================================================= */}
       {zoomedTeam && (
@@ -1316,14 +1976,38 @@ export default function CopaGruposLiga() {
               ))}
             </div>
 
-            <button
-              type="button"
-              className="btn-v-action"
-              style={{ marginTop: '20px', width: '100%', justifyContent: 'center' }}
-              onClick={() => setZoomedTeam(null)}
-            >
-              CERRAR SPOTLIGHT
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px', width: '100%' }}>
+              <button
+                type="button"
+                className="btn-v-action"
+                style={{
+                  width: '100%',
+                  justifyContent: 'center',
+                  background: spotlightTeam?.name === zoomedTeam.name 
+                    ? 'linear-gradient(135deg, #ff4655, #b91c1c)' 
+                    : 'linear-gradient(135deg, #00f5d4, #00b4d8)',
+                  borderColor: spotlightTeam?.name === zoomedTeam.name ? '#ff4655' : '#00f5d4',
+                  color: spotlightTeam?.name === zoomedTeam.name ? '#fff' : '#08080b',
+                  fontWeight: 900
+                }}
+                onClick={() => toggleSpotlightStream(zoomedTeam)}
+              >
+                {spotlightTeam?.name === zoomedTeam.name ? (
+                  <>🔴 QUITAR DE STREAM OBS</>
+                ) : (
+                  <>📡 MOSTRAR EN STREAM (ZOOM OBS)</>
+                )}
+              </button>
+
+              <button
+                type="button"
+                className="btn-v-secondary"
+                style={{ width: '100%', justifyContent: 'center' }}
+                onClick={() => setZoomedTeam(null)}
+              >
+                CERRAR SPOTLIGHT
+              </button>
+            </div>
           </div>
         </div>
       )}

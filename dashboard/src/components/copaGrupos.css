@@ -171,6 +171,83 @@
   border-color: #00f5d4;
 }
 
+/* BANNER DE ZOOM STREAM OBS ACTIVO */
+.copa-spotlight-active-banner {
+  background: linear-gradient(90deg, rgba(255, 70, 85, 0.25) 0%, rgba(192, 132, 252, 0.2) 50%, rgba(255, 70, 85, 0.25) 100%);
+  border: 1.5px solid #ff4655;
+  border-radius: 10px;
+  padding: 12px 20px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-shadow: 0 0 25px rgba(255, 70, 85, 0.35);
+  animation: bannerPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes bannerPulse {
+  0% { box-shadow: 0 0 15px rgba(255, 70, 85, 0.25); }
+  100% { box-shadow: 0 0 30px rgba(255, 70, 85, 0.5); }
+}
+
+.copa-spotlight-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.copa-spotlight-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff4655;
+  box-shadow: 0 0 10px #ff4655;
+  animation: livePulseDot 1.2s infinite ease-in-out;
+}
+
+@keyframes livePulseDot {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.copa-spotlight-banner-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.copa-spotlight-banner-team {
+  color: #00f5d4;
+  font-weight: 900;
+}
+
+.copa-btn-close-spotlight {
+  background: #ff4655;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 0 12px rgba(255, 70, 85, 0.5);
+  text-transform: uppercase;
+}
+
+.copa-btn-close-spotlight:hover {
+  background: #ff2a3c;
+  transform: scale(1.04);
+  box-shadow: 0 0 20px rgba(255, 70, 85, 0.8);
+}
+
 /* GRUPOS GRID (4 COLUMNAS) */
 .copa-presentacion-grid {
   display: grid;
@@ -260,6 +337,58 @@
   border-color: var(--omen-purple);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.copa-team-card.spotlight-active {
+  border-color: #ff4655;
+  box-shadow: 0 0 15px rgba(255, 70, 85, 0.45);
+}
+
+/* Acciones en tarjeta de equipo */
+.copa-card-actions {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.copa-card-btn {
+  background: rgba(15, 14, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ccc;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
+}
+
+.copa-card-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-color: #00f5d4;
+  transform: scale(1.1);
+}
+
+.copa-card-btn-reveal.active {
+  background: rgba(0, 245, 212, 0.15);
+  border-color: #00f5d4;
+  color: #00f5d4;
+}
+
+.copa-card-btn-zoom.active {
+  background: rgba(255, 70, 85, 0.25);
+  border-color: #ff4655;
+  color: #ff4655;
+  box-shadow: 0 0 10px rgba(255, 70, 85, 0.5);
 }
 
 /* Smoke cover para revelar */

@@ -8,6 +8,12 @@ import {
 } from './helpers/test-utils.mjs';
 import { startTestServer, stopTestServer, ADMIN_TOKEN } from './helpers/server-fixture.mjs';
 import { backupDataFiles, restoreDataFiles } from './helpers/data-backup.mjs';
+import {
+  CANONICAL_POTS,
+  generateReferenceSchedule,
+  validateScheduleMath,
+} from './helpers/schedule-oracle.mjs';
+import { computeStandings } from '../src/api/public.js';
 
 export async function runTier3Tests() {
   const ctx = new TestRunnerContext('Tier 3 - Cross-Feature Combinations');
@@ -20,217 +26,231 @@ export async function runTier3Tests() {
     console.error('Failed to start test server for Tier 3:', err);
   }
 
-  if (serverInfo) {
-    const { baseUrl, adminToken } = serverInfo;
+  const { baseUrl, adminToken } = serverInfo || {};
 
+  if (baseUrl) {
     // =========================================================================
-    // Combination 1: Admin Score Update -> Persistence -> Public Overlay API
+    // Combination 1: Free Order Pick + Spotlight Stream Mode + Real-Time Sync
     // =========================================================================
-    await ctx.runTest('C1: Admin score update -> live-match.json disk persistence -> GET /api/public/live-match?overlay=1', async () => {
-      const payload = {
-        match: {
-          active: true,
-          status: 'LIVE',
-          team1: { name: 'Fusión Stars', score: 7, mapsWon: 1, logo: '/logos/fusion.png', side: 'ATT' },
-          team2: { name: 'Neon Titans', score: 5, mapsWon: 0, logo: '/logos/neon.png', side: 'DEF' },
-          map: 'Lotus',
-          round: 13,
-          format: 'BO3',
-          side: 'Attackers vs Defenders',
-          mvp: 'Broken',
-          notes: 'Cambio de bando tras ronda 12',
-        },
-      };
+    await ctx.runTest('T3.C1: Free Order Pick + Spotlight Stream Mode + Real-Time Sync', async () => {
+      const targetTeam = CANONICAL_POTS.C[0]; // Sakura
+      const revealedSoFar = ['Thunder Buddies', 'Sakura'];
 
-      // 1. Admin sends POST /api/live-match
-      const postRes = await fetch(`${baseUrl}/api/live-match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      assert.equal(postRes.status, 200, 'POST /api/live-match must return 200');
-
-      // 2. Verify disk persistence in live-match.json
-      const livePath = path.resolve(ROOT_DIR, 'live-match.json');
-      assert.ok(fs.existsSync(livePath), 'live-match.json must exist on disk');
-      const diskContent = JSON.parse(fs.readFileSync(livePath, 'utf8'));
-      assert.equal(diskContent.team1.name, 'Fusión Stars');
-      assert.equal(diskContent.team1.score, 7);
-      assert.equal(diskContent.team2.score, 5);
-      assert.equal(diskContent.map, 'Lotus');
-      assert.equal(diskContent.round, 13);
-
-      // 3. Verify public overlay endpoint serves persisted match
-      const getRes = await fetch(`${baseUrl}/api/public/live-match?overlay=1`);
-      assert.equal(getRes.status, 200, 'GET /api/public/live-match?overlay=1 must return 200');
-      const getBody = await getRes.json();
-      assert.ok(getBody.match, 'Should return match object');
-      assert.equal(getBody.match.team1.name, 'Fusión Stars');
-      assert.equal(getBody.match.team1.score, 7);
-      assert.equal(getBody.match.team2.score, 5);
-      assert.equal(getBody.match.map, 'Lotus');
-      assert.equal(getBody.match.round, 13);
-    });
-
-    // =========================================================================
-    // Combination 2: Admin Overlay Mode Change -> Persistence -> Public Overlay-State
-    // =========================================================================
-    await ctx.runTest('C2: Admin overlay mode change -> overlay-state.json disk persistence -> GET /api/public/overlay-state', async () => {
-      const payload = {
-        mode: 'matchup',
-        roulette: {
-          state: 'winner',
-          spinning: false,
-          spinId: 42,
-          winnerMap: 'Sunset',
-        },
-      };
-
-      // 1. Admin sends POST /api/overlay-state
+      // 1. Admin sends POST /api/overlay-state with zoomedTeam and revealedTeams
       const postRes = await fetch(`${baseUrl}/api/overlay-state`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(payload),
-      });
-      assert.equal(postRes.status, 200, 'POST /api/overlay-state must return 200');
-
-      // 2. Verify disk persistence in overlay-state.json
-      const overlayPath = path.resolve(ROOT_DIR, 'overlay-state.json');
-      assert.ok(fs.existsSync(overlayPath), 'overlay-state.json must exist');
-      const diskState = JSON.parse(fs.readFileSync(overlayPath, 'utf8'));
-      assert.equal(diskState.mode, 'matchup');
-      assert.equal(diskState.roulette?.spinId, 42);
-      assert.equal(diskState.roulette?.winnerMap, 'Sunset');
-
-      // 3. Verify public overlay-state endpoint reflects new mode
-      const getRes = await fetch(`${baseUrl}/api/public/overlay-state`);
-      assert.equal(getRes.status, 200, 'GET /api/public/overlay-state must return 200');
-      const getState = await getRes.json();
-      assert.equal(getState.mode, 'matchup');
-      assert.equal(getState.roulette?.spinId, 42);
-      assert.equal(getState.roulette?.winnerMap, 'Sunset');
-    });
-
-    // =========================================================================
-    // Combination 3: Scene Mode Toggling Across All 5 Scenes
-    // =========================================================================
-    await ctx.runTest('C3: Toggling across all 5 overlay scenes (scoreboard, matchup, roulette, ticker, hidden)', async () => {
-      const scenes = ['scoreboard', 'matchup', 'roulette', 'ticker', 'hidden'];
-
-      for (const scene of scenes) {
-        const postRes = await fetch(`${baseUrl}/api/overlay-state`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${adminToken}`,
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          mode: 'sorteo',
+          sorteo: {
+            activePhase: 'presentacion',
+            revealedTeams: revealedSoFar,
+            zoomedTeam: targetTeam,
           },
-          body: JSON.stringify({ mode: scene }),
+        }),
+      });
+      assert.equal(postRes.status, 200);
+
+      // 2. Stream overlay queries public endpoint
+      const getRes = await fetch(`${baseUrl}/api/public/overlay-state`);
+      assert.equal(getRes.status, 200);
+      const data = await getRes.json();
+
+      assert.equal(data.mode, 'sorteo');
+      assert.deepEqual(data.sorteo.revealedTeams, revealedSoFar);
+      assert.equal(data.sorteo.zoomedTeam.name, 'Sakura');
+      assert.equal(data.sorteo.zoomedTeam.grupo, 'C');
+      assert.ok(data.updatedAt);
+    });
+
+    // =========================================================================
+    // Combination 2: Champions League Draw Animation + Sorteo State Broadcast
+    // =========================================================================
+    await ctx.runTest('T3.C2: Champions League Draw Animation + Sorteo State Broadcast + Stream Overlay State', async () => {
+      const animPayload = {
+        mode: 'sorteo',
+        sorteo: {
+          activePhase: 'sorteo',
+          isSpinning: false,
+          drawingTeam: { name: 'Entry Baiters', targetGroup: 'B' },
+          championsAnimation: {
+            active: true,
+            team: 'Entry Baiters',
+            step: 2,
+            revealedMatchups: [
+              { jornada: 1, rival: 'Thunder Buddies', logo: '/logo3.png' },
+              { jornada: 2, rival: 'Dream Team', logo: '/logo7.png' },
+            ],
+          },
+          revealedTeams: ['Thunder Buddies', 'Entry Baiters'],
+        },
+      };
+
+      await fetch(`${baseUrl}/api/overlay-state`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify(animPayload),
+      });
+
+      const publicState = await (await fetch(`${baseUrl}/api/public/overlay-state`)).json();
+      assert.equal(publicState.sorteo.activePhase, 'sorteo');
+      assert.equal(publicState.sorteo.drawingTeam.name, 'Entry Baiters');
+      assert.equal(publicState.sorteo.championsAnimation.step, 2);
+      assert.equal(publicState.sorteo.championsAnimation.revealedMatchups.length, 2);
+    });
+
+    // =========================================================================
+    // Combination 3: Schedule Math Engine + Matches Persistence + Public API
+    // =========================================================================
+    await ctx.runTest('T3.C3: Schedule Math Engine + Matches Persistence (POST /api/matches) + Public Endpoint', async () => {
+      const ref = generateReferenceSchedule(CANONICAL_POTS);
+      const validation = validateScheduleMath(ref.matches, ref.jornadas);
+      assert.equal(validation.valid, true);
+
+      // 1. Admin persists schedule
+      const postRes = await fetch(`${baseUrl}/api/matches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          drawCompleted: true,
+          groups: CANONICAL_POTS,
+          matches: ref.matches,
+          jornadas: ref.jornadas,
+        }),
+      });
+      assert.equal(postRes.status, 200);
+
+      // 2. Disk file verification
+      const matchesFile = path.resolve(ROOT_DIR, 'matches.json');
+      assert.ok(fs.existsSync(matchesFile));
+      const diskData = JSON.parse(fs.readFileSync(matchesFile, 'utf8'));
+      assert.equal(diskData.matches.length, 32);
+
+      // 3. Public API query
+      const getRes = await fetch(`${baseUrl}/api/public/matches`);
+      assert.equal(getRes.status, 200);
+      const publicMatches = await getRes.json();
+      assert.equal(publicMatches.drawCompleted, true);
+      assert.equal(publicMatches.matches.length, 32);
+      assert.equal(publicMatches.jornadas.length, 4);
+    });
+
+    // =========================================================================
+    // Combination 4: Sorteo Completion + MatchesPage Multi-Jornada Filtering + Standings
+    // =========================================================================
+    await ctx.runTest('T3.C4: Sorteo Completion + Multi-Jornada Filtering + Standings Calculation', async () => {
+      const ref = generateReferenceSchedule(CANONICAL_POTS);
+
+      // Simulate completed matches for Jornada 1
+      const j1Finished = ref.jornadas[0].map((m, idx) => ({
+        ...m,
+        score1: 13,
+        score2: 8,
+        status: 'Finalizado',
+      }));
+
+      const allMatches = [...j1Finished, ...ref.jornadas[1], ...ref.jornadas[2], ...ref.jornadas[3]];
+
+      await fetch(`${baseUrl}/api/matches`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          drawCompleted: true,
+          groups: CANONICAL_POTS,
+          matches: allMatches,
+          jornadas: [j1Finished, ref.jornadas[1], ref.jornadas[2], ref.jornadas[3]],
+        }),
+      });
+
+      // Query public matches
+      const publicData = await (await fetch(`${baseUrl}/api/public/matches`)).json();
+      const j1Matches = publicData.matches.filter(m => m.jornada === 1);
+      assert.equal(j1Matches.length, 8);
+      const finishedCount = j1Matches.filter(m => m.status === 'Finalizado').length;
+      assert.equal(finishedCount, 8);
+
+      // Query standings
+      const standingsRes = await (await fetch(`${baseUrl}/api/public/standings`)).json();
+      assert.ok(standingsRes.standings.length > 0);
+      assert.equal(standingsRes.finishedMatches, 8);
+
+      // All 8 winners must have 3 points
+      const winners = standingsRes.standings.filter(s => s.points === 3);
+      assert.equal(winners.length, 8);
+    });
+
+    // =========================================================================
+    // Combination 5: Rapid Free Order Draw of 4 Teams + Concurrent Overlay State
+    // =========================================================================
+    await ctx.runTest('T3.C5: Rapid Free Order Draw of 4 Teams + Real-Time Overlay State + Audio Cue Emission', async () => {
+      // Pick 4 teams non-sequentially: A4, C2, B1, D3
+      const teamsToDraw = [
+        CANONICAL_POTS.A[3], // REHENKARMACIÓN
+        CANONICAL_POTS.C[1], // Soul Resonance
+        CANONICAL_POTS.B[0], // Entry Baiters
+        CANONICAL_POTS.D[2], // Banana Kings
+      ];
+
+      const revealedAcc = [];
+
+      for (const t of teamsToDraw) {
+        revealedAcc.push(t.name);
+        await fetch(`${baseUrl}/api/overlay-state`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+          body: JSON.stringify({
+            mode: 'sorteo',
+            sorteo: {
+              activePhase: 'sorteo',
+              drawingTeam: t,
+              soundTrigger: 'ball_extract',
+              revealedTeams: [...revealedAcc],
+            },
+          }),
         });
-        assert.equal(postRes.status, 200, `POST /api/overlay-state mode="${scene}" must return 200`);
 
-        const getRes = await fetch(`${baseUrl}/api/public/overlay-state`);
-        assert.equal(getRes.status, 200);
-        const body = await getRes.json();
-        assert.equal(body.mode, scene, `Public endpoint must return mode="${scene}"`);
+        const intermediate = await (await fetch(`${baseUrl}/api/public/overlay-state`)).json();
+        assert.equal(intermediate.sorteo.drawingTeam.name, t.name);
+        assert.equal(intermediate.sorteo.revealedTeams.length, revealedAcc.length);
       }
+
+      assert.equal(revealedAcc.length, 4);
     });
 
     // =========================================================================
-    // Combination 4: Inactive Match State vs Overlay Query Parameter
+    // Combination 6: Admin Match Score Update + Public Matches Reflect + Standings Table
     // =========================================================================
-    await ctx.runTest('C4: Inactive match state filtering (public web returns null, overlay receives match for transition)', async () => {
-      const inactivePayload = {
-        match: {
-          active: false,
-          status: 'PAUSED',
-          team1: { name: 'Team A', score: 3 },
-          team2: { name: 'Team B', score: 2 },
-          map: 'Bind',
-          round: 6,
-        },
-      };
+    await ctx.runTest('T3.C6: Admin Match Score Update (PATCH /api/matches/:id) + Public Matches + Standings Re-evaluation', async () => {
+      // Load current matches to find an ID to patch
+      const matchesData = await (await fetch(`${baseUrl}/api/public/matches`)).json();
+      assert.ok(matchesData.matches.length > 0);
+      const targetMatch = matchesData.matches[0];
+      const targetId = targetMatch.id;
 
-      await fetch(`${baseUrl}/api/live-match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(inactivePayload),
+      // Patch match with final score
+      const patchRes = await fetch(`${baseUrl}/api/matches/${targetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${adminToken}` },
+        body: JSON.stringify({
+          score1: 13,
+          score2: 11,
+          status: 'Finalizado',
+        }),
       });
+      assert.equal(patchRes.status, 200);
 
-      // Regular public query (active !== false filter)
-      const pubRes = await fetch(`${baseUrl}/api/public/live-match`);
-      const pubData = await pubRes.json();
-      assert.equal(pubData.match, null, 'Public web without ?overlay=1 should receive null for inactive match');
+      // Verify public matches reflect updated score
+      const updatedPublic = await (await fetch(`${baseUrl}/api/public/matches`)).json();
+      const updatedMatch = updatedPublic.matches.find(m => String(m.id) === String(targetId));
+      assert.equal(updatedMatch.score1, 13);
+      assert.equal(updatedMatch.score2, 11);
+      assert.equal(updatedMatch.status, 'Finalizado');
 
-      // OBS overlay query (?overlay=1 bypasses active filter to animate drop-out)
-      const overlayRes = await fetch(`${baseUrl}/api/public/live-match?overlay=1`);
-      const overlayData = await overlayRes.json();
-      assert.ok(overlayData.match, 'Overlay query ?overlay=1 must receive match object even when active=false');
-      assert.equal(overlayData.match.active, false);
-      assert.equal(overlayData.match.team1.name, 'Team A');
-    });
-
-    // =========================================================================
-    // Combination 5: Halftime Side-Swap & Score Synchronization
-    // =========================================================================
-    await ctx.runTest('C5: Halftime side swap synchronization updates sides, round, and scores', async () => {
-      // First half ending at round 12
-      const round12Payload = {
-        match: {
-          active: true,
-          status: 'LIVE',
-          team1: { name: 'Los Primates', score: 8, side: 'ATT' },
-          team2: { name: 'Los Chimpancés', score: 4, side: 'DEF' },
-          map: 'Abyss',
-          round: 12,
-          format: 'BO3',
-        },
-      };
-      await fetch(`${baseUrl}/api/live-match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(round12Payload),
-      });
-
-      // Side swap at round 13
-      const round13Payload = {
-        match: {
-          active: true,
-          status: 'LIVE',
-          team1: { name: 'Los Primates', score: 8, side: 'DEF' },
-          team2: { name: 'Los Chimpancés', score: 4, side: 'ATT' },
-          map: 'Abyss',
-          round: 13,
-          format: 'BO3',
-        },
-      };
-      await fetch(`${baseUrl}/api/live-match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${adminToken}`,
-        },
-        body: JSON.stringify(round13Payload),
-      });
-
-      const res = await fetch(`${baseUrl}/api/public/live-match?overlay=1`);
-      const data = await res.json();
-      assert.equal(data.match.round, 13);
-      assert.equal(data.match.team1.side, 'DEF');
-      assert.equal(data.match.team2.side, 'ATT');
-      assert.equal(data.match.team1.score, 8);
-      assert.equal(data.match.team2.score, 4);
+      // Verify standings updated with winner
+      const standingsData = await (await fetch(`${baseUrl}/api/public/standings`)).json();
+      const winnerRow = standingsData.standings.find(s => s.team === targetMatch.t1.name);
+      assert.ok(winnerRow);
+      assert.ok(winnerRow.points >= 3);
     });
   }
 

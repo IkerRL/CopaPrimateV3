@@ -394,7 +394,7 @@ router.post('/matches', (req, res) => {
     const body = req.body || {};
     const data = {
         ...current,
-        groups: body.groups !== undefined ? body.groups : current.groups,
+        groups: body.groups !== undefined ? v.groups(body.groups) : current.groups,
         matches: Array.isArray(body.matches) ? body.matches.slice(0, 500) : current.matches,
         jornadas: Array.isArray(body.jornadas) ? body.jornadas : current.jornadas,
     };
@@ -412,6 +412,9 @@ router.post('/matches/draw', (req, res) => {
         groups: v.groups(body.groups),
         matches: (Array.isArray(body.matches) ? body.matches : []).slice(0, 500).map(v.match),
     };
+    if (Array.isArray(body.jornadas)) {
+        data.jornadas = body.jornadas.map(j => (Array.isArray(j) ? j.slice(0, 500).map(v.match) : []));
+    }
     saveMatches(data);
     logActivity('announcement', '🎲 Sorteo oficial de cruces completado y publicado');
     res.json({ success: true, data });
@@ -424,8 +427,21 @@ router.patch('/matches/:id', (req, res) => {
     if (idx < 0) return res.status(404).json({ error: 'Partido no encontrado' });
     data.matches[idx] = v.match({ ...data.matches[idx], ...req.body }, idx);
     data.matches[idx].id = data.matches[idx].id ?? req.params.id;
-    saveMatches(data);
     const m = data.matches[idx];
+
+    // Sincronizar también dentro de data.jornadas si existe
+    if (Array.isArray(data.jornadas)) {
+        for (let j = 0; j < data.jornadas.length; j++) {
+            if (Array.isArray(data.jornadas[j])) {
+                const jIdx = data.jornadas[j].findIndex(matchItem => String(matchItem?.id) === String(req.params.id));
+                if (jIdx >= 0) {
+                    data.jornadas[j][jIdx] = { ...m };
+                }
+            }
+        }
+    }
+
+    saveMatches(data);
 
     // Si se enviaron estadísticas individuales por jugador, sincronizarlas en los perfiles de equipo
     if (req.body.updateTeamStats && req.body.playerStats) {

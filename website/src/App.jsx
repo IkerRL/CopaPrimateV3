@@ -58,7 +58,7 @@ function App() {
   }, [location.pathname]);
 
   // Si es una ruta de overlay de OBS, renderizar transparente sin interfaz de la web
-  const rawPath = (window.location.pathname + window.location.hash + location.pathname).toLowerCase();
+  const rawPath = (window.location.pathname + window.location.search + window.location.hash + location.pathname).toLowerCase();
   if (rawPath.includes('/overlay')) {
     if (rawPath.includes('scoreboard')) return <OverlayScoreboard />;
     if (rawPath.includes('roulette')) return <OverlayRoulette />;
@@ -146,6 +146,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/normas" element={<RulesPage />} />
           <Route path="/enfrentamientos" element={<MatchesPage />} />
+          <Route path="/matches" element={<MatchesPage />} />
           <Route path="/equipos" element={<TeamsPage />} />
           <Route path="/clasificacion" element={<StandingsPage />} />
           <Route path="/maquina-del-tiempo" element={<TimeMachinePage />} />

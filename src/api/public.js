@@ -63,7 +63,7 @@ export function computeStandings({ groups = {}, matches = [] }) {
     };
 
     for (const [g, list] of Object.entries(groups)) {
-        for (const t of list || []) {
+        for (const t of (Array.isArray(list) ? list : [])) {
             const row = ensure(t);
             if (row) row.group = g;
         }
@@ -106,6 +106,7 @@ router.get('/matches', (req, res) => {
         drawnAt: data.drawnAt || null,
         groups: data.groups || {},
         matches: data.matches || [],
+        jornadas: data.jornadas || [],
     });
 });
 

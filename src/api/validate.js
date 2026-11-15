@@ -84,6 +84,32 @@ const matchTeam = (t) => ({
     logo: logo(t?.logo),
 });
 
+export function groupTeam(t) {
+    if (!t || typeof t !== 'object') {
+        return { name: 'Por determinar', logo: logo(null) };
+    }
+    const out = {
+        name: str(t.name, 60) || 'Por determinar',
+        logo: logo(t.logo),
+    };
+    if (t.id !== undefined && t.id !== null) {
+        out.id = typeof t.id === 'number' ? t.id : str(t.id, 40);
+    }
+    if (t.grupo !== undefined) {
+        out.grupo = str(t.grupo, 10);
+    }
+    if (t.tag !== undefined) {
+        out.tag = str(t.tag, 20);
+    }
+    if (t.bombo !== undefined) {
+        out.bombo = num(t.bombo, 1, 10, 1);
+    }
+    if (Array.isArray(t.jugadores)) {
+        out.jugadores = t.jugadores.slice(0, 10).map(j => str(j, 60)).filter(Boolean);
+    }
+    return out;
+}
+
 export function match(m, idx = 0) {
     if (!m || typeof m !== 'object') throw new ValidationError('Partido inválido');
     const out = {
@@ -100,7 +126,10 @@ export function match(m, idx = 0) {
     if (m.group) out.group = str(m.group, 10);
     if (m.kills1 !== undefined) out.kills1 = num(m.kills1, 0, 9999, 0);
     if (m.kills2 !== undefined) out.kills2 = num(m.kills2, 0, 9999, 0);
-    if (m.round !== undefined) out.round = num(m.round, 0, 99, 0);
+    if (m.jornada !== undefined) out.jornada = num(m.jornada, 1, 10, 1);
+    if (m.round !== undefined) {
+        out.round = typeof m.round === 'string' ? str(m.round, 10) : num(m.round, 0, 99, 0);
+    }
     if (m.mvp !== undefined) out.mvp = str(m.mvp, 60);
     if (m.playerStats && typeof m.playerStats === 'object') out.playerStats = m.playerStats;
     return out;
@@ -110,7 +139,7 @@ export function groups(g) {
     if (!g || typeof g !== 'object' || Array.isArray(g)) return {};
     const out = {};
     for (const [key, list] of Object.entries(g).slice(0, 16)) {
-        out[str(key, 10)] = (Array.isArray(list) ? list : []).slice(0, 64).map(matchTeam);
+        out[str(key, 10)] = (Array.isArray(list) ? list : []).slice(0, 64).map(groupTeam);
     }
     return out;
 }

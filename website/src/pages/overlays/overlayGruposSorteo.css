@@ -304,6 +304,86 @@
     letter-spacing: 1.5px;
 }
 
+/* Reversos estilo Mystery Card Back Oficial */
+.mystery-card-back {
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(20, 15, 35, 0.9) 0%, rgba(10, 8, 20, 0.95) 100%);
+    border: 1px dashed rgba(192, 132, 252, 0.3);
+    padding: 3px 8px;
+    box-sizing: border-box;
+}
+
+.mystery-card-back-inner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+    width: 100%;
+}
+
+.mystery-card-back-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    opacity: 0.75;
+    filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.5));
+    animation: mysteryPulse 2s infinite alternate ease-in-out;
+    flex-shrink: 0;
+}
+
+.mystery-card-back-text-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+}
+
+.mystery-card-back-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: #c084fc;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.mystery-card-back-status {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+}
+
+.mystery-shimmer {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(192, 132, 252, 0.18) 50%,
+        transparent 100%
+    );
+    transform: skewX(-20deg);
+    animation: mysteryShimmerSlide 2.5s infinite ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes mysteryShimmerSlide {
+    0% { left: -100%; }
+    60% { left: 150%; }
+    100% { left: 150%; }
+}
+
 /* SECCIÓN CENTRAL DE SORTEO (SI ESTÁ EN MODO SORTEO EN VIVO) */
 .sorteo-live-chamber {
     display: flex;
@@ -359,3 +439,708 @@
     background: linear-gradient(90deg, #00f5d4, #c084fc, #ff4655, #fbbf24);
     box-shadow: 0 0 15px rgba(192, 132, 252, 0.8);
 }
+
+/* ==========================================================================
+   SPOTLIGHT STREAM ZOOM VIEW
+   ========================================================================== */
+.sorteo-spotlight-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: rgba(6, 8, 14, 0.88);
+    backdrop-filter: blur(14px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: spotlightFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes spotlightFadeIn {
+    0% { opacity: 0; transform: scale(0.92); filter: blur(6px); }
+    100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+
+.sorteo-spotlight-card {
+    position: relative;
+    background: linear-gradient(135deg, rgba(16, 22, 38, 0.98) 0%, rgba(9, 11, 20, 0.99) 100%);
+    border: 2px solid rgba(192, 132, 252, 0.5);
+    border-radius: 24px;
+    padding: 32px 48px;
+    max-width: 620px;
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(192, 132, 252, 0.25);
+    text-align: center;
+}
+
+.sorteo-spotlight-card.grupo-A { border-color: rgba(255, 70, 85, 0.6); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(255, 70, 85, 0.25); }
+.sorteo-spotlight-card.grupo-B { border-color: rgba(0, 245, 212, 0.6); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 245, 212, 0.25); }
+.sorteo-spotlight-card.grupo-C { border-color: rgba(192, 132, 252, 0.6); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(192, 132, 252, 0.25); }
+.sorteo-spotlight-card.grupo-D { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(56, 189, 248, 0.25); }
+
+.spotlight-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 70, 85, 0.15);
+    border: 1px solid rgba(255, 70, 85, 0.5);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ff4655;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+}
+
+.spotlight-live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ff4655;
+    box-shadow: 0 0 8px #ff4655;
+    animation: livePulse 1.2s infinite ease-in-out;
+}
+
+@keyframes livePulse {
+    0% { transform: scale(0.9); opacity: 0.7; }
+    50% { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.spotlight-logo-wrap {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.spotlight-logo-halo {
+    position: absolute;
+    inset: -12px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(192, 132, 252, 0.45) 0%, transparent 70%);
+    animation: haloBreath 3s infinite alternate ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes haloBreath {
+    0% { transform: scale(0.92); opacity: 0.6; }
+    100% { transform: scale(1.1); opacity: 1; }
+}
+
+.spotlight-logo-img {
+    width: 140px;
+    height: 140px;
+    object-fit: contain;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    box-sizing: border-box;
+    filter: drop-shadow(0 10px 25px rgba(0, 0, 0, 0.8));
+    z-index: 2;
+}
+
+.spotlight-tag-pill {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #00f5d4;
+    margin-bottom: 4px;
+}
+
+.spotlight-team-name {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffffff;
+    margin: 0 0 14px 0;
+    line-height: 1.1;
+    text-shadow: 0 0 30px rgba(192, 132, 252, 0.6);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.spotlight-pills-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.spotlight-pill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.spotlight-pill.bombo-pill {
+    background: rgba(192, 132, 252, 0.15);
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    color: #c084fc;
+}
+
+.spotlight-pill.grupo-pill {
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid rgba(0, 245, 212, 0.5);
+    color: #00f5d4;
+}
+
+.spotlight-pill.grupo-pill.grupo-A { background: rgba(255, 70, 85, 0.15); border-color: rgba(255, 70, 85, 0.5); color: #ff4655; }
+.spotlight-pill.grupo-pill.grupo-B { background: rgba(0, 245, 212, 0.15); border-color: rgba(0, 245, 212, 0.5); color: #00f5d4; }
+.spotlight-pill.grupo-pill.grupo-C { background: rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.5); color: #c084fc; }
+.spotlight-pill.grupo-pill.grupo-D { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; }
+
+.spotlight-roster-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.spotlight-roster-title {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.spotlight-roster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    width: 100%;
+}
+
+.spotlight-player-card {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.spotlight-player-icon {
+    font-size: 14px;
+}
+
+.spotlight-player-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+/* ==========================================================================
+   CHAMPIONS LEAGUE SORTEO HUD MODAL & MATRIX SCANNER (MILESTONE 3 / R2)
+   ========================================================================== */
+
+.champions-draw-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at center, rgba(8, 14, 28, 0.94) 0%, rgba(3, 5, 12, 0.98) 100%);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    animation: championsModalFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+@keyframes championsModalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.champions-hud-container {
+    position: relative;
+    width: 100%;
+    max-width: 1140px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.96) 0%, rgba(9, 13, 26, 0.98) 100%);
+    border: 1.5px solid rgba(0, 245, 212, 0.4);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 245, 212, 0.25), inset 0 0 35px rgba(192, 132, 252, 0.08);
+    border-radius: 20px;
+    padding: 28px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* Header */
+.champions-hud-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 14px;
+}
+
+.champions-hud-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.champions-stars-icon {
+    font-size: 22px;
+    color: #facc15;
+    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.8));
+    animation: starPulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes starPulse {
+    0% { transform: rotate(0deg) scale(0.95); opacity: 0.8; }
+    100% { transform: rotate(15deg) scale(1.1); opacity: 1; }
+}
+
+.champions-hud-subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: #00f5d4;
+    text-transform: uppercase;
+}
+
+.champions-hud-title {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffffff;
+    margin: 2px 0 0 0;
+    text-transform: uppercase;
+}
+
+.champions-status-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.champions-status-badge.running {
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid #00f5d4;
+    color: #00f5d4;
+}
+
+.champions-status-badge.completed {
+    background: rgba(250, 204, 21, 0.15);
+    border: 1px solid #facc15;
+    color: #facc15;
+}
+
+/* Selected Team Showcase */
+.champions-selected-team-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+.shield-halo {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 245, 212, 0.45) 0%, transparent 70%);
+    pointer-events: none;
+    animation: haloPulse 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes haloPulse {
+    0% { transform: translateY(-50%) scale(0.9); opacity: 0.5; }
+    100% { transform: translateY(-50%) scale(1.25); opacity: 0.9; }
+}
+
+.champions-team-main-col {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    z-index: 2;
+}
+
+.champions-team-logo-wrap {
+    position: relative;
+    width: 68px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.champions-team-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8));
+}
+
+.champions-team-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.champions-team-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    color: #c084fc;
+    letter-spacing: 2px;
+}
+
+.champions-team-name {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.champions-team-badges-col {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 2;
+}
+
+.champions-pot-pill {
+    padding: 6px 14px;
+    background: rgba(192, 132, 252, 0.15);
+    border: 1px solid rgba(192, 132, 252, 0.5);
+    color: #c084fc;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+.champions-group-pill {
+    padding: 6px 14px;
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid rgba(0, 245, 212, 0.5);
+    color: #00f5d4;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1px;
+}
+
+/* Matchups Grid */
+.champions-matchups-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    width: 100%;
+}
+
+.matchup-card-slot {
+    position: relative;
+    background: rgba(10, 14, 24, 0.8);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 210px;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.matchup-card-slot.revealed {
+    border-color: #00f5d4;
+    background: linear-gradient(180deg, rgba(12, 22, 36, 0.95) 0%, rgba(8, 14, 24, 0.98) 100%);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 245, 212, 0.2);
+}
+
+.matchup-card-slot.scanning {
+    border-color: #c084fc;
+    box-shadow: 0 0 30px rgba(192, 132, 252, 0.3);
+}
+
+.matchup-card-slot.pending {
+    opacity: 0.45;
+    border-style: dashed;
+}
+
+.matchup-jornada-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.matchup-jornada-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: #ffb300;
+    text-transform: uppercase;
+}
+
+.matchup-status-icon {
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* Revealed Matchup Content */
+.matchup-revealed-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.matchup-opponent-logo {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+    animation: popInLogo 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes popInLogo {
+    0% { transform: scale(0.6); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.matchup-opponent-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    color: #00f5d4;
+    letter-spacing: 1.5px;
+}
+
+.matchup-opponent-name {
+    font-family: 'Oswald', 'Rajdhani', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lock-pill {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    background: rgba(0, 245, 212, 0.15);
+    border: 1px solid rgba(0, 245, 212, 0.4);
+    color: #00f5d4;
+}
+
+.lock-pill.locked {
+    background: rgba(0, 245, 212, 0.2);
+    border-color: #00f5d4;
+}
+
+.lock-flash {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    pointer-events: none;
+    border-radius: 14px;
+    animation: lockFlashAnim 0.5s ease-out forwards;
+}
+
+@keyframes lockFlashAnim {
+    0% { opacity: 0.9; }
+    100% { opacity: 0; }
+}
+
+/* Matrix Scanner Effect */
+.matrix-scanner {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(192, 132, 252, 0.12) 0%, rgba(0, 0, 0, 0.4) 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.scan-laser {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #00f5d4, #ffffff, #00f5d4, transparent);
+    box-shadow: 0 0 15px #00f5d4, 0 0 25px #00f5d4;
+    animation: scanLaserSweep 1.2s infinite ease-in-out;
+    z-index: 4;
+}
+
+@keyframes scanLaserSweep {
+    0% { top: 0%; opacity: 0.4; }
+    50% { top: 96%; opacity: 1; }
+    100% { top: 0%; opacity: 0.4; }
+}
+
+.matrix-scanner-orb {
+    font-size: 32px;
+    animation: scannerOrbSpin 1s infinite linear;
+}
+
+@keyframes scannerOrbSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.matrix-glitch-text {
+    font-family: 'Rajdhani', monospace;
+    font-size: 13px;
+    font-weight: 900;
+    color: #c084fc;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(192, 132, 252, 0.8);
+    animation: matrixGlitch 0.2s infinite alternate;
+}
+
+@keyframes matrixGlitch {
+    0% { opacity: 0.8; transform: skewX(0deg); }
+    50% { opacity: 1; transform: skewX(-4deg); }
+    100% { opacity: 0.9; transform: skewX(4deg); }
+}
+
+/* Pending Slot Content */
+.matchup-pending-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 8px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.matchup-pending-icon {
+    font-size: 28px;
+}
+
+.matchup-pending-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Footer / Progress Bar */
+.champions-hud-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 14px;
+}
+
+.champions-hud-engine-note {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+}
+
+.champions-hud-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.champions-hud-progress-bar {
+    width: 200px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.champions-hud-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00f5d4, #c084fc);
+    box-shadow: 0 0 10px #00f5d4;
+    transition: width 0.4s ease;
+}
+
+.champions-hud-progress-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: #00f5d4;
+    letter-spacing: 1px;
+}
+

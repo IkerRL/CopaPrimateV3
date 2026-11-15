@@ -15,12 +15,23 @@ const PHASES = [
 const STATUS_LABEL = { done: 'Completado', current: 'En curso', pending: 'Próximamente' };
 
 const MATCHDAYS = [
-  { id: 'ALL', label: 'Todas' },
+  { id: 'TODOS', label: 'Todas' },
   { id: 'J1', label: 'Jornada 1' },
   { id: 'J2', label: 'Jornada 2' },
   { id: 'J3', label: 'Jornada 3' },
   { id: 'J4', label: 'Jornada 4' },
 ];
+
+const normalizeMatchday = (val) => {
+  if (!val) return 'TODOS';
+  const s = String(val).toUpperCase();
+  if (s === 'ALL' || s === 'TODAS' || s === 'TODOS' || s === 'TODO') return 'TODOS';
+  if (s === 'J1' || s === '1') return 'J1';
+  if (s === 'J2' || s === '2') return 'J2';
+  if (s === 'J3' || s === '3') return 'J3';
+  if (s === 'J4' || s === '4') return 'J4';
+  return s;
+};
 
 const DEFAULT_GRUPOS = {
   A: [
@@ -53,14 +64,14 @@ export default function MatchesPage() {
   usePageTitle('Enfrentamientos');
   useReveal();
 
-  const { matches: apiMatches, groups: apiGroups } = usePublicMatches();
+  const { matches: apiMatches, groups: apiGroups, drawCompleted } = usePublicMatches();
   const { settings } = useWebSettings();
 
-  const [selectedMatchday, setSelectedMatchday] = useState(settings?.activeMatchday || 'ALL');
+  const [selectedMatchday, setSelectedMatchday] = useState(() => normalizeMatchday(settings?.activeMatchday || 'TODOS'));
 
   useEffect(() => {
     if (settings?.activeMatchday) {
-      setSelectedMatchday(settings.activeMatchday);
+      setSelectedMatchday(normalizeMatchday(settings.activeMatchday));
     }
   }, [settings?.activeMatchday]);
 
@@ -70,17 +81,36 @@ export default function MatchesPage() {
   const showGroupsSection = settings.showGroups !== false;
 
   // Solo mostrar partidos si están activados en moderación y tienen datos reales
-  const hasOfficialMatches = settings.showMatches && apiMatches && apiMatches.length > 0;
+  const showMatchesSection = settings.showMatches !== false || (apiMatches && apiMatches.length > 0) || drawCompleted;
+  const hasOfficialMatches = (settings.showMatches !== false || drawCompleted) && apiMatches && apiMatches.length > 0;
   const matches = hasOfficialMatches ? apiMatches : [];
 
   const filteredMatches = matches.filter(m => {
-    if (selectedMatchday === 'ALL') return true;
-    const roundStr = String(m.round || m.matchday || m.date || '').toUpperCase();
-    if (selectedMatchday === 'J1') return /J1|JORNADA 1/i.test(roundStr);
-    if (selectedMatchday === 'J2') return /J2|JORNADA 2/i.test(roundStr);
-    if (selectedMatchday === 'J3') return /J3|JORNADA 3/i.test(roundStr);
-    if (selectedMatchday === 'J4') return /J4|JORNADA 4/i.test(roundStr);
-    return true;
+    const norm = normalizeMatchday(selectedMatchday);
+    if (norm === 'TODOS') return true;
+
+    let targetJ = null;
+    if (norm === 'J1') targetJ = 1;
+    else if (norm === 'J2') targetJ = 2;
+    else if (norm === 'J3') targetJ = 3;
+    else if (norm === 'J4') targetJ = 4;
+
+    if (!targetJ) return true;
+
+    // 1. Check numeric m.jornada (1, 2, 3, 4)
+    if (Number(m.jornada) === targetJ) return true;
+
+    // 2. Check m.round (can be "J1".."J4" or number 1..4)
+    if (Number(m.round) === targetJ) return true;
+    if (String(m.round || '').toUpperCase() === `J${targetJ}`) return true;
+
+    // 3. Check text in m.round, m.matchday, and m.date
+    const roundStr = String(m.round || '').toUpperCase();
+    const matchdayStr = String(m.matchday || '').toUpperCase();
+    const dateStr = String(m.date || '').toUpperCase();
+    const jPattern = new RegExp(`J${targetJ}\\b|JORNADA\\s*${targetJ}\\b|^${targetJ}$`, 'i');
+
+    return jPattern.test(roundStr) || jPattern.test(matchdayStr) || jPattern.test(dateStr);
   });
 
   return (
@@ -159,7 +189,7 @@ export default function MatchesPage() {
                     {(gTeams || []).map((t, idx) => (
                       <div key={idx} className="group-team-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <img src={t.logo || '/copa-logo.png'} alt="" className="group-team-logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/copa-logo.png'; }} />
+                          <img src={t.logo || '/copa-logo.png'} alt="" className="group-team-logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/copa-logo.png'; }} />
                           <div>
                             <div style={{ color: '#fff', fontSize: '14px', fontWeight: '700' }}>{t.name}</div>
                             {Array.isArray(t.jugadores) && t.jugadores.length > 0 && (
@@ -183,7 +213,7 @@ export default function MatchesPage() {
       )}
 
       {/* Calendario de Enfrentamientos por Jornada (solo visible si se activa en moderación) */}
-      {settings.showMatches && (
+      {showMatchesSection && (
         <section className="section">
           <div className="section-head reveal" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '15px', textAlign: 'left' }}>
             <div>
@@ -191,13 +221,13 @@ export default function MatchesPage() {
               <h2 className="section-title">Cruces de <span className="text-gradient">Jornada</span></h2>
             </div>
 
-            {/* Filtros de Jornada (J1, J2, J3, J4) */}
+            {/* Filtros de Jornada (TODOS, J1, J2, J3, J4) */}
             <div style={{ display: 'flex', gap: '6px', background: 'rgba(0,0,0,0.35)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border)' }}>
               {MATCHDAYS.map(day => (
                 <button
                   key={day.id}
                   type="button"
-                  className={`filter-pill ${selectedMatchday === day.id ? 'active' : ''}`}
+                  className={`filter-pill ${normalizeMatchday(selectedMatchday) === normalizeMatchday(day.id) ? 'active' : ''}`}
                   onClick={() => setSelectedMatchday(day.id)}
                 >
                   {day.label}
@@ -235,11 +265,11 @@ export default function MatchesPage() {
 
                     <div className="match-card-content">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '13px', color: 'var(--text-soft)', marginBottom: '18px' }}>
-                        <span className="match-date-label">// {m.date || m.round || 'Jornada'}</span>
+                        <span className="match-date-label">// {m.date || (m.jornada ? `Jornada ${m.jornada}` : m.round) || 'Jornada'}</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {m.round && (
+                          {(m.round || m.jornada) && (
                             <span className="match-group-pill">
-                              {m.round}
+                              {typeof m.round === 'number' ? `J${m.round}` : (m.round || `J${m.jornada}`)}
                             </span>
                           )}
                           {isLive ? (
@@ -260,14 +290,20 @@ export default function MatchesPage() {
                           <div style={{ position: 'relative' }}>
                             <img
                               src={m.t1?.logo || '/copa-logo.png'}
-                              alt={m.t1?.name}
+                              alt={m.t1?.name || 'Equipo 1'}
                               className={`match-team-crest ${winner === 1 ? 'winner' : ''}`}
+                              onError={(e) => { e.target.onerror = null; e.target.src = '/copa-logo.png'; }}
                             />
                             {winner === 1 && (
                               <Crown size={16} color="var(--primary)" style={{ position: 'absolute', top: -8, right: -8, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }} />
                             )}
                           </div>
                           <strong style={{ fontSize: '15px', color: winner === 1 ? 'var(--primary)' : '#fff' }}>{m.t1?.name}</strong>
+                          {(m.t1?.grupo || m.t1?.group || m.group) && (
+                            <span className="match-team-group-pill" style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                              Grupo {m.t1?.grupo || m.t1?.group || m.group}
+                            </span>
+                          )}
                         </div>
 
                         {/* Centro: Tanteo o VS */}
@@ -291,14 +327,20 @@ export default function MatchesPage() {
                           <div style={{ position: 'relative' }}>
                             <img
                               src={m.t2?.logo || '/copa-logo.png'}
-                              alt={m.t2?.name}
+                              alt={m.t2?.name || 'Equipo 2'}
                               className={`match-team-crest ${winner === 2 ? 'winner' : ''}`}
+                              onError={(e) => { e.target.onerror = null; e.target.src = '/copa-logo.png'; }}
                             />
                             {winner === 2 && (
                               <Crown size={16} color="var(--primary)" style={{ position: 'absolute', top: -8, right: -8, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.8))' }} />
                             )}
                           </div>
                           <strong style={{ fontSize: '15px', color: winner === 2 ? 'var(--primary)' : '#fff' }}>{m.t2?.name}</strong>
+                          {(m.t2?.grupo || m.t2?.group || m.group) && (
+                            <span className="match-team-group-pill" style={{ fontSize: '11px', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: '4px', marginTop: '2px' }}>
+                              Grupo {m.t2?.grupo || m.t2?.group || m.group}
+                            </span>
+                          )}
                         </div>
                       </div>
 

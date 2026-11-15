@@ -1,5 +1,5 @@
 {
-  "mode": "scoreboard",
+  "mode": "sorteo",
   "roulette": {
     "state": "spinning",
     "spinning": false,
@@ -29,5 +29,13 @@
       "Summit"
     ]
   },
-  "updatedAt": "2026-11-14T18:05:59.733Z"
+  "sorteo": {
+    "championsAnimation": {
+      "animId": 1794711616298,
+      "revealedCount": 4,
+      "stepDuration": 1600,
+      "startedAt": 1794711616279
+    }
+  },
+  "updatedAt": "2026-11-15T03:00:16.353Z"
 }
