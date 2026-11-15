@@ -123,8 +123,8 @@ export default function Overlays() {
           active: true,
           status: isPost ? 'FINALIZADO' : 'LIVE',
           phase: 'FASE DE GRUPOS',
-          team1: { name: currentMatch.t1?.name || 'Los Monos', logo: currentMatch.t1?.logo || '/logo1.png', mapsWon: isPost ? matchupModalConfig.m1 : 0 },
-          team2: { name: currentMatch.t2?.name || 'Gorilas', logo: currentMatch.t2?.logo || '/logo2.png', mapsWon: isPost ? matchupModalConfig.m2 : 0 },
+          team1: { name: currentMatch.t1?.name || 'Por Determinar', logo: currentMatch.t1?.logo || '/copa-logo.png', mapsWon: isPost ? matchupModalConfig.m1 : 0 },
+          team2: { name: currentMatch.t2?.name || 'Por Determinar', logo: currentMatch.t2?.logo || '/copa-logo.png', mapsWon: isPost ? matchupModalConfig.m2 : 0 },
           map: isMapValid ? matchupModalConfig.map : '',
           showMap: isMapValid,
           format: matchupModalConfig.format,
@@ -187,10 +187,10 @@ export default function Overlays() {
 
   const currentMatch = matches.find((m) => m.id === selectedMatchId) || matches[0] || {
     id: 1,
-    t1: { name: 'Los Monos', logo: '/logo1.png' },
-    t2: { name: 'Gorilas', logo: '/logo2.png' },
-    map: 'Ascent',
-    date: 'Jornada 1',
+    t1: { name: 'Por Determinar', logo: '/copa-logo.png' },
+    t2: { name: 'Por Determinar', logo: '/copa-logo.png' },
+    map: '',
+    date: '',
     format: 'BO1 (Swiftplay)'
   };
 
@@ -717,7 +717,7 @@ export default function Overlays() {
                   {m.t1?.name} vs {m.t2?.name} ({m.map || 'Sin mapa'} · {m.date || 'Jornada'})
                 </option>
               ))}
-              {matches.length === 0 && <option value="">Thunder Buddies vs Entry Baiters (Demostración)</option>}
+              {matches.length === 0 && <option value="">Sin partidos oficiales en directo</option>}
             </select>
           </div>
 

@@ -34,30 +34,10 @@ const normalizeMatchday = (val) => {
 };
 
 const DEFAULT_GRUPOS = {
-  A: [
-    { id: 'A1', name: "Thunder Buddies", jugadores: ["Brrokeen", "Pipe"], logo: "/logo3.png", tag: "THB" },
-    { id: 'A2', name: "Los Akrtona2", jugadores: ["Kira", "Serax"], logo: "/logo2.png", tag: "AKR" },
-    { id: 'A3', name: "Chuu-Chuu 100% MAX", jugadores: ["MakaQuillo", "Max"], logo: "/logo8.png", tag: "CHU" },
-    { id: 'A4', name: "REHENKARMACIÓN", jugadores: ["Satha", "Makflat"], logo: "/logo1.png", tag: "REH" }
-  ],
-  B: [
-    { id: 'B1', name: "Entry Baiters", jugadores: ["レックウザ", "Militantedelsoe"], logo: "/logo5.png", tag: "ENT" },
-    { id: 'B2', name: "Dream Team", jugadores: ["JoKker", "Pepardo"], logo: "/logo7.png", tag: "DRM" },
-    { id: 'B3', name: "Makaco Ninja-Pelocho", jugadores: ["MakacoNinja", "Iker 😎"], logo: "/logo6.png", tag: "MNP" },
-    { id: 'B4', name: "Kizuna", jugadores: ["Alezita", "Sarix"], logo: "/logo4.png", tag: "KZN" }
-  ],
-  C: [
-    { id: 'C1', name: "Sakura", jugadores: ["Gustavo", "Carlos"], logo: "/logo14.png", tag: "SAK" },
-    { id: 'C2', name: "Soul Resonance", jugadores: ["KrypT", "Charly"], logo: "/logo11.png", tag: "SOU" },
-    { id: 'C3', name: "Stranger Picks", jugadores: ["TheDori", "Sotomi"], logo: "/logo9.png", tag: "STR" },
-    { id: 'C4', name: "MARIIKS", jugadores: ["Acid", "Bru"], logo: "/logo10.png", tag: "MRK" }
-  ],
-  D: [
-    { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png", tag: "PFC" },
-    { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png", tag: "CHP" },
-    { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png", tag: "BNK" },
-    { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png", tag: "GOR" }
-  ]
+  A: [],
+  B: [],
+  C: [],
+  D: []
 };
 
 export default function MatchesPage() {
@@ -153,62 +133,76 @@ export default function MatchesPage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '20px' }}>
-            {Object.entries(groups).map(([gName, gTeams]) => {
-              const potColors = { A: '#ff4655', B: '#00f5d4', C: '#c084fc', D: '#fbbf24' };
-              const potColor = potColors[gName] || 'var(--primary)';
+          {Object.values(groups).flat().length === 0 ? (
+            <div className="glass-card reveal" style={{ padding: '36px 20px', textAlign: 'center', marginTop: '20px' }}>
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'rgba(0, 245, 212, 0.1)', border: '1px solid #00f5d4', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#00f5d4', marginBottom: '14px' }}>
+                <Users size={28} />
+              </div>
+              <h3 style={{ fontSize: '20px', color: '#fff', margin: '0 0 8px', fontFamily: "'Oswald', sans-serif", letterSpacing: '1px' }}>
+                Bombos & Grupos en Fase de Inscripción
+              </h3>
+              <p style={{ maxWidth: '560px', margin: '0 auto', color: 'var(--text-muted)', fontSize: '14px', lineHeight: '1.6' }}>
+                Actualmente se están validando las inscripciones de las escuadras. Los grupos oficiales por nivel de habilidad (A, B, C, D) se publicarán aquí en cuanto se cierren las plazas oficiales del torneo.
+              </p>
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginTop: '20px' }}>
+              {Object.entries(groups).map(([gName, gTeams]) => {
+                const potColors = { A: '#ff4655', B: '#00f5d4', C: '#c084fc', D: '#fbbf24' };
+                const potColor = potColors[gName] || 'var(--primary)';
 
-              return (
-                <div key={gName} className="glass-card group-card reveal" style={{ padding: '22px', borderTop: `3px solid ${potColor}`, boxShadow: `0 10px 30px rgba(0,0,0,0.5), 0 0 20px ${potColor}22` }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '6px',
-                        background: `${potColor}26`,
-                        border: `1.5px solid ${potColor}`,
-                        color: potColor,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 900,
-                        fontSize: '15px'
-                      }}>
-                        {gName}
-                      </span>
-                      <h3 style={{ fontSize: '20px', color: '#fff', margin: 0, fontFamily: "'Oswald', sans-serif", letterSpacing: '1.5px' }}>
-                        GRUPO {gName}
-                      </h3>
-                    </div>
-                    <span style={{ fontSize: '11px', color: potColor, background: `${potColor}18`, border: `1px solid ${potColor}55`, padding: '3px 10px', borderRadius: '6px', fontWeight: '800', letterSpacing: '1px' }}>
-                      {(gTeams || []).length} EQUIPOS
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {(gTeams || []).map((t, idx) => (
-                      <div key={idx} className="group-team-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <img src={t.logo || '/copa-logo.png'} alt="" className="group-team-logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/copa-logo.png'; }} />
-                          <div>
-                            <div style={{ color: '#fff', fontSize: '14px', fontWeight: '700' }}>{t.name}</div>
-                            {Array.isArray(t.jugadores) && t.jugadores.length > 0 && (
-                              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                                {t.jugadores.join(' · ')}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', fontFamily: "'Rajdhani', monospace", letterSpacing: '1px' }}>
-                          #{idx + 1}
+                return (
+                  <div key={gName} className="glass-card group-card reveal" style={{ padding: '22px', borderTop: `3px solid ${potColor}`, boxShadow: `0 10px 30px rgba(0,0,0,0.5), 0 0 20px ${potColor}22` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '6px',
+                          background: `${potColor}26`,
+                          border: `1.5px solid ${potColor}`,
+                          color: potColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontWeight: 900,
+                          fontSize: '15px'
+                        }}>
+                          {gName}
                         </span>
+                        <h3 style={{ fontSize: '20px', color: '#fff', margin: 0, fontFamily: "'Oswald', sans-serif", letterSpacing: '1.5px' }}>
+                          GRUPO {gName}
+                        </h3>
                       </div>
-                    ))}
+                      <span style={{ fontSize: '11px', color: potColor, background: `${potColor}18`, border: `1px solid ${potColor}55`, padding: '3px 10px', borderRadius: '6px', fontWeight: '800', letterSpacing: '1px' }}>
+                        {(gTeams || []).length} EQUIPOS
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      {(gTeams || []).map((t, idx) => (
+                        <div key={idx} className="group-team-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <img src={t.logo || '/copa-logo.png'} alt="" className="group-team-logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} onError={(e) => { e.target.onerror = null; e.target.src = '/copa-logo.png'; }} />
+                            <div>
+                              <div style={{ color: '#fff', fontSize: '14px', fontWeight: '700' }}>{t.name}</div>
+                              {Array.isArray(t.jugadores) && t.jugadores.length > 0 && (
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                                  {t.jugadores.join(' · ')}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-muted)', fontFamily: "'Rajdhani', monospace", letterSpacing: '1px' }}>
+                            #{idx + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
 

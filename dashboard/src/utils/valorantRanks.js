@@ -32,47 +32,7 @@ export const RANK_ICONS = {
   Radiante: `https://media.valorant-api.com/competitivetiers/${VALORANT_TIER_UUID}/27/largeicon.png`,
 };
 
-export const PLAYER_RANKS = {
-  // Los Monos / Golden Gorillas
-  "TenZ#NA1": "Diamante 2", "TenZ": "Diamante 2",
-  "Kyedae#0001": "Oro 3", "Kyedae": "Oro 3",
-  "ScreaM#1 tap": "Plata 3", "ScreaM": "Plata 3",
-  // Gorilas / Banana Kings
-  "Mixwell#G2": "Platino 2", "Mixwell": "Platino 2",
-  "Keloqz#FR": "Oro 3", "Keloqz": "Oro 3",
-  "Avova#123": "Plata 3", "Avova": "Plata 3",
-  // Primates FC
-  "Knekro#123": "Oro 2", "Knekro": "Oro 2",
-  "IlloJuan#Malaga": "Plata 2", "IlloJuan": "Plata 2",
-  "Xokas#WoW": "Bronce 3", "Xokas": "Bronce 3",
-  // Chimp Squad
-  "Boaster#FNC": "Plata 1", "Boaster": "Plata 1",
-  "Derke#FNC": "Bronce 3", "Derke": "Bronce 3",
-  "Leo#FNC": "Hierro 3", "Leo": "Inmortal 1",
-  // Group A (Tier 1: Cabezas de Serie)
-  "Brrokeen": "Inmortal 2", "Pipe": "Inmortal 1",
-  "Kira": "Inmortal 1", "Serax": "Inmortal 2",
-  "MakaQuillo": "Inmortal 3", "Max": "Inmortal 1",
-  "Satha": "Platino 3", "Makflat": "Oro 3",
-  // Group B (Tier 2)
-  "レックウザ": "Ascendente 3", "Militantedelsoe": "Ascendente 1",
-  "JoKker": "Ascendente 2", "Pepardo": "Ascendente 1",
-  "MakacoNinja": "Ascendente 2", "Iker 😎": "Ascendente 3", "Iker": "Ascendente 3",
-  "Alezita": "Platino 1", "Sarix": "Oro 2",
-  // Group C (Tier 3)
-  "Gustavo": "Diamante 3", "Carlos": "Platino 2",
-  "KrypT": "Diamante 1", "Charly": "Platino 3",
-  "TheDori": "Platino 2", "Sotomi": "Oro 3",
-  "Acid": "Plata 3", "Bru": "Oro 1",
-  // Group D (Tier 4) & Pro Roster
-  "Maka": "Ascendente 2",
-  "Black": "Diamante 1",
-  "Saadhak": "Inmortal 3",
-  "Less": "Inmortal 2",
-  "Chronicle": "Inmortal 1",
-  "aspas": "Radiante",
-  "cauanzin": "Inmortal 2",
-};
+export const PLAYER_RANKS = {};
 
 /**
  * Parses any rank representation into the official Valorant competitive tier number (0 to 27).

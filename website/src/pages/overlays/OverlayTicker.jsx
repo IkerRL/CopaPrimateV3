@@ -5,9 +5,9 @@ export default function OverlayTicker() {
   const [match, setMatch] = useState({
     active: true,
     status: 'LIVE',
-    team1: { name: 'Los Monos', score: 0 },
-    team2: { name: 'Gorilas', score: 0 },
-    map: 'Ascent',
+    team1: { name: 'TBD', score: 0 },
+    team2: { name: 'TBD', score: 0 },
+    map: '',
     round: 0,
     format: 'BO3',
   });

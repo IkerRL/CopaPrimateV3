@@ -23,46 +23,10 @@ export const DEFAULT_MAPS = [
 ];
 
 export const DEFAULT_BOMBOS = [
-    {
-        bombo: 1,
-        title: 'Bombo 1 · Cabezas de Serie',
-        teams: [
-            { id: 'A1', name: 'Thunder Buddies', logo: '/logo3.png', bombo: 1 },
-            { id: 'B1', name: 'Entry Baiters', logo: '/logo5.png', bombo: 1 },
-            { id: 'C1', name: 'Sakura', logo: '/logo14.png', bombo: 1 },
-            { id: 'D1', name: 'Primates FC', logo: '/logo12.png', bombo: 1 },
-        ],
-    },
-    {
-        bombo: 2,
-        title: 'Bombo 2',
-        teams: [
-            { id: 'A2', name: 'Los Akrtona2', logo: '/logo2.png', bombo: 2 },
-            { id: 'B2', name: 'Dream Team', logo: '/logo7.png', bombo: 2 },
-            { id: 'C2', name: 'Soul Resonance', logo: '/logo11.png', bombo: 2 },
-            { id: 'D2', name: 'Chimp Squad', logo: '/logo13.png', bombo: 2 },
-        ],
-    },
-    {
-        bombo: 3,
-        title: 'Bombo 3',
-        teams: [
-            { id: 'A3', name: 'Chuu-Chuu 100% MAX', logo: '/logo8.png', bombo: 3 },
-            { id: 'B3', name: 'Makaco Ninja-Pelocho', logo: '/logo6.png', bombo: 3 },
-            { id: 'C3', name: 'Stranger Picks', logo: '/logo9.png', bombo: 3 },
-            { id: 'D3', name: 'Banana Kings', logo: '/logo15.png', bombo: 3 },
-        ],
-    },
-    {
-        bombo: 4,
-        title: 'Bombo 4',
-        teams: [
-            { id: 'A4', name: 'REHENKARMACIÓN', logo: '/logo1.png', bombo: 4 },
-            { id: 'B4', name: 'Kizuna', logo: '/logo4.png', bombo: 4 },
-            { id: 'C4', name: 'MARIIKS', logo: '/logo10.png', bombo: 4 },
-            { id: 'D4', name: 'Golden Gorillas', logo: '/logo10.png', bombo: 4 },
-        ],
-    },
+    { bombo: 1, title: 'Bombo 1 · Cabezas de Serie', teams: [] },
+    { bombo: 2, title: 'Bombo 2', teams: [] },
+    { bombo: 3, title: 'Bombo 3', teams: [] },
+    { bombo: 4, title: 'Bombo 4', teams: [] },
 ];
 
 /**

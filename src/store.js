@@ -50,38 +50,13 @@ function createJsonStore(fileName, fallback) {
     return { read, write, file };
 }
 
-// Equipos de ejemplo usados solo si teams.json no existe
+// Si teams.json no existe se inicializa vacío para que el organizador cargue sus propios equipos
 function seedTeams() {
-    const now = new Date().toISOString();
-    const mk = (id, name, logo, players) => ({
-        id, name, logo, hidden: true, players, validatedAt: now, status: 'Aprobado (Oculto)',
-    });
-    return [
-        mk(1, 'Los Monos', '/copa-logo.png', [
-            { name: 'TenZ#NA1', rank: 'Diamante', level: 120 },
-            { name: 'Kyedae#0001', rank: 'Oro', level: 85 },
-            { name: 'ScreaM#1 tap', rank: 'Plata', level: 45 },
-        ]),
-        mk(2, 'Gorilas', '/gorilas.jpg', [
-            { name: 'Mixwell#G2', rank: 'Platino', level: 200 },
-            { name: 'Keloqz#FR', rank: 'Oro', level: 90 },
-            { name: 'Avova#123', rank: 'Plata', level: 50 },
-        ]),
-        mk(3, 'Primates FC', '/logo3.png', [
-            { name: 'Knekro#123', rank: 'Oro', level: 150 },
-            { name: 'IlloJuan#Malaga', rank: 'Plata', level: 60 },
-            { name: 'Xokas#WoW', rank: 'Bronce', level: 41 },
-        ]),
-        mk(4, 'Chimp Squad', '/logo4.png', [
-            { name: 'Boaster#FNC', rank: 'Inmortal', level: 300 },
-            { name: 'Derke#FNC', rank: 'Ascendente', level: 120 },
-            { name: 'Leo#FNC', rank: 'Hierro', level: 42 },
-        ]),
-    ];
+    return [];
 }
 
 export const teamsStore = createJsonStore('teams.json', seedTeams);
-export const matchesStore = createJsonStore('matches.json', { groups: {}, matches: [] });
+export const matchesStore = createJsonStore('matches.json', { groups: { A: [], B: [], C: [], D: [] }, matches: [], jornadas: [[], [], [], []], drawCompleted: false });
 export const liveMatchStore = createJsonStore('live-match.json', null);
 
 export const loadTeams = () => {

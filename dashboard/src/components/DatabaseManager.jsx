@@ -604,9 +604,47 @@ export default function DatabaseManager() {
                     />
                   </div>
 
-                  <button type="button" className="db-btn-add" onClick={handleOpenAddTeam}>
-                    <Plus size={16} /> Añadir Nuevo Equipo
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {dbData.teams && dbData.teams.length >= 16 && (
+                      <button
+                        type="button"
+                        style={{
+                          background: 'rgba(0, 245, 212, 0.15)',
+                          border: '1px solid #00f5d4',
+                          color: '#00f5d4',
+                          padding: '8px 14px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          fontSize: '13px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                        onClick={async () => {
+                          if (!window.confirm('¿Asignar los 16 equipos de teams.json a los Grupos A, B, C y D de matches.json?')) return;
+                          const all = dbData.teams || [];
+                          const gA = all.slice(0, 4).map((t, idx) => ({ id: `A${idx+1}`, name: t.name, logo: t.logo || '/logo1.png', grupo: 'A', jugadores: (t.players || []).map(p => p.name) }));
+                          const gB = all.slice(4, 8).map((t, idx) => ({ id: `B${idx+1}`, name: t.name, logo: t.logo || '/logo2.png', grupo: 'B', jugadores: (t.players || []).map(p => p.name) }));
+                          const gC = all.slice(8, 12).map((t, idx) => ({ id: `C${idx+1}`, name: t.name, logo: t.logo || '/logo3.png', grupo: 'C', jugadores: (t.players || []).map(p => p.name) }));
+                          const gD = all.slice(12, 16).map((t, idx) => ({ id: `D${idx+1}`, name: t.name, logo: t.logo || '/logo4.png', grupo: 'D', jugadores: (t.players || []).map(p => p.name) }));
+                          const updatedMatches = {
+                            ...dbData.matches,
+                            groups: { A: gA, B: gB, C: gC, D: gD }
+                          };
+                          setDbData(prev => ({ ...prev, matches: updatedMatches }));
+                          await saveTableData('matches', updatedMatches);
+                          notify('16 equipos asignados a los Grupos A, B, C, D de matches.json');
+                        }}
+                      >
+                        <Layers size={15} /> Asignar a Grupos A, B, C, D
+                      </button>
+                    )}
+
+                    <button type="button" className="db-btn-add" onClick={handleOpenAddTeam}>
+                      <Plus size={16} /> Añadir Nuevo Equipo
+                    </button>
+                  </div>
                 </div>
 
                 <div className="db-table-container">
@@ -623,6 +661,19 @@ export default function DatabaseManager() {
                       </tr>
                     </thead>
                     <tbody>
+                      {teamsList.length === 0 && (
+                        <tr>
+                          <td colSpan={7} style={{ textAlign: 'center', padding: '36px 20px', color: '#888' }}>
+                            <div style={{ fontSize: '28px', marginBottom: '8px' }}>📂</div>
+                            <div style={{ color: '#fff', fontWeight: 700, fontSize: '15px' }}>
+                              No hay equipos registrados en teams.json
+                            </div>
+                            <div style={{ fontSize: '13px', marginTop: '4px' }}>
+                              Todos los equipos de ejemplo han sido eliminados. Pulsa en "+ Añadir Nuevo Equipo" para subir tus equipos oficiales.
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                       {teamsList.map((team, idx) => (
                         <tr key={team.id || idx}>
                           <td style={{ color: '#888' }}>{team.id}</td>
@@ -1221,7 +1272,7 @@ export default function DatabaseManager() {
                     className="db-input-field"
                     value={teamModal.team.name}
                     onChange={(e) => setTeamModal(m => ({ ...m, team: { ...m.team, name: e.target.value } }))}
-                    placeholder="Ej: Los Monos GG"
+                    placeholder="Ej: Nombre de la escuadra"
                   />
                 </div>
 

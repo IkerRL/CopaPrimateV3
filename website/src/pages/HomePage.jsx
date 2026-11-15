@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Trophy, Users, ShieldAlert, ChevronDown, Sparkles, History } from 'lucide-react';
 import { usePageTitle, useReveal, useCountUp } from '../hooks';
 import { fetchPublic } from '../api';
-import { TEAMS } from '../data';
 
 function Stat({ value, label, suffix = '', prefix = '' }) {
   const [ref, n] = useCountUp(value);

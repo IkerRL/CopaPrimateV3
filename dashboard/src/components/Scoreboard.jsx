@@ -96,16 +96,16 @@ export default function Scoreboard() {
   });
 
   const [matchData, setMatchData] = useState({
-    active: true,
-    status: 'LIVE',
-    team1: { name: 'Los Monos', logo: '/logo1.png', score: 11, mapsWon: 1, side: 'DEFENSOR' },
-    team2: { name: 'Gorilas', logo: '/logo2.png', score: 9, mapsWon: 0, side: 'ATACANTE' },
-    map: 'Ascent',
-    round: 20,
-    format: 'BO3',
+    active: false,
+    status: 'PROGRAMADO',
+    team1: { name: 'Por Determinar', logo: '/copa-logo.png', score: 0, mapsWon: 0, side: 'DEFENSOR' },
+    team2: { name: 'Por Determinar', logo: '/copa-logo.png', score: 0, mapsWon: 0, side: 'ATACANTE' },
+    map: '',
+    round: 0,
+    format: 'BO1',
     side: 'DEF vs ATK',
-    mvp: 'TenZ#NA1',
-    notes: 'Ronda 20: Compra completa. Defensa en A.',
+    mvp: '',
+    notes: '',
   });
 
   // URLs de overlays para OBS
@@ -1416,7 +1416,7 @@ export default function Scoreboard() {
                 {teams.map((t) => (
                   <option key={t.name} value={t.name}>{t.name}</option>
                 ))}
-                {teams.length === 0 && <option value="Los Monos">Los Monos</option>}
+                {teams.length === 0 && <option value="">Sin equipos registrados</option>}
               </select>
             </div>
 

@@ -19,90 +19,33 @@ const VALORANT_AGENTS = [
 ];
 
 const DEFAULT_GRUPOS = {
-  A: [
-    { id: 'A1', name: "Thunder Buddies", jugadores: ["Brrokeen", "Pipe"], logo: "/logo3.png", grupo: 'A' },
-    { id: 'A2', name: "Los Akrtona2", jugadores: ["Kira", "Serax"], logo: "/logo2.png", grupo: 'A' },
-    { id: 'A3', name: "Chuu-Chuu 100% MAX", jugadores: ["MakaQuillo", "Max"], logo: "/logo8.png", grupo: 'A' },
-    { id: 'A4', name: "REHENKARMACIÓN", jugadores: ["Satha", "Makflat"], logo: "/logo1.png", grupo: 'A' }
-  ],
-  B: [
-    { id: 'B1', name: "Entry Baiters", jugadores: ["レックウザ", "Militantedelsoe"], logo: "/logo5.png", grupo: 'B' },
-    { id: 'B2', name: "Dream Team", jugadores: ["JoKker", "Pepardo"], logo: "/logo7.png", grupo: 'B' },
-    { id: 'B3', name: "Makaco Ninja-Pelocho", jugadores: ["MakacoNinja", "Iker 😎"], logo: "/logo6.png", grupo: 'B' },
-    { id: 'B4', name: "Kizuna", jugadores: ["Alezita", "Sarix"], logo: "/logo4.png", grupo: 'B' }
-  ],
-  C: [
-    { id: 'C1', name: "Sakura", jugadores: ["Gustavo", "Carlos"], logo: "/logo14.png", grupo: 'C' },
-    { id: 'C2', name: "Soul Resonance", jugadores: ["KrypT", "Charly"], logo: "/logo11.png", grupo: 'C' },
-    { id: 'C3', name: "Stranger Picks", jugadores: ["TheDori", "Sotomi"], logo: "/logo9.png", grupo: 'C' },
-    { id: 'C4', name: "MARIIKS", jugadores: ["Acid", "Bru"], logo: "/logo10.png", grupo: 'C' }
-  ],
-  D: [
-    { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png", grupo: 'D' },
-    { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png", grupo: 'D' },
-    { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png", grupo: 'D' },
-    { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png", grupo: 'D' }
-  ]
+  A: [],
+  B: [],
+  C: [],
+  D: []
 };
 
-const BOMBOS_DATA = [
-  {
-    bombo: 1,
-    title: 'Bombo 1 · Cabezas de Serie',
-    color: '#00f5d4',
-    teams: [
-      { id: 'A1', name: "Thunder Buddies", jugadores: ["Brrokeen", "Pipe"], logo: "/logo3.png" },
-      { id: 'B1', name: "Entry Baiters", jugadores: ["レックウザ", "Militantedelsoe"], logo: "/logo5.png" },
-      { id: 'C1', name: "Sakura", jugadores: ["Gustavo", "Carlos"], logo: "/logo14.png" },
-      { id: 'D1', name: "Primates FC", jugadores: ["Knekro", "IlloJuan"], logo: "/logo12.png" }
-    ]
-  },
-  {
-    bombo: 2,
-    title: 'Bombo 2',
-    color: '#c084fc',
-    teams: [
-      { id: 'A2', name: "Los Akrtona2", jugadores: ["Kira", "Serax"], logo: "/logo2.png" },
-      { id: 'B2', name: "Dream Team", jugadores: ["JoKker", "Pepardo"], logo: "/logo7.png" },
-      { id: 'C2', name: "Soul Resonance", jugadores: ["KrypT", "Charly"], logo: "/logo11.png" },
-      { id: 'D2', name: "Chimp Squad", jugadores: ["Boaster", "Derke"], logo: "/logo13.png" }
-    ]
-  },
-  {
-    bombo: 3,
-    title: 'Bombo 3',
-    color: '#ff4655',
-    teams: [
-      { id: 'A3', name: "Chuu-Chuu 100% MAX", jugadores: ["MakaQuillo", "Max"], logo: "/logo8.png" },
-      { id: 'B3', name: "Makaco Ninja-Pelocho", jugadores: ["MakacoNinja", "Iker 😎"], logo: "/logo6.png" },
-      { id: 'C3', name: "Stranger Picks", jugadores: ["TheDori", "Sotomi"], logo: "/logo9.png" },
-      { id: 'D3', name: "Banana Kings", jugadores: ["Maka", "Mixwell"], logo: "/logo15.png" }
-    ]
-  },
-  {
-    bombo: 4,
-    title: 'Bombo 4',
-    color: '#fbbf24',
-    teams: [
-      { id: 'A4', name: "REHENKARMACIÓN", jugadores: ["Satha", "Makflat"], logo: "/logo1.png" },
-      { id: 'B4', name: "Kizuna", jugadores: ["Alezita", "Sarix"], logo: "/logo4.png" },
-      { id: 'C4', name: "MARIIKS", jugadores: ["Acid", "Bru"], logo: "/logo10.png" },
-      { id: 'D4', name: "Golden Gorillas", jugadores: ["TenZ", "ScreaM"], logo: "/logo10.png" }
-    ]
-  }
-];
-
-// Utilidades de resolución de bombos y grupos
-function getTeamPot(teamName) {
-  for (const b of BOMBOS_DATA) {
-    if (b.teams.some(t => t.name === teamName)) return b.bombo;
+// Utilidades dinámicas de resolución de bombos y grupos
+function getTeamPot(teamName, currentGrupos) {
+  const gSource = currentGrupos || (typeof grupos !== 'undefined' ? grupos : null);
+  if (gSource) {
+    for (const [gKey, list] of Object.entries(gSource)) {
+      if (Array.isArray(list)) {
+        const idx = list.findIndex(t => t?.name === teamName);
+        if (idx >= 0) {
+          const t = list[idx];
+          if (t?.bombo) return t.bombo;
+          return idx + 1;
+        }
+      }
+    }
   }
   return 1;
 }
 
 function getTeamGroup(teamName, currentGrupos) {
   for (const [gKey, list] of Object.entries(currentGrupos || {})) {
-    if (Array.isArray(list) && list.some(t => t.name === teamName)) return gKey;
+    if (Array.isArray(list) && list.some(t => t?.name === teamName)) return gKey;
   }
   return 'A';
 }
@@ -272,7 +215,7 @@ export default function CopaGruposLiga() {
       broadcastSorteoState(grupos, drawingTeam, isSpinningBall, revealedTeams, activePhase, null);
     } else if (team) {
       const gKey = team.grupo || Object.keys(grupos).find(k => (grupos[k] || []).some(t => t.name === team.name)) || 'A';
-      const potIdx = team.bombo || BOMBOS_DATA.find(b => b.teams.some(t => t.name === team.name))?.bombo || ((grupos[gKey] || []).findIndex(t => t.name === team.name) + 1) || 1;
+      const potIdx = team.bombo || getTeamPot(team.name, grupos);
       const target = {
         ...team,
         grupo: gKey,
@@ -1047,6 +990,26 @@ export default function CopaGruposLiga() {
           ========================================================= */}
       {activePhase === 'presentacion' && (
         <div>
+          {Object.values(grupos).flat().length === 0 && (
+            <div style={{
+              padding: '30px',
+              textAlign: 'center',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              color: '#aaa',
+            }}>
+              <div style={{ fontSize: '32px', marginBottom: '8px' }}>📂</div>
+              <div style={{ fontWeight: 800, color: '#fff', fontSize: '16px' }}>
+                No hay equipos asignados a los Grupos A, B, C y D
+              </div>
+              <div style={{ fontSize: '13px', maxWidth: '500px', margin: '6px auto 14px', lineHeight: '1.5' }}>
+                Todos los equipos de ejemplo han sido eliminados. Puedes registrar tus equipos reales en la pestaña de <strong>Base de Datos</strong>.
+              </div>
+            </div>
+          )}
+
           <div className="copa-action-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button type="button" className="btn-v-action" onClick={revealAll}>
