@@ -488,5 +488,81 @@ router.post('/web-settings', (req, res) => {
     res.json({ ok: true, settings: updated });
 });
 
+// 10. Gestión Directa de Base de Datos (Protegida con clave maestra)
+const MASTER_DB_PASSWORD = 'Iker2005izan@';
+
+router.post('/database/verify', (req, res) => {
+    const { password } = req.body || {};
+    if (password === MASTER_DB_PASSWORD) {
+        return res.json({ success: true, authorized: true });
+    }
+    return res.status(403).json({ success: false, error: 'Contraseña de base de datos incorrecta' });
+});
+
+router.get('/database/all', (req, res) => {
+    res.json({
+        teams: loadTeams(),
+        matches: loadMatches(),
+        overlayState: loadOverlayState(),
+        liveMatch: loadLiveMatch(),
+        webSettings: loadWebSettings(),
+    });
+});
+
+router.put('/database/:table', (req, res) => {
+    const { table } = req.params;
+    const { data, password } = req.body || {};
+    if (password !== MASTER_DB_PASSWORD) {
+        return res.status(403).json({ error: 'Acceso denegado: se requiere la contraseña maestra de base de datos' });
+    }
+    switch (table) {
+        case 'teams':
+            if (!Array.isArray(data)) return res.status(400).json({ error: 'teams debe ser un array' });
+            saveTeams(data);
+            logActivity('system', 'Base de datos: teams.json modificado directamente');
+            break;
+        case 'matches':
+            if (typeof data !== 'object' || data === null) return res.status(400).json({ error: 'matches debe ser un objeto' });
+            saveMatches(data);
+            logActivity('system', 'Base de datos: matches.json modificado directamente');
+            break;
+        case 'overlay-state':
+            if (typeof data !== 'object' || data === null) return res.status(400).json({ error: 'overlay-state debe ser un objeto' });
+            saveOverlayState(data);
+            logActivity('system', 'Base de datos: overlay-state.json modificado directamente');
+            break;
+        case 'live-match':
+            saveLiveMatch(data);
+            logActivity('system', 'Base de datos: live-match.json modificado directamente');
+            break;
+        case 'web-settings':
+            if (typeof data !== 'object' || data === null) return res.status(400).json({ error: 'web-settings debe ser un objeto' });
+            saveWebSettings(data);
+            logActivity('system', 'Base de datos: web-settings.json modificado directamente');
+            break;
+        default:
+            return res.status(404).json({ error: `Tabla desconocida: ${table}` });
+    }
+    res.json({ success: true, table, data });
+});
+
+router.post('/database/backup/restore', (req, res) => {
+    const { backup, password } = req.body || {};
+    if (password !== MASTER_DB_PASSWORD) {
+        return res.status(403).json({ error: 'Acceso denegado: se requiere la contraseña maestra de base de datos' });
+    }
+    if (!backup || typeof backup !== 'object') {
+        return res.status(400).json({ error: 'El archivo de copia de seguridad no es válido' });
+    }
+    if (Array.isArray(backup.teams)) saveTeams(backup.teams);
+    if (backup.matches && typeof backup.matches === 'object') saveMatches(backup.matches);
+    if (backup.overlayState && typeof backup.overlayState === 'object') saveOverlayState(backup.overlayState);
+    if (backup.liveMatch !== undefined) saveLiveMatch(backup.liveMatch);
+    if (backup.webSettings && typeof backup.webSettings === 'object') saveWebSettings(backup.webSettings);
+
+    logActivity('system', 'Base de datos: Copia de seguridad completa restaurada');
+    res.json({ success: true, message: 'Copia de seguridad restaurada correctamente' });
+});
+
 export { HttpError };
 export default router;

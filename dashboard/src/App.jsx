@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Ticket, Megaphone, Users, Activity, LayoutDashboard, Menu, X, Radio, Shuffle, LogOut, Tv, BookOpen, Compass, Dices, Trophy, Globe } from 'lucide-react';
+import { Ticket, Megaphone, Users, Activity, LayoutDashboard, Menu, X, Radio, Shuffle, LogOut, Tv, BookOpen, Compass, Dices, Trophy, Globe, Database } from 'lucide-react';
 import Overview from './components/Overview';
 import Tickets from './components/Tickets';
 import Announcements from './components/Announcements';
@@ -11,6 +11,7 @@ import EquipmentRandomizer from './components/EquipmentRandomizer';
 import Overlays from './components/Overlays';
 import RulesGuide from './components/RulesGuide';
 import WebManager from './components/WebManager';
+import DatabaseManager from './components/DatabaseManager';
 import Login from './components/Login';
 import OverlayScoreboard from './components/overlays/OverlayScoreboard';
 import OverlayMatchup from './components/overlays/OverlayMatchup';
@@ -31,6 +32,7 @@ const NAV = [
   { id: 'overlays', label: 'Overlays para Stream', icon: Tv },
   { id: 'tickets', label: 'Gestión de Tickets', icon: Ticket, badge: 'tickets' },
   { id: 'teams', label: 'Equipos & Elos', icon: Users },
+  { id: 'database', label: 'Base de Datos 🔒', icon: Database },
   { id: 'rules', label: 'Reglas & Protocolos', icon: BookOpen },
   { id: 'announcements', label: 'Anuncios Oficiales', icon: Megaphone },
 ];
@@ -223,6 +225,7 @@ function DashboardMain() {
             {activeTab === 'rules' && <RulesGuide />}
             {activeTab === 'announcements' && <Announcements />}
             {activeTab === 'teams' && <Teams initialTeam={extractedTeam} />}
+            {activeTab === 'database' && <DatabaseManager />}
           </div>
         </main>
       </div>

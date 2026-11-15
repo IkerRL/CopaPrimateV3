@@ -1,0 +1,1039 @@
+/* ==========================================================================
+   GESTOR DE BASE DE DATOS (DATABASE MANAGER) - COPA PRIMATE
+   ========================================================================== */
+
+/* PANTALLA DE BLOQUEO (LOCK VAULT) */
+.db-vault-lock-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+  padding: 24px;
+}
+
+.db-vault-card {
+  background: linear-gradient(135deg, rgba(16, 22, 38, 0.95) 0%, rgba(9, 12, 22, 0.98) 100%);
+  border: 1.5px solid rgba(0, 245, 212, 0.45);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 245, 212, 0.2);
+  border-radius: 20px;
+  padding: 40px 48px;
+  max-width: 480px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  animation: vaultPopIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes vaultPopIn {
+  from { opacity: 0; transform: scale(0.94) translateY(15px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.db-vault-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(0, 245, 212, 0.12);
+  border: 1.5px solid rgba(0, 245, 212, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 0 25px rgba(0, 245, 212, 0.3);
+}
+
+.db-vault-title {
+  font-family: 'Oswald', 'Rajdhani', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+}
+
+.db-vault-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 24px 0;
+}
+
+.db-vault-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.db-password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.db-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #00f5d4;
+  pointer-events: none;
+}
+
+.db-password-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1.5px solid rgba(0, 245, 212, 0.4);
+  border-radius: 10px;
+  padding: 12px 42px;
+  color: #ffffff;
+  font-size: 15px;
+  font-family: monospace;
+  letter-spacing: 2px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.db-password-input:focus {
+  outline: none;
+  border-color: #00f5d4;
+  box-shadow: 0 0 20px rgba(0, 245, 212, 0.35);
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.db-eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.db-eye-btn:hover {
+  color: #00f5d4;
+}
+
+.db-auth-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid rgba(255, 70, 85, 0.5);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ff4655;
+  font-size: 12px;
+  font-weight: 700;
+  animation: shakeError 0.3s ease-in-out;
+}
+
+@keyframes shakeError {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+.db-btn-unlock {
+  width: 100%;
+  background: linear-gradient(135deg, #00f5d4 0%, #0284c7 100%);
+  color: #08080b;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 20px rgba(0, 245, 212, 0.3);
+}
+
+.db-btn-unlock:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(0, 245, 212, 0.5);
+}
+
+.db-btn-unlock:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.db-vault-footer {
+  margin-top: 24px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ==========================================================================
+   PANEL PRINCIPAL DESBLOQUEADO
+   ========================================================================== */
+
+.db-manager-container {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px;
+}
+
+.db-manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: rgba(14, 20, 36, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px 24px;
+}
+
+.db-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.db-header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.db-main-title {
+  font-family: 'Oswald', 'Rajdhani', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #ffffff;
+  margin: 0;
+}
+
+.db-badge-secure {
+  background: rgba(0, 245, 212, 0.15);
+  border: 1px solid rgba(0, 245, 212, 0.5);
+  color: #00f5d4;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.db-header-subtitle {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.db-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.db-btn-tool {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-btn-tool:hover {
+  background: rgba(0, 245, 212, 0.15);
+  border-color: #00f5d4;
+  color: #00f5d4;
+}
+
+.db-btn-lock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid rgba(255, 70, 85, 0.4);
+  color: #ff4655;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-btn-lock:hover {
+  background: rgba(255, 70, 85, 0.3);
+  border-color: #ff4655;
+}
+
+.db-notification-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 800;
+  animation: phaseFadeIn 0.3s ease-out;
+}
+
+.db-notification-banner.success {
+  background: rgba(0, 245, 212, 0.15);
+  border: 1px solid #00f5d4;
+  color: #00f5d4;
+}
+
+.db-notification-banner.error {
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid #ff4655;
+  color: #ff4655;
+}
+
+/* Barra de pestañas */
+.db-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 10px;
+}
+
+.db-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 9px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.db-tab-btn.active {
+  background: rgba(0, 245, 212, 0.15);
+  border-color: #00f5d4;
+  color: #00f5d4;
+  box-shadow: 0 0 15px rgba(0, 245, 212, 0.2);
+}
+
+.db-tab-count {
+  background: rgba(0, 0, 0, 0.5);
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.db-mode-switch-wrap {
+  margin-left: auto;
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.db-mode-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.db-mode-pill.active {
+  background: #00f5d4;
+  color: #08080b;
+}
+
+/* ==========================================================================
+   MODO JSON DIRECTO
+   ========================================================================== */
+
+.db-raw-editor-card {
+  background: rgba(10, 14, 24, 0.95);
+  border: 1.5px solid rgba(192, 132, 252, 0.4);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.db-raw-editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.db-raw-file-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.db-raw-header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.db-btn-raw-action {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.db-btn-raw-save {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #00f5d4, #0284c7);
+  border: none;
+  color: #08080b;
+  padding: 6px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.db-json-error-pill {
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid rgba(255, 70, 85, 0.5);
+  color: #ff4655;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: monospace;
+}
+
+.db-raw-textarea {
+  width: 100%;
+  height: 480px;
+  background: #060910;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #00f5d4;
+  font-family: 'Consolas', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  resize: vertical;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.db-raw-textarea:focus {
+  border-color: #c084fc;
+}
+
+/* ==========================================================================
+   VISTAS VISUALES INTERACTIVAS
+   ========================================================================== */
+
+.db-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.db-toolbar-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.db-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 380px;
+  width: 100%;
+}
+
+.db-search-icon {
+  position: absolute;
+  left: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.db-search-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 12px 8px 36px;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.db-search-input:focus {
+  outline: none;
+  border-color: #00f5d4;
+}
+
+.db-btn-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #00f5d4 0%, #0284c7 100%);
+  color: #08080b;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+/* Tabla de datos */
+.db-table-container {
+  overflow-x: auto;
+  background: rgba(12, 16, 26, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.db-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.db-data-table th {
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.db-data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
+}
+
+.db-data-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.db-table-team-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.db-group-tag {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.db-group-tag.group-A { background: rgba(255, 70, 85, 0.15); color: #ff4655; border: 1px solid rgba(255, 70, 85, 0.4); }
+.db-group-tag.group-B { background: rgba(0, 245, 212, 0.15); color: #00f5d4; border: 1px solid rgba(0, 245, 212, 0.4); }
+.db-group-tag.group-C { background: rgba(192, 132, 252, 0.15); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); }
+.db-group-tag.group-D { background: rgba(251, 191, 36, 0.15); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.4); }
+
+.db-players-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.db-player-chip {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: #ddd;
+}
+
+.db-badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+}
+
+.db-badge-status.public {
+  background: rgba(0, 245, 212, 0.15);
+  color: #00f5d4;
+  border: 1px solid rgba(0, 245, 212, 0.4);
+}
+
+.db-badge-status.hidden {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.db-row-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.db-btn-action-edit, .db-btn-action-delete {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s;
+}
+
+.db-btn-action-edit:hover {
+  background: rgba(0, 245, 212, 0.2);
+  color: #00f5d4;
+  border-color: #00f5d4;
+}
+
+.db-btn-action-delete:hover {
+  background: rgba(255, 70, 85, 0.2);
+  color: #ff4655;
+  border-color: #ff4655;
+}
+
+/* Partidos */
+.db-jornada-tabs-row {
+  display: flex;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.db-jornada-tab {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.db-jornada-tab.active {
+  background: rgba(192, 132, 252, 0.15);
+  border-color: #c084fc;
+  color: #c084fc;
+}
+
+.db-pill-count {
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.db-matches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.db-match-card {
+  background: rgba(12, 16, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.db-match-card-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.db-match-teams-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.db-match-team-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 40%;
+  overflow: hidden;
+}
+
+.db-match-team-col.align-right {
+  justify-content: flex-end;
+}
+
+.db-match-logo {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+.db-match-team-name {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db-match-score-inputs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.db-score-input {
+  width: 32px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #00f5d4;
+  font-weight: 900;
+  text-align: center;
+  padding: 4px;
+}
+
+.db-match-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+}
+
+.db-status-select {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.db-btn-del-match {
+  background: none;
+  border: none;
+  color: #ff4655;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.db-matches-actions-bar {
+  margin-top: 16px;
+}
+
+.db-btn-save-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #00f5d4 0%, #0284c7 100%);
+  color: #08080b;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.db-btn-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 70, 85, 0.15);
+  border: 1px solid rgba(255, 70, 85, 0.4);
+  color: #ff4655;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Tarjetas simples para formularios */
+.db-simple-card {
+  background: rgba(12, 16, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.db-card-title {
+  font-family: 'Oswald', 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+}
+
+.db-card-subtitle {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  margin: 0 0 20px 0;
+}
+
+.db-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.db-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.db-form-group label {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.db-input-field {
+  background: rgba(0, 0, 0, 0.5);
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.db-input-field:focus {
+  outline: none;
+  border-color: #00f5d4;
+}
+
+.db-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* MODAL */
+.db-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.db-modal-card {
+  background: linear-gradient(135deg, rgba(16, 22, 38, 0.98) 0%, rgba(9, 12, 22, 0.99) 100%);
+  border: 1.5px solid rgba(0, 245, 212, 0.5);
+  border-radius: 16px;
+  max-width: 620px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.db-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.db-modal-header h3 {
+  font-family: 'Oswald', 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: #fff;
+  margin: 0;
+}
+
+.db-modal-close {
+  background: none;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+}
+
+.db-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.db-roster-editor-section {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.db-btn-add-player {
+  background: rgba(0, 245, 212, 0.15);
+  border: 1px solid rgba(0, 245, 212, 0.4);
+  color: #00f5d4;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.db-players-inputs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.db-player-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.db-player-num {
+  font-size: 12px;
+  font-weight: 800;
+  color: #888;
+  width: 24px;
+}
+
+.db-input-player-name {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #fff;
+  font-size: 12px;
+}
+
+.db-select-player-rank {
+  width: 120px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #00f5d4;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.db-btn-remove-player {
+  background: none;
+  border: none;
+  color: #ff4655;
+  cursor: pointer;
+}
+
+.db-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 14px;
+}
+
+.db-btn-cancel {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.db-btn-save-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #00f5d4, #0284c7);
+  border: none;
+  color: #08080b;
+  padding: 8px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+}
