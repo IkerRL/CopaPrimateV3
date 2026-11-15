@@ -698,88 +698,169 @@ export default function OverlayGruposSorteo() {
           );
         })()}
 
-        {/* FASE 4: JORNADAS / CALENDARIO (4 COLUMNAS DE PARTIDOS) */}
-        {(activePhase === 'jornadas' || (activePhase === 'liga' && jornadas && jornadas.length > 0)) && (
-          <div key={activePhase} className="phase-content-wrapper" style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px',
-            width: '100%',
-            overflowY: 'auto',
-            zIndex: 2,
-          }}>
-            {jornadas.map((jList, jIdx) => (
-              <div
-                key={jIdx}
-                style={{
-                  background: 'rgba(12, 16, 26, 0.75)',
-                  border: '1.5px solid rgba(192, 132, 252, 0.4)',
-                  borderRadius: '14px',
-                  padding: '14px',
+        {/* FASE 4: JORNADAS / CALENDARIO (4 COLUMNAS DE PARTIDOS O PENDIENTE DE SORTEO) */}
+        {(activePhase === 'jornadas' || (activePhase === 'liga' && jornadas && jornadas.length > 0)) && (() => {
+          const totalMatches = (jornadas || []).flat().length;
+
+          if (totalMatches === 0) {
+            return (
+              <div key="jornadas-pending" className="phase-content-wrapper" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                minHeight: '440px',
+                background: 'rgba(12, 16, 26, 0.85)',
+                border: '1.5px solid rgba(192, 132, 252, 0.45)',
+                borderRadius: '18px',
+                padding: '40px 24px',
+                textAlign: 'center',
+                zIndex: 2,
+                gap: '16px',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.6)'
+              }}>
+                <div style={{
+                  width: '68px',
+                  height: '68px',
+                  borderRadius: '50%',
+                  background: 'rgba(192, 132, 252, 0.15)',
+                  border: '2px solid rgba(192, 132, 252, 0.6)',
                   display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
-                }}
-              >
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '32px',
+                  boxShadow: '0 0 25px rgba(192, 132, 252, 0.35)',
+                }}>
+                  ⏳
+                </div>
+                <div style={{
+                  color: '#fff',
+                  fontWeight: 900,
+                  fontSize: '24px',
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                }}>
+                  CALENDARIO OFICIAL · PENDIENTE DE SORTEO
+                </div>
                 <div style={{
                   color: '#00f5d4',
-                  fontWeight: 900,
-                  fontSize: '14px',
-                  letterSpacing: '1.5px',
-                  textAlign: 'center',
-                  paddingBottom: '8px',
-                  borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  fontWeight: 700,
+                  fontSize: '15px',
+                  letterSpacing: '1px',
+                  maxWidth: '560px',
+                  lineHeight: '1.5'
                 }}>
-                  JORNADA {jIdx + 1}
+                  Los 32 enfrentamientos de las Jornadas 1 a 4 se generarán y mostrarán aquí durante el sorteo en directo.
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
-                  {jList.map((m, mIdx) => {
-                    const t1Tag = getTeamTag(m.t1?.name);
-                    const t2Tag = getTeamTag(m.t2?.name);
-                    const hasScores = m.score1 !== '' && m.score2 !== '' && m.score1 !== undefined && m.score2 !== undefined;
-                    return (
-                      <div
-                        key={mIdx}
-                        style={{
-                          background: 'rgba(0,0,0,0.45)',
-                          border: '1px solid rgba(255,255,255,0.06)',
-                          borderRadius: '8px',
-                          padding: '8px 10px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          gap: '6px',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '40%', overflow: 'hidden' }}>
-                          <img src={m.t1?.logo || '/logo1.png'} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
-                          <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {t1Tag}
-                          </span>
-                        </div>
-                        <div style={{ textAlign: 'center', minWidth: '40px' }}>
-                          {hasScores ? (
-                            <span style={{ fontSize: '13px', fontWeight: 900, color: '#00f5d4', fontVariantNumeric: 'tabular-nums' }}>
-                              {m.score1} - {m.score2}
-                            </span>
-                          ) : (
-                            <span style={{ fontSize: '10px', color: '#c084fc', fontWeight: 900 }}>VS</span>
-                          )}
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '40%', overflow: 'hidden', justifyContent: 'flex-end' }}>
-                          <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {t2Tag}
-                          </span>
-                          <img src={m.t2?.logo || '/logo2.png'} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo2.png'; }} />
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div style={{ display: 'flex', gap: '12px', marginTop: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {['Jornada 1', 'Jornada 2', 'Jornada 3', 'Jornada 4'].map((jName, i) => (
+                    <div key={i} style={{
+                      padding: '10px 18px',
+                      background: 'rgba(0,0,0,0.5)',
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      color: '#aaa',
+                      letterSpacing: '1px',
+                    }}>
+                      🔒 {jName} (Pendiente)
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+            );
+          }
+
+          return (
+            <div key={activePhase} className="phase-content-wrapper" style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '16px',
+              width: '100%',
+              overflowY: 'auto',
+              zIndex: 2,
+            }}>
+              {jornadas.map((jList, jIdx) => (
+                <div
+                  key={jIdx}
+                  style={{
+                    background: 'rgba(12, 16, 26, 0.75)',
+                    border: '1.5px solid rgba(192, 132, 252, 0.4)',
+                    borderRadius: '14px',
+                    padding: '14px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}
+                >
+                  <div style={{
+                    color: '#00f5d4',
+                    fontWeight: 900,
+                    fontSize: '14px',
+                    letterSpacing: '1.5px',
+                    textAlign: 'center',
+                    paddingBottom: '8px',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)',
+                  }}>
+                    JORNADA {jIdx + 1}
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
+                    {jList.length === 0 ? (
+                      <div style={{ textAlign: 'center', color: '#666', fontSize: '11px', padding: '24px 0' }}>
+                        Sin partidos programados
+                      </div>
+                    ) : (
+                      jList.map((m, mIdx) => {
+                        const t1Tag = getTeamTag(m.t1?.name);
+                        const t2Tag = getTeamTag(m.t2?.name);
+                        const hasScores = m.score1 !== '' && m.score2 !== '' && m.score1 !== undefined && m.score2 !== undefined;
+                        return (
+                          <div
+                            key={mIdx}
+                            style={{
+                              background: 'rgba(0,0,0,0.45)',
+                              border: '1px solid rgba(255,255,255,0.06)',
+                              borderRadius: '8px',
+                              padding: '8px 10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '6px',
+                            }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '40%', overflow: 'hidden' }}>
+                              <img src={m.t1?.logo || '/logo1.png'} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo1.png'; }} />
+                              <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {t1Tag}
+                              </span>
+                            </div>
+                            <div style={{ textAlign: 'center', minWidth: '40px' }}>
+                              {hasScores ? (
+                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#00f5d4', fontVariantNumeric: 'tabular-nums' }}>
+                                  {m.score1} - {m.score2}
+                                </span>
+                              ) : (
+                                <span style={{ fontSize: '10px', color: '#c084fc', fontWeight: 900 }}>VS</span>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '40%', overflow: 'hidden', justifyContent: 'flex-end' }}>
+                              <span style={{ fontSize: '12px', fontWeight: 900, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {t2Tag}
+                              </span>
+                              <img src={m.t2?.logo || '/logo2.png'} alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} onError={(e) => { e.target.src = '/logo2.png'; }} />
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
 
         {/* MODO DEFAULT (FALLBACK) */}
         {activePhase !== 'presentacion' && activePhase !== 'sorteo' && activePhase !== 'clasificacion' && activePhase !== 'jornadas' && activePhase !== 'liga' && (

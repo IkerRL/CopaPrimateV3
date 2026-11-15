@@ -30,12 +30,12 @@
     ]
   },
   "sorteo": {
-    "championsAnimation": {
-      "animId": 1794711616298,
-      "revealedCount": 4,
-      "stepDuration": 1600,
-      "startedAt": 1794711616279
-    }
+    "activePhase": "presentacion",
+    "revealedTeams": [],
+    "drawnTeamNames": [],
+    "spotlightTeam": null,
+    "zoomedTeam": null,
+    "championsAnimation": null
   },
   "updatedAt": "2026-11-15T03:00:16.353Z"
 }

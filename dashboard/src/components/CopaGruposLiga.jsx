@@ -220,7 +220,8 @@ export default function CopaGruposLiga() {
     phase = activePhase,
     customSpotlight = spotlightTeam,
     customChampionsAnim = championsModalState,
-    customDrawnNames = drawnTeamNames
+    customDrawnNames = drawnTeamNames,
+    customJornadas = jornadas
   ) => {
     let computedStandings = [];
     try {
@@ -243,7 +244,7 @@ export default function CopaGruposLiga() {
           championsAnimation: customChampionsAnim !== undefined ? customChampionsAnim : null,
           drawnTeamNames: customDrawnNames,
           standings: computedStandings,
-          jornadas: jornadas,
+          jornadas: customJornadas,
         }
       })
     }).catch(() => {});
@@ -597,13 +598,9 @@ export default function CopaGruposLiga() {
           const j2 = data.matches.filter(m => m.jornada === 2);
           const j3 = data.matches.filter(m => m.jornada === 3);
           const j4 = data.matches.filter(m => m.jornada === 4);
-          if (j1.length || j2.length || j3.length || j4.length) {
-            setJornadas([j1, j2, j3, j4]);
-          } else {
-            setJornadas(generarCalendarioLiga(DEFAULT_GRUPOS));
-          }
+          setJornadas([j1, j2, j3, j4]);
         } else {
-          setJornadas(generarCalendarioLiga(DEFAULT_GRUPOS));
+          setJornadas([[], [], [], []]);
         }
       }
 
@@ -628,14 +625,16 @@ export default function CopaGruposLiga() {
         }
       }
     } catch (e) {
-      setJornadas(generarCalendarioLiga(DEFAULT_GRUPOS));
+      setJornadas([[], [], [], []]);
     }
   };
 
-  const saveLigaState = async (customJornadas = jornadas) => {
+  const saveLigaState = async (customJornadas = jornadas, isDrawCompleted = null) => {
     setSaving(true);
     try {
-      const allMatches = customJornadas.flat();
+      const allMatches = (customJornadas || []).flat();
+      const hasMatches = allMatches.length > 0;
+      const completed = isDrawCompleted !== null ? isDrawCompleted : hasMatches;
       await apiFetch('/matches', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -643,7 +642,7 @@ export default function CopaGruposLiga() {
           groups: grupos,
           matches: allMatches,
           jornadas: customJornadas,
-          drawCompleted: true
+          drawCompleted: completed
         })
       });
       setSaveStatus('¡Guardado correctamente en el servidor!');
@@ -679,8 +678,8 @@ export default function CopaGruposLiga() {
     broadcastSorteoState(grupos, drawingTeam, isSpinningBall, [], activePhase, spotlightTeam);
   };
 
-  // Reiniciar Sorteo a 0
-  const reiniciarSorteo = () => {
+  // Reiniciar Sorteo a 0 (vacía los partidos de las 4 jornadas y resetea los bombos)
+  const reiniciarSorteo = async () => {
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
     if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
     setIsAutoDrawing(false);
@@ -696,14 +695,16 @@ export default function CopaGruposLiga() {
     setGrupos(baseGrupos);
     const allNames = Object.values(baseGrupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
-    const cleanCalendario = generarCalendarioLiga(baseGrupos);
-    setJornadas(cleanCalendario);
-    saveLigaState(cleanCalendario);
-    broadcastSorteoState(baseGrupos, null, false, allNames, activePhase, null, null, []);
+
+    // VACIAR Y ELIMINAR PARTIDOS DE JORNADAS
+    const emptyJornadas = [[], [], [], []];
+    setJornadas(emptyJornadas);
+    await saveLigaState(emptyJornadas, false);
+    broadcastSorteoState(baseGrupos, null, false, allNames, activePhase, null, null, [], emptyJornadas);
   };
 
   // Sorteo instantáneo de todos los enfrentamientos de Liga
-  const ejecutarSorteoInstantaneo = () => {
+  const ejecutarSorteoInstantaneo = async () => {
     playClickSound();
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
     if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
@@ -723,8 +724,8 @@ export default function CopaGruposLiga() {
     const allNames = Object.values(activeGrupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
     setDrawnTeamNames(allNames);
-    saveLigaState(nuevoCalendario);
-    broadcastSorteoState(activeGrupos, null, false, allNames, activePhase, null, null, allNames);
+    await saveLigaState(nuevoCalendario, true);
+    broadcastSorteoState(activeGrupos, null, false, allNames, activePhase, null, null, allNames, nuevoCalendario);
   };
 
   // Actualizar marcador de un partido en la fase de liga
@@ -1255,10 +1256,14 @@ export default function CopaGruposLiga() {
                 <button
                   type="button"
                   className="btn-v-secondary"
-                  onClick={reiniciarSorteo}
+                  onClick={() => {
+                    if (window.confirm('¿Reiniciar sorteo a 0? Se eliminarán los enfrentamientos de las 4 jornadas y los bombos volverán a estar disponibles.')) {
+                      reiniciarSorteo();
+                    }
+                  }}
                   style={{ borderColor: '#ff4655', color: '#ff4655', fontWeight: 800, padding: '11px 18px' }}
                 >
-                  <RotateCcw size={16} /> REINICIAR SORTEO
+                  <RotateCcw size={16} /> REINICIAR SORTEO (VACIAR JORNADAS)
                 </button>
 
                 <button
@@ -1421,12 +1426,43 @@ export default function CopaGruposLiga() {
               </div>
 
               {(() => {
-                const schedule = (jornadas && jornadas.length === 4 && jornadas[0]?.length === 8)
-                  ? jornadas
-                  : generarCalendarioLiga(grupos);
+                const totalMatches = (jornadas || []).flat().length;
+
+                if (totalMatches === 0) {
+                  return (
+                    <div style={{
+                      background: 'rgba(255, 255, 255, 0.03)',
+                      border: '1.5px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      padding: '30px 20px',
+                      textAlign: 'center',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px',
+                    }}>
+                      <div style={{ fontSize: '32px' }}>🎲</div>
+                      <div style={{ fontSize: '1rem', fontWeight: 900, color: '#fff' }}>
+                        CALENDARIO VACÍO (SORTEO NO REALIZADO O ELIMINADO)
+                      </div>
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: '#888', maxWidth: '520px', lineHeight: '1.5' }}>
+                        No hay enfrentamientos generados en las jornadas. Puedes realizar el sorteo equipo a equipo arriba o pulsar el botón para generar todos los cruces de una sola vez.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={ejecutarSorteoInstantaneo}
+                        className="copa-instant-btn"
+                        style={{ marginTop: '8px' }}
+                      >
+                        <Zap size={16} /> GENERAR / SORTEAR TODOS LOS CRUCES (32 PARTIDOS)
+                      </button>
+                    </div>
+                  );
+                }
+
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '14px' }}>
-                    {schedule.map((jList, jIdx) => (
+                    {jornadas.map((jList, jIdx) => (
                       <div
                         key={jIdx}
                         style={{
@@ -1601,11 +1637,68 @@ export default function CopaGruposLiga() {
             {/* ACORDEÓN DE JORNADAS */}
             {(activePhase === 'jornadas' || activePhase === 'liga') && (
             <div className="copa-jornadas-box">
-              <div className="copa-section-title">
-                <Radio size={18} /> ENFRENTAMIENTOS POR JORNADA
+              <div className="copa-section-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Radio size={18} /> ENFRENTAMIENTOS POR JORNADA
+                </div>
+                {(jornadas || []).flat().length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('¿Eliminar todos los partidos de las jornadas? Esta acción vaciará el calendario de partidos y dejará el sorteo a 0.')) {
+                        reiniciarSorteo();
+                      }
+                    }}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.15)',
+                      border: '1px solid rgba(239, 68, 68, 0.4)',
+                      color: '#f87171',
+                      borderRadius: '6px',
+                      padding: '4px 10px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <Trash2 size={12} /> Vaciar Partidos de Jornadas
+                  </button>
+                )}
               </div>
 
-              {jornadas.map((jList, jIdx) => {
+              {(jornadas || []).flat().length === 0 ? (
+                <div style={{
+                  padding: '40px 20px',
+                  textAlign: 'center',
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  borderRadius: '10px',
+                  border: '1px dashed rgba(255, 255, 255, 0.1)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  margin: '10px 0'
+                }}>
+                  <div style={{ fontSize: '32px' }}>📭</div>
+                  <h4 style={{ margin: 0, color: '#fff', fontSize: '1.05rem', fontWeight: 800 }}>
+                    No hay partidos en las Jornadas
+                  </h4>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: '#888', maxWidth: '480px', lineHeight: '1.5' }}>
+                    Se han eliminado los cruces o el sorteo no se ha realizado todavía. Para registrar los resultados o consultar los partidos, realiza primero el sorteo de liga.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => handleSwitchPhase('sorteo')}
+                    className="copa-instant-btn"
+                    style={{ marginTop: '8px' }}
+                  >
+                    <Shuffle size={16} /> Ir al Sorteo de Liga
+                  </button>
+                </div>
+              ) : (
+                jornadas.map((jList, jIdx) => {
                 const isOpen = activeAccordion === jIdx;
                 return (
                   <div key={jIdx} className="copa-accordion-item">
@@ -1706,7 +1799,7 @@ export default function CopaGruposLiga() {
                     )}
                   </div>
                 );
-              })}
+              }))}
             </div>
             )}
           </div>

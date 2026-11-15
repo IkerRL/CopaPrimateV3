@@ -10,6 +10,50 @@ import './databaseManager.css';
 const MASTER_PASSWORD = 'Iker2005izan@';
 const STORAGE_KEY = 'copa_db_master_key';
 
+// Generador de cruces de fase de liga balanceados para Database Manager
+function generarCrucesPorDefecto(gruposData) {
+  const gA = gruposData?.A || [];
+  const gB = gruposData?.B || [];
+  const gC = gruposData?.C || [];
+  const gD = gruposData?.D || [];
+  if (gA.length < 4 || gB.length < 4 || gC.length < 4 || gD.length < 4) return [[], [], [], []];
+
+  const j1 = [
+    { t1: gA[0], t2: gB[0] }, { t1: gA[1], t2: gB[1] }, { t1: gA[2], t2: gB[2] }, { t1: gA[3], t2: gB[3] },
+    { t1: gC[0], t2: gD[0] }, { t1: gC[1], t2: gD[1] }, { t1: gC[2], t2: gD[2] }, { t1: gC[3], t2: gD[3] }
+  ];
+  const j2 = [
+    { t1: gA[0], t2: gC[0] }, { t1: gA[1], t2: gC[1] }, { t1: gA[2], t2: gC[2] }, { t1: gA[3], t2: gC[3] },
+    { t1: gB[0], t2: gD[0] }, { t1: gB[1], t2: gD[1] }, { t1: gB[2], t2: gD[2] }, { t1: gB[3], t2: gD[3] }
+  ];
+  const j3 = [
+    { t1: gA[0], t2: gD[0] }, { t1: gA[1], t2: gD[1] }, { t1: gA[2], t2: gD[2] }, { t1: gA[3], t2: gD[3] },
+    { t1: gB[0], t2: gC[0] }, { t1: gB[1], t2: gC[1] }, { t1: gB[2], t2: gC[2] }, { t1: gB[3], t2: gC[3] }
+  ];
+  const j4 = [
+    { t1: gA[0], t2: gA[1] }, { t1: gA[2], t2: gA[3] },
+    { t1: gB[0], t2: gB[1] }, { t1: gB[2], t2: gB[3] },
+    { t1: gC[0], t2: gC[1] }, { t1: gC[2], t2: gC[3] },
+    { t1: gD[0], t2: gD[1] }, { t1: gD[2], t2: gD[3] }
+  ];
+
+  const formatear = (partidos, jNum) =>
+    partidos.map((p, idx) => ({
+      id: `j${jNum}-m${idx + 1}`,
+      jornada: jNum,
+      round: `J${jNum}`,
+      t1: { name: p.t1.name, logo: p.t1.logo || '/logo1.png', grupo: p.t1.grupo || 'A' },
+      t2: { name: p.t2.name, logo: p.t2.logo || '/logo2.png', grupo: p.t2.grupo || 'B' },
+      score1: '',
+      score2: '',
+      status: 'Programado',
+      format: 'BO1 (Swiftplay)',
+      date: `Jornada ${jNum} · Partido ${idx + 1}`
+    }));
+
+  return [formatear(j1, 1), formatear(j2, 2), formatear(j3, 3), formatear(j4, 4)];
+}
+
 export default function DatabaseManager() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem(STORAGE_KEY) === MASTER_PASSWORD;
@@ -672,93 +716,188 @@ export default function DatabaseManager() {
                 </div>
 
                 <div className="db-matches-grid">
-                  {(jornadasList[selectedJornadaTab] || []).map((m, mIdx) => (
-                    <div key={m.id || mIdx} className="db-match-card">
-                      <div className="db-match-card-header">
-                        <span className="db-match-id">MATCH {m.id || `#${mIdx + 1}`}</span>
-                        <span className="db-match-format">{m.format || 'BO1'}</span>
+                  {(jornadasList[selectedJornadaTab] || []).length === 0 ? (
+                    <div style={{
+                      gridColumn: '1 / -1',
+                      padding: '40px 20px',
+                      textAlign: 'center',
+                      background: 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: '12px',
+                      border: '1.5px dashed rgba(255, 255, 255, 0.12)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '10px',
+                      color: '#aaa',
+                    }}>
+                      <div style={{ fontSize: '32px' }}>📭</div>
+                      <div style={{ fontWeight: 800, color: '#fff', fontSize: '16px' }}>
+                        No hay partidos registrados en la Jornada {selectedJornadaTab + 1}
                       </div>
-
-                      <div className="db-match-teams-row">
-                        <div className="db-match-team-col">
-                          <img src={m.t1?.logo || '/copa-logo.png'} alt="" className="db-match-logo" onError={(e) => { e.target.src = '/copa-logo.png'; }} />
-                          <span className="db-match-team-name">{m.t1?.name}</span>
-                        </div>
-
-                        <div className="db-match-score-inputs">
-                          <input
-                            type="number"
-                            className="db-score-input"
-                            value={m.score1 ?? ''}
-                            placeholder="0"
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const updated = JSON.parse(JSON.stringify(dbData.matches));
-                              if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
-                                updated.jornadas[selectedJornadaTab][mIdx].score1 = val;
-                                setDbData(prev => ({ ...prev, matches: updated }));
-                              }
-                            }}
-                          />
-                          <span style={{ color: '#aaa', fontWeight: 900 }}>-</span>
-                          <input
-                            type="number"
-                            className="db-score-input"
-                            value={m.score2 ?? ''}
-                            placeholder="0"
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              const updated = JSON.parse(JSON.stringify(dbData.matches));
-                              if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
-                                updated.jornadas[selectedJornadaTab][mIdx].score2 = val;
-                                setDbData(prev => ({ ...prev, matches: updated }));
-                              }
-                            }}
-                          />
-                        </div>
-
-                        <div className="db-match-team-col align-right">
-                          <span className="db-match-team-name">{m.t2?.name}</span>
-                          <img src={m.t2?.logo || '/copa-logo.png'} alt="" className="db-match-logo" onError={(e) => { e.target.src = '/copa-logo.png'; }} />
-                        </div>
-                      </div>
-
-                      <div className="db-match-footer">
-                        <select
-                          value={m.status || 'Programado'}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            const updated = JSON.parse(JSON.stringify(dbData.matches));
-                            if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
-                              updated.jornadas[selectedJornadaTab][mIdx].status = val;
-                              setDbData(prev => ({ ...prev, matches: updated }));
-                            }
-                          }}
-                          className="db-status-select"
-                        >
-                          <option value="Programado">Programado</option>
-                          <option value="LIVE">LIVE (En Juego)</option>
-                          <option value="Finalizado">Finalizado</option>
-                        </select>
-
-                        <button
-                          type="button"
-                          className="db-btn-del-match"
-                          onClick={() => {
-                            if (!window.confirm('¿Eliminar este partido de la jornada?')) return;
-                            const updated = JSON.parse(JSON.stringify(dbData.matches));
-                            updated.jornadas[selectedJornadaTab].splice(mIdx, 1);
-                            saveTableData('matches', updated);
-                          }}
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                      <div style={{ fontSize: '13px', maxWidth: '420px', lineHeight: '1.5' }}>
+                        El sorteo de partidos se ha eliminado o aún no se ha generado para esta jornada.
                       </div>
                     </div>
-                  ))}
+                  ) : (
+                    (jornadasList[selectedJornadaTab] || []).map((m, mIdx) => (
+                      <div key={m.id || mIdx} className="db-match-card">
+                        <div className="db-match-card-header">
+                          <span className="db-match-id">MATCH {m.id || `#${mIdx + 1}`}</span>
+                          <span className="db-match-format">{m.format || 'BO1'}</span>
+                        </div>
+
+                        <div className="db-match-teams-row">
+                          <div className="db-match-team-col">
+                            <img src={m.t1?.logo || '/copa-logo.png'} alt="" className="db-match-logo" onError={(e) => { e.target.src = '/copa-logo.png'; }} />
+                            <span className="db-match-team-name">{m.t1?.name}</span>
+                          </div>
+
+                          <div className="db-match-score-inputs">
+                            <input
+                              type="number"
+                              className="db-score-input"
+                              value={m.score1 ?? ''}
+                              placeholder="0"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const updated = JSON.parse(JSON.stringify(dbData.matches));
+                                if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
+                                  updated.jornadas[selectedJornadaTab][mIdx].score1 = val;
+                                  setDbData(prev => ({ ...prev, matches: updated }));
+                                }
+                              }}
+                            />
+                            <span style={{ color: '#aaa', fontWeight: 900 }}>-</span>
+                            <input
+                              type="number"
+                              className="db-score-input"
+                              value={m.score2 ?? ''}
+                              placeholder="0"
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                const updated = JSON.parse(JSON.stringify(dbData.matches));
+                                if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
+                                  updated.jornadas[selectedJornadaTab][mIdx].score2 = val;
+                                  setDbData(prev => ({ ...prev, matches: updated }));
+                                }
+                              }}
+                            />
+                          </div>
+
+                          <div className="db-match-team-col align-right">
+                            <span className="db-match-team-name">{m.t2?.name}</span>
+                            <img src={m.t2?.logo || '/copa-logo.png'} alt="" className="db-match-logo" onError={(e) => { e.target.src = '/copa-logo.png'; }} />
+                          </div>
+                        </div>
+
+                        <div className="db-match-footer">
+                          <select
+                            value={m.status || 'Programado'}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const updated = JSON.parse(JSON.stringify(dbData.matches));
+                              if (updated.jornadas?.[selectedJornadaTab]?.[mIdx]) {
+                                updated.jornadas[selectedJornadaTab][mIdx].status = val;
+                                setDbData(prev => ({ ...prev, matches: updated }));
+                              }
+                            }}
+                            className="db-status-select"
+                          >
+                            <option value="Programado">Programado</option>
+                            <option value="LIVE">LIVE (En Juego)</option>
+                            <option value="Finalizado">Finalizado</option>
+                          </select>
+
+                          <button
+                            type="button"
+                            className="db-btn-del-match"
+                            onClick={() => {
+                              if (!window.confirm('¿Eliminar este partido de la jornada?')) return;
+                              const updated = JSON.parse(JSON.stringify(dbData.matches));
+                              updated.jornadas[selectedJornadaTab].splice(mIdx, 1);
+                              saveTableData('matches', updated);
+                            }}
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
 
-                <div className="db-matches-actions-bar">
+                <div className="db-matches-actions-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="db-btn-danger"
+                      style={{
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        border: '1px solid rgba(239, 68, 68, 0.4)',
+                        color: '#f87171',
+                        fontWeight: 700,
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '13px'
+                      }}
+                      onClick={async () => {
+                        if (!window.confirm('¿Deseas ELIMINAR Y VACIAR todos los partidos de las 4 jornadas? (matches.json quedará con matches y jornadas vacíos a 0)')) return;
+                        const currentGroups = dbData.matches?.groups || {};
+                        const updated = {
+                          groups: currentGroups,
+                          matches: [],
+                          jornadas: [[], [], [], []],
+                          drawCompleted: false,
+                          drawnAt: null,
+                        };
+                        setDbData(prev => ({ ...prev, matches: updated }));
+                        await saveTableData('matches', updated);
+                        notify('Cruces y jornadas eliminados correctamente. Sorteo a 0.');
+                      }}
+                    >
+                      <Trash2 size={15} /> Vaciar y Eliminar Partidos de Todas las Jornadas
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{
+                        background: 'rgba(192, 132, 252, 0.15)',
+                        border: '1px solid rgba(192, 132, 252, 0.4)',
+                        color: '#c084fc',
+                        fontWeight: 700,
+                        padding: '9px 16px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '13px'
+                      }}
+                      onClick={async () => {
+                        if (!window.confirm('¿Generar automáticamente el calendario oficial de 32 partidos en 4 jornadas a partir de los grupos?')) return;
+                        const currentGroups = dbData.matches?.groups || {};
+                        const newJornadas = generarCrucesPorDefecto(currentGroups);
+                        const allMatches = newJornadas.flat();
+                        const updated = {
+                          groups: currentGroups,
+                          matches: allMatches,
+                          jornadas: newJornadas,
+                          drawCompleted: true,
+                          drawnAt: new Date().toISOString(),
+                        };
+                        setDbData(prev => ({ ...prev, matches: updated }));
+                        await saveTableData('matches', updated);
+                        notify('32 partidos de jornadas generados correctamente.');
+                      }}
+                    >
+                      <Trophy size={15} /> Generar Calendario Oficial (32 Partidos)
+                    </button>
+                  </div>
+
                   <button
                     type="button"
                     className="db-btn-save-all"
