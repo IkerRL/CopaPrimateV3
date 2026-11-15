@@ -83,6 +83,15 @@ export default function Scoreboard() {
   });
   const firstRender = useRef(true);
 
+  const [showMatchupConfigModal, setShowMatchupConfigModal] = useState(false);
+  const [matchupModalConfig, setMatchupModalConfig] = useState({
+    map: '',
+    moment: 'previa',
+    format: 'BO3',
+    m1: 0,
+    m2: 0,
+  });
+
   const [matchData, setMatchData] = useState({
     active: true,
     status: 'LIVE',
@@ -188,6 +197,21 @@ export default function Scoreboard() {
   };
 
   const handleSetOverlayMode = async (mode) => {
+    if (mode === 'matchup') {
+      const currentFormat = (matchData.format || 'BO3').toUpperCase();
+      const fmt = currentFormat.includes('BO1') ? 'BO1' : currentFormat.includes('BO5') ? 'BO5' : 'BO3';
+      const isKnownMap = matchData.map && !['TBD', 'POR DECIDIR', 'SIN MAPA', 'NINGUNO'].includes(matchData.map.trim().toUpperCase());
+      setMatchupModalConfig({
+        map: isKnownMap ? matchData.map : '',
+        moment: (matchData.team1?.mapsWon > 0 || matchData.team2?.mapsWon > 0 || matchData.matchMoment === 'post') ? 'post' : 'previa',
+        format: fmt,
+        m1: Number(matchData.team1?.mapsWon || 0),
+        m2: Number(matchData.team2?.mapsWon || 0),
+      });
+      setShowMatchupConfigModal(true);
+      return;
+    }
+
     setActiveOverlayMode(mode);
     try {
       await apiFetch(`/overlay-state`, {
@@ -198,6 +222,48 @@ export default function Scoreboard() {
       setFeedback({ type: 'success', text: `🎬 Escena activa en OBS cambiada a: ${mode.toUpperCase()}` });
     } catch {
       setFeedback({ type: 'error', text: 'Error al cambiar la escena en OBS' });
+    }
+  };
+
+  const handleConfirmMatchupBroadcast = async () => {
+    const isMapValid = Boolean(matchupModalConfig.map && matchupModalConfig.map.trim() !== '' && matchupModalConfig.map !== 'SIN MAPA');
+    const isPost = matchupModalConfig.moment === 'post';
+
+    const updatedMatch = {
+      ...matchData,
+      map: isMapValid ? matchupModalConfig.map : '',
+      showMap: isMapValid,
+      format: matchupModalConfig.format,
+      matchMoment: matchupModalConfig.moment,
+      showScore: isPost,
+      team1: {
+        ...matchData.team1,
+        mapsWon: isPost ? matchupModalConfig.m1 : 0,
+      },
+      team2: {
+        ...matchData.team2,
+        mapsWon: isPost ? matchupModalConfig.m2 : 0,
+      },
+    };
+
+    setMatchData(updatedMatch);
+    setShowMatchupConfigModal(false);
+
+    try {
+      await apiFetch('/live-match', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedMatch)
+      });
+      await apiFetch('/overlay-state', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'matchup' })
+      });
+      setActiveOverlayMode('matchup');
+      setFeedback({ type: 'success', text: '🎬 Pantalla Versus transmitida a OBS con éxito' });
+    } catch {
+      setFeedback({ type: 'error', text: 'Error al emitir Pantalla Versus a OBS' });
     }
   };
 
@@ -419,6 +485,232 @@ export default function Scoreboard() {
         onConfirm={confirmConfig.onConfirm}
         onCancel={() => setConfirmConfig(c => ({ ...c, isOpen: false }))}
       />
+
+      {/* Modal interactivo de configuración de Pantalla Versus */}
+      {showMatchupConfigModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(8, 8, 11, 0.88)',
+            backdropFilter: 'blur(10px)',
+            padding: '20px',
+            animation: 'modalBackdropFade 0.2s ease-out'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowMatchupConfigModal(false);
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              width: '100%',
+              maxWidth: '520px',
+              backgroundColor: '#0c101a',
+              borderRadius: '16px',
+              border: '1.5px solid #c084fc',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(192, 132, 252, 0.3)',
+              padding: '28px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '18px',
+              color: '#fff',
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#c084fc', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ⚔️ CONFIGURACIÓN PANTALLA VERSUS
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowMatchupConfigModal(false)}
+                style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '18px' }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.4 }}>
+              Configura la información que se mostrará en el stream antes de cambiar a la escena Versus:
+            </p>
+
+            {/* 1. MAPA */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#00f5d4', letterSpacing: '1px' }}>
+                1. ¿QUÉ MAPA SE JUEGA?
+              </label>
+              <select
+                value={matchupModalConfig.map}
+                onChange={(e) => setMatchupModalConfig({ ...matchupModalConfig, map: e.target.value })}
+                style={{
+                  background: 'rgba(0,0,0,0.6)',
+                  color: '#fff',
+                  border: '1px solid rgba(0, 245, 212, 0.4)',
+                  borderRadius: '8px',
+                  padding: '10px 12px',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                }}
+              >
+                <option value="">🙈 Sin mapa / Por decidir (Ocultar contenedor de mapa)</option>
+                <option value="Ascent">Ascent</option>
+                <option value="Bind">Bind</option>
+                <option value="Haven">Haven</option>
+                <option value="Split">Split</option>
+                <option value="Icebox">Icebox</option>
+                <option value="Breeze">Breeze</option>
+                <option value="Sunset">Sunset</option>
+                <option value="Lotus">Lotus</option>
+                <option value="Abyss">Abyss</option>
+              </select>
+              <span style={{ fontSize: '0.72rem', color: '#888' }}>
+                Si aún no se ha hecho el veto de mapas, déjalo en blanco y no se mostrará nada.
+              </span>
+            </div>
+
+            {/* 2. MOMENTO DE LA EMISIÓN */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#c084fc', letterSpacing: '1px' }}>
+                2. MOMENTO DE LA PARTIDA
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setMatchupModalConfig({ ...matchupModalConfig, moment: 'previa' })}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: matchupModalConfig.moment === 'previa' ? '2px solid #00f5d4' : '1px solid rgba(255,255,255,0.15)',
+                    background: matchupModalConfig.moment === 'previa' ? 'rgba(0,245,212,0.15)' : 'rgba(0,0,0,0.4)',
+                    color: matchupModalConfig.moment === 'previa' ? '#00f5d4' : '#fff',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <span>🕒 Previa / Antes del partido</span>
+                  <span style={{ fontSize: '0.7rem', color: '#888' }}>Ocultar resultado</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setMatchupModalConfig({ ...matchupModalConfig, moment: 'post' })}
+                  style={{
+                    padding: '10px',
+                    borderRadius: '8px',
+                    border: matchupModalConfig.moment === 'post' ? '2px solid #ff4655' : '1px solid rgba(255,255,255,0.15)',
+                    background: matchupModalConfig.moment === 'post' ? 'rgba(255,70,85,0.15)' : 'rgba(0,0,0,0.4)',
+                    color: matchupModalConfig.moment === 'post' ? '#ff4655' : '#fff',
+                    fontSize: '0.82rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <span>🏆 Post-partido / Con Resultado</span>
+                  <span style={{ fontSize: '0.7rem', color: '#888' }}>Mostrar marcador final</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 3. FORMATO */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 800, color: '#fbbf24', letterSpacing: '1px' }}>
+                3. FORMATO DE LA SERIE (PLATANITOS 🍌)
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                {['BO1', 'BO3', 'BO5'].map((fmt) => (
+                  <button
+                    key={fmt}
+                    type="button"
+                    onClick={() => setMatchupModalConfig({ ...matchupModalConfig, format: fmt })}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '8px',
+                      border: matchupModalConfig.format === fmt ? '2px solid #fbbf24' : '1px solid rgba(255,255,255,0.15)',
+                      background: matchupModalConfig.format === fmt ? 'rgba(251, 191, 36, 0.15)' : 'rgba(0,0,0,0.4)',
+                      color: matchupModalConfig.format === fmt ? '#fbbf24' : '#fff',
+                      fontSize: '0.85rem',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {fmt} ({fmt === 'BO1' ? '🍌' : fmt === 'BO3' ? '🍌🍌' : '🍌🍌🍌'})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* MARCADOR SI ES POST */}
+            {matchupModalConfig.moment === 'post' && (
+              <div style={{ display: 'flex', gap: '12px', alignItems: 'center', background: 'rgba(0,0,0,0.4)', padding: '10px', borderRadius: '8px' }}>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '0.75rem', color: '#00f5d4', fontWeight: 800 }}>Mapas {matchData.team1?.name}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="3"
+                    value={matchupModalConfig.m1}
+                    onChange={(e) => setMatchupModalConfig({ ...matchupModalConfig, m1: Number(e.target.value) })}
+                    style={{ width: '100%', background: '#08080b', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '6px', borderRadius: '4px', textAlign: 'center', fontWeight: 900 }}
+                  />
+                </div>
+                <span style={{ fontWeight: 900, color: '#aaa', marginTop: '14px' }}>VS</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontSize: '0.75rem', color: '#ff4655', fontWeight: 800 }}>Mapas {matchData.team2?.name}</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="3"
+                    value={matchupModalConfig.m2}
+                    onChange={(e) => setMatchupModalConfig({ ...matchupModalConfig, m2: Number(e.target.value) })}
+                    style={{ width: '100%', background: '#08080b', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '6px', borderRadius: '4px', textAlign: 'center', fontWeight: 900 }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* BOTONES */}
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setShowMatchupConfigModal(false)}
+                className="btn-v-secondary"
+                style={{ padding: '9px 16px' }}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmMatchupBroadcast}
+                className="btn-v-action"
+                style={{
+                  background: 'linear-gradient(135deg, #c084fc 0%, #7c3aed 100%)',
+                  borderColor: '#c084fc',
+                  color: '#fff',
+                  fontWeight: 900,
+                  padding: '9px 20px',
+                }}
+              >
+                🚀 Transmitir a OBS
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '15px' }}>

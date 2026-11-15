@@ -51,12 +51,15 @@ export default function OverlayMatchup() {
     phase: 'FASE DE GRUPOS',
     team1: { name: 'Los Monos', logo: '/logo1.png', score: 0, mapsWon: 0 },
     team2: { name: 'Gorilas', logo: '/logo2.png', score: 0, mapsWon: 0 },
-    map: 'Ascent',
+    map: '',
     round: 0,
     format: 'BO3',
     side: 'DEF vs ATK',
     mvp: '',
     notes: '',
+    showMap: false,
+    showScore: false,
+    matchMoment: 'previa',
   });
 
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function OverlayMatchup() {
     let mounted = true;
     const fetchLive = async () => {
       try {
-        const res = await fetch(`${API_URL}/public/live-match?overlay=1`);
+        const res = await fetch(`${API_URL}/live-match?overlay=1`);
         if (res.ok) {
           const data = await res.json();
           if (mounted && data.match) {
@@ -98,118 +101,136 @@ export default function OverlayMatchup() {
   const team2Side = isSwapped ? 'DEFENSOR' : 'ATACANTE';
   const team1Color = isSwapped ? '#ff4655' : '#00f5d4';
   const team2Color = isSwapped ? '#00f5d4' : '#ff4655';
-  const team1Glow = isSwapped ? 'rgba(255, 70, 85, 0.45)' : 'rgba(0, 245, 212, 0.45)';
-  const team2Glow = isSwapped ? 'rgba(0, 245, 212, 0.45)' : 'rgba(255, 70, 85, 0.45)';
+  const team1Glow = isSwapped ? 'rgba(255, 70, 85, 0.4)' : 'rgba(0, 245, 212, 0.4)';
+  const team2Glow = isSwapped ? 'rgba(0, 245, 212, 0.4)' : 'rgba(255, 70, 85, 0.4)';
 
   const t1Tag = getTeamTag(match.team1);
   const t2Tag = getTeamTag(match.team2);
 
-  // Extraer SOLO la fase (sin BO3 ni formatos)
-  const getCleanPhase = () => {
-    const raw = match.phase || match.stage || match.jornada || '';
-    if (typeof raw === 'number') return `JORNADA ${raw}`;
-    if (typeof raw === 'string' && raw.trim().length > 0) {
-      const clean = raw.replace(/\bBO[0-9]\b/gi, '').replace(/·/g, '').trim();
-      if (clean) return clean.toUpperCase();
-    }
-    if (match.notes && !match.notes.toLowerCase().includes('bo')) {
-      return match.notes.trim().toUpperCase();
-    }
-    return 'FASE DE GRUPOS';
-  };
+  const m1 = Number(match.team1?.mapsWon || 0);
+  const m2 = Number(match.team2?.mapsWon || 0);
 
-  const phaseText = getCleanPhase();
-  const m1 = match.team1?.mapsWon ?? 0;
-  const m2 = match.team2?.mapsWon ?? 0;
+  // Formato y platanitos dinámicos (BO1: 1, BO3: 2, BO5: 3)
+  const rawFormat = (match.format || 'BO3').toUpperCase();
+  const maxBananas = rawFormat.includes('BO1') ? 1 : rawFormat.includes('BO5') ? 3 : 2;
+
+  // Mapa visible solo si está elegido y no es nulo/vacío/TBD/desconocido
+  const hasValidMap = Boolean(
+    match.showMap !== false &&
+    match.map &&
+    typeof match.map === 'string' &&
+    match.map.trim().length > 0 &&
+    !['TBD', 'POR DECIDIR', 'SIN MAPA', 'NINGUNO', 'PENDIENTE', 'DESCONOCIDO', 'OCULTAR'].includes(match.map.trim().toUpperCase())
+  );
+
+  // Resultado visible según momento (antes del partido = oculto, después del partido / post = visible)
+  const showScore = Boolean(
+    match.showScore === true ||
+    match.matchMoment === 'post' ||
+    match.status === 'FINALIZADO' ||
+    (match.showScore !== false && match.matchMoment !== 'previa' && (match.team1?.score > 0 || match.team2?.score > 0 || m1 > 0 || m2 > 0))
+  );
+
+  const rawPhase = String(match.phase || '').trim().toUpperCase();
+  const phaseText = rawPhase
+    ? rawPhase.replace(/\s*\(?\s*BO\d+\s*\)?/gi, '').trim() || 'FASE DE GRUPOS'
+    : 'FASE DE GRUPOS';
+
+  if (!isVisible) return null;
 
   return (
     <div style={{
+      position: 'fixed',
+      inset: 0,
       width: '100vw',
       height: '100vh',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       background: 'transparent',
-      fontFamily: "'Outfit', 'Rajdhani', sans-serif",
-      userSelect: 'none',
+      fontFamily: "'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif",
+      color: '#fff',
       padding: '30px',
       boxSizing: 'border-box',
-      pointerEvents: isVisible ? 'auto' : 'none',
+      overflow: 'hidden',
     }}>
       <style>{`
-        @keyframes previaCardIn {
-          0% {
-            opacity: 0;
-            transform: scale(0.9) translateY(30px);
-            filter: blur(10px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            filter: blur(0px);
-          }
-        }
         @keyframes vsPulseAnim {
-          0% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(192, 132, 252, 0.6)); }
-          50% { transform: scale(1.06); filter: drop-shadow(0 0 28px rgba(192, 132, 252, 0.95)); }
-          100% { transform: scale(1); filter: drop-shadow(0 0 15px rgba(192, 132, 252, 0.6)); }
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(192, 132, 252, 0.45)); }
+          50% { transform: scale(1.05); filter: drop-shadow(0 0 32px rgba(192, 132, 252, 0.85)); }
         }
         @keyframes monkeyBobLeft {
-          0% { transform: rotate(-3deg) scale(1); }
-          100% { transform: rotate(3deg) scale(1.08); }
+          0% { transform: translateY(0px) rotate(-3deg); }
+          100% { transform: translateY(-8px) rotate(3deg); }
         }
         @keyframes monkeyBobRight {
-          0% { transform: rotate(3deg) scale(1); }
-          100% { transform: rotate(-3deg) scale(1.08); }
+          0% { transform: translateY(0px) rotate(3deg); }
+          100% { transform: translateY(-8px) rotate(-3deg); }
+        }
+        @keyframes borderGlowPulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
         }
         .banana-dot {
-          font-size: 1.35rem;
-          filter: grayscale(1) opacity(0.25);
-          transition: all 0.3s ease;
+          font-size: 16px;
+          filter: grayscale(1) opacity(0.35);
+          transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .banana-dot.active {
-          filter: drop-shadow(0 0 8px #ffeb3b) brightness(1.2) !important;
-          animation: 1s ease-in-out infinite alternate bananaWiggle;
-        }
-        @keyframes bananaWiggle {
-          0% { transform: rotate(-10deg) scale(1.15); }
-          100% { transform: rotate(10deg) scale(1.15); }
+          filter: grayscale(0) opacity(1) drop-shadow(0 0 8px #facc15);
+          transform: scale(1.2);
         }
       `}</style>
 
+      {/* CONTENEDOR PRINCIPAL */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(16, 22, 34, 0.98) 0%, rgba(9, 10, 16, 0.99) 100%)',
-        border: '1.5px solid rgba(192, 132, 252, 0.45)',
+        position: 'relative',
+        width: '100%',
+        maxWidth: '1240px',
+        background: 'linear-gradient(135deg, rgba(10, 14, 24, 0.96) 0%, rgba(5, 7, 14, 0.98) 100%)',
+        border: '1.5px solid rgba(192, 132, 252, 0.4)',
         borderRadius: '24px',
-        padding: '36px 54px',
-        boxShadow: '0 30px 80px rgba(0, 0, 0, 0.95), 0 0 40px rgba(192, 132, 252, 0.22)',
+        padding: '36px 48px',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.9), 0 0 50px rgba(192, 132, 252, 0.25)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: '24px',
-        maxWidth: '1040px',
-        width: '100%',
-        position: 'relative',
-        overflow: 'hidden',
         backdropFilter: 'blur(16px)',
-        animation: 'previaCardIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        WebkitBackdropFilter: 'blur(16px)',
+        overflow: 'hidden',
       }}>
-        {/* Glow ambiental central */}
+        {/* HALOS AMBIENTALES */}
         <div style={{
           position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(circle at center, rgba(192, 132, 252, 0.15) 0%, transparent 70%)',
+          top: '-80px',
+          left: '10%',
+          width: '320px',
+          height: '320px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0, 245, 212, 0.18) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <div style={{
+          position: 'absolute',
+          bottom: '-80px',
+          right: '10%',
+          width: '320px',
+          height: '320px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255, 70, 85, 0.18) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
-        {/* ENCABEZADO OFICIAL CON MONOS Y LOGO */}
+        {/* ENCABEZADO OFICIAL (SIN LOGO DE LA COPA AL LADO DEL TÍTULO) */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '20px',
-          zIndex: 2,
+          justifyContent: 'space-between',
           width: '100%',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          paddingBottom: '16px',
+          zIndex: 2,
         }}>
           {/* Monito Izquierdo */}
           <img
@@ -226,7 +247,6 @@ export default function OverlayMatchup() {
 
           <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <img src="/copa-logo.png" alt="Copa" style={{ width: '22px', height: '22px', objectFit: 'contain' }} />
               <span style={{ fontSize: '12px', color: '#c084fc', fontWeight: 900, letterSpacing: '3px', textTransform: 'uppercase' }}>
                 COPA PRIMATE // VOL. III
               </span>
@@ -243,10 +263,10 @@ export default function OverlayMatchup() {
               textShadow: '0 0 20px rgba(192, 132, 252, 0.4)',
               lineHeight: 1.1,
             }}>
-              PREVIA DEL PARTIDO
+              {showScore ? (match.status === 'FINALIZADO' || match.matchMoment === 'post' ? 'RESULTADO FINAL DEL ENFRENTAMIENTO' : 'PARTIDO EN DIRECTO') : 'PREVIA DEL PARTIDO'}
             </h2>
 
-            {/* PÍLDORA EXCLUSIVA DE FASE (SIN BO3) */}
+            {/* PÍLDORA EXCLUSIVA DE FASE */}
             <div style={{
               marginTop: '4px',
               background: 'linear-gradient(90deg, rgba(0, 245, 212, 0.15) 0%, rgba(192, 132, 252, 0.18) 50%, rgba(255, 70, 85, 0.15) 100%)',
@@ -314,6 +334,7 @@ export default function OverlayMatchup() {
             boxShadow: `0 12px 30px rgba(0,0,0,0.7), inset 0 0 25px ${team1Glow}`,
             transition: 'all 0.3s ease',
           }}>
+            {/* Logo en cápsula brillante */}
             <div style={{
               width: '110px',
               height: '110px',
@@ -333,6 +354,7 @@ export default function OverlayMatchup() {
               />
             </div>
 
+            {/* Tag de 3 letras */}
             <span style={{
               fontFamily: "'Rajdhani', sans-serif",
               fontSize: '2.4rem',
@@ -345,6 +367,7 @@ export default function OverlayMatchup() {
               {t1Tag}
             </span>
 
+            {/* Nombre completo */}
             <h3 style={{
               margin: 0,
               fontSize: '17px',
@@ -359,6 +382,7 @@ export default function OverlayMatchup() {
               {match.team1?.name || 'Equipo 1'}
             </h3>
 
+            {/* Lado Táctico */}
             <div style={{
               fontSize: '11px',
               color: team1Color,
@@ -374,14 +398,15 @@ export default function OverlayMatchup() {
               {team1Side}
             </div>
 
-            <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }} title="Mapas ganados">
-              <span className={`banana-dot ${m1 > 0 ? 'active' : ''}`}>🍌</span>
-              <span className={`banana-dot ${m1 > 1 ? 'active' : ''}`}>🍌</span>
-              <span className={`banana-dot ${m1 > 2 ? 'active' : ''}`}>🍌</span>
+            {/* Platanitos de mapas adaptados a BO1 / BO3 / BO5 */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }} title={`Formato: ${rawFormat}`}>
+              {Array.from({ length: maxBananas }).map((_, i) => (
+                <span key={i} className={`banana-dot ${m1 > i ? 'active' : ''}`}>🍌</span>
+              ))}
             </div>
           </div>
 
-          {/* VS CENTRAL CON ESCUDO */}
+          {/* VS CENTRAL CON ESCUDO, MAPA (SI APLICA) Y MARCADOR (SI APLICA) */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -412,7 +437,29 @@ export default function OverlayMatchup() {
               </span>
             </div>
 
-            {match.map && (
+            {/* MARCADOR SI ESTÁ HABILITADO / POST-PARTIDO */}
+            {showScore && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.95), rgba(8, 12, 22, 0.98))',
+                border: '1.5px solid #00f5d4',
+                borderRadius: '10px',
+                padding: '4px 18px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                boxShadow: '0 0 18px rgba(0, 245, 212, 0.3)',
+              }}>
+                <span style={{ fontSize: '22px', fontWeight: 900, color: '#00f5d4', fontVariantNumeric: 'tabular-nums' }}>
+                  {m1 > 0 || m2 > 0 ? `${m1} - ${m2}` : `${match.team1?.score || 0} - ${match.team2?.score || 0}`}
+                </span>
+                <span style={{ fontSize: '10px', color: '#c084fc', fontWeight: 900, letterSpacing: '1px' }}>
+                  {match.status === 'FINALIZADO' || match.matchMoment === 'post' ? 'FINAL' : 'MAPAS'}
+                </span>
+              </div>
+            )}
+
+            {/* MAPA SELECCIONADO (SI NO SE SABE O ESTÁ OCULTO, NO SE MUESTRA) */}
+            {hasValidMap && (
               <div style={{
                 background: 'rgba(0,0,0,0.6)',
                 border: '1px solid rgba(0, 245, 212, 0.4)',
@@ -445,6 +492,7 @@ export default function OverlayMatchup() {
             boxShadow: `0 12px 30px rgba(0,0,0,0.7), inset 0 0 25px ${team2Glow}`,
             transition: 'all 0.3s ease',
           }}>
+            {/* Logo en cápsula brillante */}
             <div style={{
               width: '110px',
               height: '110px',
@@ -464,6 +512,7 @@ export default function OverlayMatchup() {
               />
             </div>
 
+            {/* Tag de 3 letras */}
             <span style={{
               fontFamily: "'Rajdhani', sans-serif",
               fontSize: '2.4rem',
@@ -476,6 +525,7 @@ export default function OverlayMatchup() {
               {t2Tag}
             </span>
 
+            {/* Nombre completo */}
             <h3 style={{
               margin: 0,
               fontSize: '17px',
@@ -490,6 +540,7 @@ export default function OverlayMatchup() {
               {match.team2?.name || 'Equipo 2'}
             </h3>
 
+            {/* Lado Táctico */}
             <div style={{
               fontSize: '11px',
               color: team2Color,
@@ -505,10 +556,11 @@ export default function OverlayMatchup() {
               {team2Side}
             </div>
 
-            <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }} title="Mapas ganados">
-              <span className={`banana-dot ${m2 > 0 ? 'active' : ''}`}>🍌</span>
-              <span className={`banana-dot ${m2 > 1 ? 'active' : ''}`}>🍌</span>
-              <span className={`banana-dot ${m2 > 2 ? 'active' : ''}`}>🍌</span>
+            {/* Platanitos de mapas adaptados a BO1 / BO3 / BO5 */}
+            <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }} title={`Formato: ${rawFormat}`}>
+              {Array.from({ length: maxBananas }).map((_, i) => (
+                <span key={i} className={`banana-dot ${m2 > i ? 'active' : ''}`}>🍌</span>
+              ))}
             </div>
           </div>
         </div>

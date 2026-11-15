@@ -209,7 +209,6 @@ export default function CopaGruposLiga() {
   const [drawnTeamNames, setDrawnTeamNames] = useState([]);
   const [championsModalState, setChampionsModalState] = useState(null);
   const championsAnimIntervalRef = useRef(null);
-  const championsAudioRef = useRef(null);
   const championsLastStepRef = useRef(0);
 
   const broadcastSorteoState = (
@@ -222,6 +221,11 @@ export default function CopaGruposLiga() {
     customChampionsAnim = championsModalState,
     customDrawnNames = drawnTeamNames
   ) => {
+    let computedStandings = [];
+    try {
+      computedStandings = calcularClasificacion();
+    } catch {}
+
     apiFetch('/overlay-state', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -237,9 +241,26 @@ export default function CopaGruposLiga() {
           zoomedTeam: customSpotlight,
           championsAnimation: customChampionsAnim !== undefined ? customChampionsAnim : null,
           drawnTeamNames: customDrawnNames,
+          standings: computedStandings,
+          jornadas: jornadas,
         }
       })
     }).catch(() => {});
+  };
+
+  const handleSwitchPhase = (phase) => {
+    playClickSound();
+    setActivePhase(phase);
+    broadcastSorteoState(
+      grupos,
+      drawingTeam,
+      isSpinningBall,
+      revealedTeams,
+      phase,
+      spotlightTeam,
+      championsModalState,
+      drawnTeamNames
+    );
   };
 
   const toggleSpotlightStream = (team) => {
@@ -326,26 +347,6 @@ export default function CopaGruposLiga() {
         subGain.connect(ctx.destination);
         subOsc.start(now);
         subOsc.stop(now + 0.31);
-      }
-    } catch {}
-  };
-
-  const playChampionsAnthem = () => {
-    try {
-      if (!championsAudioRef.current) {
-        championsAudioRef.current = new Audio('/champions.mp3');
-      }
-      championsAudioRef.current.currentTime = 0;
-      championsAudioRef.current.volume = 0.55;
-      championsAudioRef.current.play().catch(() => {});
-    } catch {}
-  };
-
-  const stopChampionsAnthem = () => {
-    try {
-      if (championsAudioRef.current) {
-        championsAudioRef.current.pause();
-        championsAudioRef.current.currentTime = 0;
       }
     } catch {}
   };
@@ -497,7 +498,6 @@ export default function CopaGruposLiga() {
       if (isComplete) {
         clearInterval(championsAnimIntervalRef.current);
         championsAnimIntervalRef.current = null;
-        playChampionsAnthem();
 
         const allOppNames = matchups.map(m => m.opponent.name);
         const finalRevealed = Array.from(new Set([...revealedTeams, team.name, ...allOppNames]));
@@ -520,7 +520,6 @@ export default function CopaGruposLiga() {
 
   const dismissChampionsModal = () => {
     playClickSound();
-    stopChampionsAnthem();
     if (championsAnimIntervalRef.current) {
       clearInterval(championsAnimIntervalRef.current);
       championsAnimIntervalRef.current = null;
@@ -543,9 +542,6 @@ export default function CopaGruposLiga() {
       }
       if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
         audioCtxRef.current.close().catch(() => {});
-      }
-      if (championsAudioRef.current) {
-        championsAudioRef.current.pause();
       }
     };
   }, []);
@@ -772,51 +768,48 @@ export default function CopaGruposLiga() {
   const reiniciarSorteo = () => {
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
     if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
-    stopChampionsAnthem();
     setIsAutoDrawing(false);
     setIsSpinningBall(false);
     setDrawingTeam(null);
     setChampionsModalState(null);
     setSelectedTeamForDraw(null);
     setDrawnTeamNames([]);
-    const emptyGrupos = { A: [], B: [], C: [], D: [] };
-    setGrupos(emptyGrupos);
-    setRevealedTeams([]);
-    broadcastSorteoState(emptyGrupos, null, false, [], activePhase, null, null, []);
+    // Los grupos A, B, C y D representan los niveles predefinidos (no se borran ni vacían)
+    const baseGrupos = (grupos && Object.keys(grupos).length === 4 && Object.values(grupos).flat().length === 16)
+      ? grupos
+      : DEFAULT_GRUPOS;
+    setGrupos(baseGrupos);
+    const allNames = Object.values(baseGrupos).flat().map(t => t.name);
+    setRevealedTeams(allNames);
+    const cleanCalendario = generarCalendarioLiga(baseGrupos);
+    setJornadas(cleanCalendario);
+    saveLigaState(cleanCalendario);
+    broadcastSorteoState(baseGrupos, null, false, allNames, activePhase, null, null, []);
   };
 
-  // Sorteo instantáneo de todos los bombos
+  // Sorteo instantáneo de todos los enfrentamientos de Liga
   const ejecutarSorteoInstantaneo = () => {
     playClickSound();
     if (autoDrawTimerRef.current) clearInterval(autoDrawTimerRef.current);
     if (championsAnimIntervalRef.current) clearInterval(championsAnimIntervalRef.current);
-    stopChampionsAnthem();
     setIsAutoDrawing(false);
     setIsSpinningBall(false);
 
-    const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
-    const p1 = shuffle(BOMBOS_DATA[0].teams);
-    const p2 = shuffle(BOMBOS_DATA[1].teams);
-    const p3 = shuffle(BOMBOS_DATA[2].teams);
-    const p4 = shuffle(BOMBOS_DATA[3].teams);
+    // Los grupos A, B, C y D representan los niveles y se mantienen intactos
+    const activeGrupos = (grupos && Object.keys(grupos).length === 4 && Object.values(grupos).flat().length === 16)
+      ? grupos
+      : DEFAULT_GRUPOS;
 
-    const nuevosGrupos = {
-      A: [{ ...p1[0], grupo: 'A', id: 'A1' }, { ...p2[0], grupo: 'A', id: 'A2' }, { ...p3[0], grupo: 'A', id: 'A3' }, { ...p4[0], grupo: 'A', id: 'A4' }],
-      B: [{ ...p1[1], grupo: 'B', id: 'B1' }, { ...p2[1], grupo: 'B', id: 'B2' }, { ...p3[1], grupo: 'B', id: 'B3' }, { ...p4[1], grupo: 'B', id: 'B4' }],
-      C: [{ ...p1[2], grupo: 'C', id: 'C1' }, { ...p2[2], grupo: 'C', id: 'C2' }, { ...p3[2], grupo: 'C', id: 'C3' }, { ...p4[2], grupo: 'C', id: 'C4' }],
-      D: [{ ...p1[3], grupo: 'D', id: 'D1' }, { ...p2[3], grupo: 'D', id: 'D2' }, { ...p3[3], grupo: 'D', id: 'D3' }, { ...p4[3], grupo: 'D', id: 'D4' }],
-    };
-
-    const nuevoCalendario = generarCalendarioLiga(nuevosGrupos);
-    setGrupos(nuevosGrupos);
+    const nuevoCalendario = generarCalendarioLiga(activeGrupos);
+    setGrupos(activeGrupos);
     setJornadas(nuevoCalendario);
     setDrawingTeam(null);
     setChampionsModalState(null);
-    const allNames = Object.values(nuevosGrupos).flat().map(t => t.name);
+    const allNames = Object.values(activeGrupos).flat().map(t => t.name);
     setRevealedTeams(allNames);
     setDrawnTeamNames(allNames);
     saveLigaState(nuevoCalendario);
-    broadcastSorteoState(nuevosGrupos, null, false, allNames, activePhase, null, null, allNames);
+    broadcastSorteoState(activeGrupos, null, false, allNames, activePhase, null, null, allNames);
   };
 
   // Actualizar marcador de un partido en la fase de liga
@@ -1060,30 +1053,38 @@ export default function CopaGruposLiga() {
         </div>
       </header>
 
-      {/* SELECTOR DE PANTALLAS / FASES */}
+      {/* SELECTOR DE PANTALLAS / FASES (EMITE EN TIEMPO REAL A OBS) */}
       <nav className="copa-phase-nav">
         <button
           type="button"
           className={`copa-phase-btn ${activePhase === 'presentacion' ? 'active' : ''}`}
-          onClick={() => { playClickSound(); setActivePhase('presentacion'); }}
+          onClick={() => handleSwitchPhase('presentacion')}
         >
-          <Eye size={16} /> 1. PRESENTACIÓN DE GRUPOS
+          <Eye size={16} /> 1. PRESENTACIÓN (GRUPOS)
         </button>
 
         <button
           type="button"
           className={`copa-phase-btn ${activePhase === 'sorteo' ? 'active' : ''}`}
-          onClick={() => { playClickSound(); setActivePhase('sorteo'); }}
+          onClick={() => handleSwitchPhase('sorteo')}
         >
-          <Shuffle size={16} /> 2. SORTEO FASE DE LIGA
+          <Shuffle size={16} /> 2. SORTEO (CHAMPIONS)
         </button>
 
         <button
           type="button"
-          className={`copa-phase-btn ${activePhase === 'liga' ? 'active' : ''}`}
-          onClick={() => { playClickSound(); setActivePhase('liga'); }}
+          className={`copa-phase-btn ${activePhase === 'clasificacion' ? 'active' : ''}`}
+          onClick={() => handleSwitchPhase('clasificacion')}
         >
-          <Trophy size={16} /> 3. CLASIFICACIÓN & JORNADAS
+          <Trophy size={16} /> 3. CLASIFICACIÓN
+        </button>
+
+        <button
+          type="button"
+          className={`copa-phase-btn ${(activePhase === 'jornadas' || activePhase === 'liga') ? 'active' : ''}`}
+          onClick={() => handleSwitchPhase('jornadas')}
+        >
+          <Layers size={16} /> 4. JORNADAS (32 PARTIDOS)
         </button>
       </nav>
 
@@ -1239,193 +1240,63 @@ export default function CopaGruposLiga() {
 
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            {/* PANEL DE CONTROL SUPERIOR */}
-            <div className="copa-sorteo-box" style={{ padding: '24px 30px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: 'var(--omen-cyan)', letterSpacing: '2px', margin: 0 }}>
-                    SISTEMA DE SORTEO POR BOMBOS
-                  </h3>
-                  <div style={{ fontSize: '0.85rem', color: '#aaa', marginTop: '4px' }}>
-                    16 equipos en 4 bombos asignados equitativamente a los Grupos A, B, C y D.
-                  </div>
-                </div>
-
-                {/* Badges de Estado */}
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <div style={{ background: 'rgba(0, 245, 212, 0.15)', border: '1px solid #00f5d4', padding: '6px 14px', borderRadius: '8px', color: '#00f5d4', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
-                    ASIGNADOS: {totalCount} / 16
-                  </div>
-                  <div style={{ background: 'rgba(192, 132, 252, 0.15)', border: '1px solid #c084fc', padding: '6px 14px', borderRadius: '8px', color: '#c084fc', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
-                    BOMBO ACTUAL: #{currentPotIdx + 1}
-                  </div>
-                  <div style={{ background: 'rgba(255, 70, 85, 0.15)', border: '1px solid #ff4655', padding: '6px 14px', borderRadius: '8px', color: '#ff4655', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
-                    DESTINO: GRUPO {nextGroup}
-                  </div>
-                </div>
-              </div>
-
-              {/* BOLA INTERACTIVA / CAMARA DE EXTRACCIÓN */}
-              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '30px', margin: '20px 0', flexWrap: 'wrap' }}>
-                <div
-                  className={`sorteo-ball-interactive ${isSpinningBall ? 'spinning' : ''}`}
-                  onClick={() => !isSpinningBall && totalCount < 16 && extraerSiguienteBola()}
-                  title={totalCount < 16 ? "Haz clic para extraer bola" : "Sorteo completado"}
-                  style={{
-                    cursor: totalCount < 16 ? 'pointer' : 'default',
-                    opacity: totalCount >= 16 ? 0.7 : 1,
-                  }}
-                >
-                  {isSpinningBall ? '🎰' : '🐒'}
-                </div>
-
-                {/* Tarjeta de Equipo Extraído */}
-                {drawingTeam && (
-                  <div style={{
-                    background: 'linear-gradient(135deg, rgba(20, 26, 40, 0.95), rgba(10, 12, 20, 0.98))',
-                    border: '2px solid #00f5d4',
-                    borderRadius: '16px',
-                    padding: '16px 28px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '18px',
-                    boxShadow: '0 10px 30px rgba(0,0,0,0.8), 0 0 25px rgba(0, 245, 212, 0.35)',
-                    animation: 'scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                  }}>
-                    <img
-                      src={drawingTeam.logo || '/logo1.png'}
-                      alt=""
-                      style={{ width: '64px', height: '64px', objectFit: 'contain' }}
-                      onError={(e) => { e.target.src = '/logo1.png'; }}
-                    />
-                    <div>
-                      <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 900, letterSpacing: '2px' }}>
-                        ¡BOLA EXTRAÍDA!
-                      </span>
-                      <h4 style={{ margin: '2px 0 6px', fontSize: '1.3rem', color: '#fff', fontWeight: 900 }}>
-                        {drawingTeam.name}
-                      </h4>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                        <span style={{ background: '#00f5d4', color: '#08080b', fontSize: '11px', fontWeight: 900, padding: '2px 10px', borderRadius: '4px', letterSpacing: '1px' }}>
-                          ➔ ASIGNADO AL GRUPO {drawingTeam.targetGroup}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* BOTONERA DE ACCIÓN DEL SORTEO */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  className="btn-v-action"
-                  disabled={isSpinningBall || totalCount >= 16}
-                  onClick={extraerSiguienteBola}
-                  style={{
-                    background: 'linear-gradient(135deg, #00f5d4 0%, #0284c7 100%)',
-                    color: '#08080b',
-                    borderColor: '#00f5d4',
-                    fontWeight: 900,
-                    fontSize: '0.95rem',
-                    padding: '12px 24px',
-                  }}
-                >
-                  <Shuffle size={18} /> {isSpinningBall ? 'EXTRAYENDO...' : totalCount >= 16 ? 'SORTEO COMPLETO' : 'EXTRAER SIGUIENTE BOLA'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn-v-secondary"
-                  disabled={isSpinningBall}
-                  onClick={toggleSorteoAutomatico}
-                  style={{ fontWeight: 800 }}
-                >
-                  <Play size={16} /> {isAutoDrawing ? 'DETENER AUTO-SORTEO' : 'SORTEO AUTOMÁTICO COMPLETO'}
-                </button>
-
-                <button
-                  type="button"
-                  className="btn-v-secondary"
-                  disabled={isSpinningBall || isAutoDrawing}
-                  onClick={ejecutarSorteoInstantaneo}
-                  style={{ fontWeight: 800 }}
-                >
-                  <Sparkles size={16} /> SORTEO INSTANTÁNEO
-                </button>
-
-                <button
-                  type="button"
-                  className="btn-v-secondary"
-                  disabled={isSpinningBall || isAutoDrawing}
-                  onClick={reiniciarSorteo}
-                  style={{ borderColor: '#ff4655', color: '#ff4655', fontWeight: 800 }}
-                >
-                  <RotateCcw size={16} /> REINICIAR SORTEO
-                </button>
-
-                <button
-                  type="button"
-                  className="btn-v-action"
-                  style={{ background: 'linear-gradient(135deg, #1565c0, #0d47a1)', borderColor: '#29b6f6' }}
-                  onClick={() => { playClickSound(); setActivePhase('liga'); }}
-                >
-                  <Trophy size={16} /> VER CALENDARIO & RESULTADOS →
-                </button>
-              </div>
-            </div>
-
-            {/* SELECTOR LIBRE DE EQUIPO PARA SORTEO CHAMPIONS LEAGUE (R2) */}
+            {/* PANEL DE CONTROL UNIFICADO DEL SORTEO DE ENFRENTAMIENTOS */}
             <div className="copa-sorteo-box" style={{
               background: 'linear-gradient(135deg, rgba(16, 24, 40, 0.95), rgba(10, 14, 24, 0.98))',
               border: '1.5px solid #00f5d4',
               borderRadius: '16px',
-              padding: '20px 24px',
+              padding: '24px 28px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '14px',
+              gap: '16px',
               boxShadow: '0 8px 30px rgba(0, 245, 212, 0.15)',
             }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '1.15rem', color: '#00f5d4', fontWeight: 900, letterSpacing: '1.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Sparkles size={18} color="#00f5d4" /> SORTEO CHAMPIONS LEAGUE · ORDEN LIBRE
-                  </h4>
-                  <div style={{ fontSize: '0.8rem', color: '#aaa', marginTop: '3px' }}>
-                    Selecciona cualquier equipo de los 4 bombos para sortear secuencialmente sus 4 rivales de liga en tiempo real.
+                  <h3 style={{ fontSize: '1.35rem', fontWeight: 900, color: 'var(--omen-cyan)', letterSpacing: '2px', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <Shuffle size={22} color="var(--omen-cyan)" /> SORTEO DE ENFRENTAMIENTOS DE LIGA (FORMATO CHAMPIONS)
+                  </h3>
+                  <div style={{ fontSize: '0.85rem', color: '#ccc', marginTop: '4px' }}>
+                    Los 16 equipos están organizados por nivel (Grupos A, B, C, D). Sortea en directo los 4 rivales que enfrentará cada equipo.
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.82rem', color: '#c084fc', fontWeight: 800 }}>
-                    SORTEADOS: {drawnTeamNames.length} / 16 EQUIPOS
-                  </span>
+
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div style={{ background: 'rgba(0, 245, 212, 0.15)', border: '1px solid #00f5d4', padding: '6px 14px', borderRadius: '8px', color: '#00f5d4', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
+                    SORTEADOS: {drawnTeamNames.length} / 16
+                  </div>
+                  <div style={{ background: 'rgba(192, 132, 252, 0.15)', border: '1px solid #c084fc', padding: '6px 14px', borderRadius: '8px', color: '#c084fc', fontWeight: 900, fontSize: '0.82rem', letterSpacing: '1px' }}>
+                    PARTIDOS: 32 (J1 a J4)
+                  </div>
                 </div>
               </div>
 
+              {/* SELECTOR LIBRE Y BOTONERA */}
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <select
                   value={selectedTeamForDraw?.name || ''}
                   onChange={(e) => {
-                    const found = BOMBOS_DATA.flatMap(b => b.teams.map(t => ({ ...t, bombo: b.bombo, grupo: getTeamGroup(t.name, grupos) }))).find(t => t.name === e.target.value);
+                    const allTeams = Object.entries(grupos).flatMap(([gKey, list]) => (list || []).map(t => ({ ...t, grupo: gKey, bombo: getTeamPot(t.name) })));
+                    const found = allTeams.find(t => t.name === e.target.value);
                     if (found) setSelectedTeamForDraw(found);
                   }}
                   style={{
                     flex: '1 1 280px',
-                    background: 'rgba(0, 0, 0, 0.6)',
+                    background: 'rgba(0, 0, 0, 0.65)',
                     color: '#fff',
                     border: '1.5px solid rgba(0, 245, 212, 0.4)',
                     borderRadius: '8px',
-                    padding: '10px 14px',
+                    padding: '11px 14px',
                     fontSize: '0.92rem',
                     fontWeight: 800,
                   }}
                 >
-                  <option value="">-- Elige un equipo para sortear rivales (16 disponibles) --</option>
-                  {BOMBOS_DATA.flatMap(b => b.teams.map(t => ({ ...t, bombo: b.bombo, grupo: getTeamGroup(t.name, grupos) }))).map(t => {
+                  <option value="">-- Elige un equipo para sortear sus 4 rivales --</option>
+                  {Object.entries(grupos).flatMap(([gKey, list]) => (list || []).map(t => ({ ...t, grupo: gKey }))).map(t => {
                     const isDrawn = drawnTeamNames.includes(t.name);
                     return (
                       <option key={t.name} value={t.name}>
-                        {isDrawn ? '✓ ' : '○ '} [Bombo {t.bombo} · Grupo {t.grupo}] {t.name}
+                        {isDrawn ? '✓ ' : '○ '} [Grupo {t.grupo}] {t.name}
                       </option>
                     );
                   })}
@@ -1445,7 +1316,34 @@ export default function CopaGruposLiga() {
                     fontSize: '0.92rem',
                   }}
                 >
-                  <Sparkles size={16} /> SORTEAR RIVALES {selectedTeamForDraw ? `(${selectedTeamForDraw.name})` : ''}
+                  <Sparkles size={16} /> SORTEAR RIVALES EN STREAM {selectedTeamForDraw ? `(${selectedTeamForDraw.name})` : ''}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  onClick={ejecutarSorteoInstantaneo}
+                  style={{ fontWeight: 800, padding: '11px 18px' }}
+                >
+                  <Play size={16} /> SORTEAR TODOS AUTOMÁTICO
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  onClick={reiniciarSorteo}
+                  style={{ borderColor: '#ff4655', color: '#ff4655', fontWeight: 800, padding: '11px 18px' }}
+                >
+                  <RotateCcw size={16} /> REINICIAR SORTEO
+                </button>
+
+                <button
+                  type="button"
+                  className="btn-v-secondary"
+                  onClick={() => handleSwitchPhase('clasificacion')}
+                  style={{ borderColor: '#c084fc', color: '#c084fc', fontWeight: 800, padding: '11px 18px' }}
+                >
+                  <Trophy size={16} /> VER CLASIFICACIÓN →
                 </button>
               </div>
             </div>
@@ -1600,9 +1498,9 @@ export default function CopaGruposLiga() {
       })()}
 
       {/* =========================================================
-          FASE 3: LIGA SPLIT (TABLA DE CLASIFICACIÓN & JORNADAS)
+          FASE 3 & 4: CLASIFICACIÓN GENERAL Y JORNADAS
           ========================================================= */}
-      {activePhase === 'liga' && (
+      {(activePhase === 'clasificacion' || activePhase === 'jornadas' || activePhase === 'liga') && (
         <div>
           <div className="copa-action-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -1618,9 +1516,18 @@ export default function CopaGruposLiga() {
               <button
                 type="button"
                 className="btn-v-secondary"
-                onClick={() => { playClickSound(); setActivePhase('sorteo'); }}
+                onClick={() => handleSwitchPhase('sorteo')}
               >
-                <RotateCcw size={16} /> REPETIR SORTEO
+                <RotateCcw size={16} /> VOLVER AL SORTEO
+              </button>
+
+              <button
+                type="button"
+                className="btn-v-secondary"
+                style={{ borderColor: '#00f5d4', color: '#00f5d4', fontWeight: 800 }}
+                onClick={() => handleSwitchPhase(activePhase === 'clasificacion' ? 'clasificacion' : 'jornadas')}
+              >
+                <Eye size={16} /> EMITIR EN OBS
               </button>
             </div>
 
@@ -1629,8 +1536,13 @@ export default function CopaGruposLiga() {
             </div>
           </div>
 
-          <div className="copa-liga-split">
-            {/* COLUMNA IZQUIERDA: TABLA DE CLASIFICACIÓN */}
+          <div className="copa-liga-split" style={{
+            display: 'grid',
+            gridTemplateColumns: activePhase === 'clasificacion' ? '1fr' : activePhase === 'jornadas' ? '1fr' : '1fr 1fr',
+            gap: '20px'
+          }}>
+            {/* TABLA DE CLASIFICACIÓN */}
+            {(activePhase === 'clasificacion' || activePhase === 'liga') && (
             <div className="copa-tabla-box">
               <div className="copa-section-title">
                 <Trophy size={18} /> CLASIFICACIÓN GENERAL
@@ -1684,8 +1596,10 @@ export default function CopaGruposLiga() {
                 </table>
               </div>
             </div>
+            )}
 
-            {/* COLUMNA DERECHA: ACORDEÓN DE JORNADAS */}
+            {/* ACORDEÓN DE JORNADAS */}
+            {(activePhase === 'jornadas' || activePhase === 'liga') && (
             <div className="copa-jornadas-box">
               <div className="copa-section-title">
                 <Radio size={18} /> ENFRENTAMIENTOS POR JORNADA
@@ -1794,6 +1708,7 @@ export default function CopaGruposLiga() {
                 );
               })}
             </div>
+            )}
           </div>
         </div>
       )}
